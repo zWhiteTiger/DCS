@@ -1,0 +1,17 @@
+body,
+html,
+* {
+    font-family: "Kanit", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.custom-input-password .ant-input {
+    font-family: 'Kanit';
+    /* Change font for the input field inside Input.Password */
+}
+
+.ant-form-item-explain-error {
+    font-family: 'Kanit';
+    /* Change font for the error message */
+}

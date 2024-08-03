@@ -1,0 +1,114 @@
+import { Box, Grid, Typography, Card, CardContent } from '@mui/material';
+import { FaCheck, FaXmark } from 'react-icons/fa6';
+import { LuSearch } from 'react-icons/lu';
+import { useSelector } from 'react-redux';
+import { authSelector } from '../../Store/Slices/authSlice';
+import SearchBarBlack from './Utility/SearchBar_Black';
+
+const cardStyles = {
+  borderRadius: '10px',
+  boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)', // Drop shadow with color #FFF
+};
+
+export default function Explore() {
+
+  const profileReducer = useSelector(authSelector)
+
+  return (
+    <>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ overflowX: 'auto', flex: '1' }}>
+          <Grid container spacing={1}>
+            {/* Left Section */}
+            <Grid item xs={12} md={8}>
+              <Card sx={cardStyles}>
+                <CardContent>
+                  <Grid container spacing={1}>
+                    <Box className='m-5'>
+                      <img src='https://www.bing.com/th?id=OIP.zb2bMkSw2aP62F8liqmASQHaE8&w=202&h=200&c=8&rs=1&qlt=90&o=6&pid=3.1&rm=2' alt="User Avatar" style={{ maxWidth: '100%', height: 'auto', borderRadius: '10px' }} />
+                    </Box>
+                    <Box
+                      className="infoBox mt-6"
+                      display="flex"
+                      flexDirection="column"
+                    >
+                      <Box className="my-5">
+                        <Typography style={{ color: '#1B2559' }} className='text-xl font-bold'>{profileReducer.result?.firstName} {profileReducer.result?.lastName}</Typography>
+                        <Typography>รหัสนักศึกษา: 12345678</Typography>
+                      </Box>
+                      <Box className="my-5">
+                        <Typography style={{ color: '#1B2559' }} className='text-xl font-bold'>สาขาวิชา</Typography>
+                        <Typography>วิศวกรรมคอมพิวเตอร์และระบบอัตโนมัติ (6441)</Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card sx={cardStyles}>
+                <CardContent>
+                  <Typography style={{ color: '#1B2559' }} className='text-xl font-bold'>History</Typography>
+                  <Box className="my-2" style={{ display: 'flex', alignItems: 'center' }}>
+                    <LuSearch style={{
+                      background: '#E0E5F2',
+                      color: '#7551FF',
+                      padding: '5px',
+                      borderRadius: '4px',
+                      fontSize: '30px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginRight: '8px' // เพิ่ม margin ขวาเพื่อให้มีระยะห่างระหว่างไอคอนกับข้อความ
+                    }} />
+                    <Typography>หนังสือ1</Typography>
+                    <FaCheck className='mx-2' style={{
+                      fontSize: '20px',
+                      color: 'green',
+                    }} />
+                  </Box>
+                  <Box className="my-2" style={{ display: 'flex', alignItems: 'center' }}>
+                    <LuSearch style={{
+                      background: '#E0E5F2',
+                      color: '#7551FF',
+                      padding: '5px',
+                      borderRadius: '4px',
+                      fontSize: '30px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginRight: '8px' // เพิ่ม margin ขวาเพื่อให้มีระยะห่างระหว่างไอคอนกับข้อความ
+                    }} />
+                    <Typography>หนังสือ2</Typography>
+                    <FaXmark className='mx-2' style={{
+                      fontSize: '20px',
+                      color: 'red',
+                    }} />
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </div>
+      </div>
+      <Box className="m-6" />
+      <div style={{ overflowX: 'auto', display: 'flex' }}>
+        <Grid container spacing={4}>
+          {/* Full Width Section */}
+          <Grid item xs={12}>
+            <Card sx={cardStyles}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography style={{ color: '#1B2559' }} className='text-xl font-bold'>Documents</Typography>
+                  <Box sx={{ ml: 3 }}>
+                    <SearchBarBlack />
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </div>
+    </>
+  );
+}
