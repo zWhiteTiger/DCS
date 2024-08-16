@@ -6,6 +6,7 @@ type Profile = {
     firstName: string
     lastName: string
     _id: string
+    picture: string
 }
 
 type AuthState = {
@@ -28,9 +29,12 @@ const authSlice = createSlice({
         setIsLogin: (state: AuthState) => {
             state.isLogin = true
         },
+        setIsLogout: (state: AuthState) => {
+            state.isLogin = false
+        },
     }
 })
 
-export const { setProfile, setIsLogin } = authSlice.actions
+export const { setProfile, setIsLogin, setIsLogout } = authSlice.actions
 export const authSelector = (store: RootState) => store.authReducer
 export default authSlice.reducer

@@ -4,15 +4,23 @@ import { LuSearch } from 'react-icons/lu';
 import { useSelector } from 'react-redux';
 import { authSelector } from '../../Store/Slices/authSlice';
 import SearchBarBlack from './Utility/SearchBar_Black';
+import { Divider } from 'antd';
+import NoMoreContent from './Utility/NoMoreContent';
 
 const cardStyles = {
   borderRadius: '10px',
   boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)', // Drop shadow with color #FFF
 };
 
+
 export default function Explore() {
 
   const profileReducer = useSelector(authSelector)
+
+  const picturePath = profileReducer.result?.picture;
+  const imageSrc = picturePath
+    ? `http://localhost:4444${picturePath}`
+    : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
 
   return (
     <>
@@ -25,7 +33,7 @@ export default function Explore() {
                 <CardContent>
                   <Grid container spacing={1}>
                     <Box className='m-5'>
-                      <img src='https://www.bing.com/th?id=OIP.zb2bMkSw2aP62F8liqmASQHaE8&w=202&h=200&c=8&rs=1&qlt=90&o=6&pid=3.1&rm=2' alt="User Avatar" style={{ maxWidth: '100%', height: 'auto', borderRadius: '10px' }} />
+                      <img src={imageSrc} alt="Profile" style={{ maxWidth: '200px', height: '200px', borderRadius: '10px', objectFit: 'cover' }} />
                     </Box>
                     <Box
                       className="infoBox mt-6"
@@ -109,6 +117,8 @@ export default function Explore() {
           </Grid>
         </Grid>
       </div>
+      <NoMoreContent />
+
     </>
   );
 }

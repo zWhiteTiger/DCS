@@ -5,7 +5,7 @@ import { Box, createTheme, CssBaseline, ThemeProvider, Toolbar } from '@mui/mate
 // Import your components here
 import Appbar from './Components/Sidebar/Appbar';
 import Sidebar from './Components/Sidebar/Sidebar';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { authSelector } from './Store/Slices/authSlice';
 import { useProfile } from './Hooks/useProfile';
 import PrivateRoute from './Utility/PrivateRoute';
@@ -67,6 +67,8 @@ const App = () => {
   const authReducer = useSelector(authSelector)
   const dispatch = useAppDispatch()
   const { } = useProfile()
+
+  
 
   useEffect(() => {
     const handleResize = () => {

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Grid, Card, CardContent, Typography, Box, styled } from '@mui/material';
-import { Steps, Button, message } from 'antd';
+import { Steps, Button, message, Divider } from 'antd';
 import Uploader from './Services/Uploader';
 import PDFServices from './Services/PDFServices';
+import NoMoreContent from '../Utility/NoMoreContent';
 
 const CreateDocs: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -87,33 +88,36 @@ const CreateDocs: React.FC = () => {
   };
 
   return (
-    <Card style={{ borderRadius: '10px', boxShadow: '0px 0px 10px rgba(0, 0, 0, 0)', padding: '25px' }}>
-      <CardContent>
-        <Steps current={currentStep}>
-          {steps.map((step, index) => (
-            <Steps.Step key={index.toString()} title={step.title} />
-          ))}
-        </Steps>
-        <div style={{ marginTop: '20px' }}>{steps[currentStep].content}</div>
-        <div style={{ marginTop: '20px' }}>
-          {currentStep > 0 && (
-            <Button style={{ marginRight: '10px', color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }} onClick={prevStep}>
-              Previous
-            </Button>
-          )}
-          {currentStep < steps.length - 1 && (
-            <Button type="primary" onClick={nextStep} style={{ color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }}>
-              Next
-            </Button>
-          )}
-          {currentStep === steps.length - 1 && (
-            <Button type="primary" onClick={handleDone} style={{ color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }}>
-              Done
-            </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+    <>
+      <Card style={{ borderRadius: '10px', boxShadow: '0px 0px 10px rgba(0, 0, 0, 0)', padding: '25px' }}>
+        <CardContent>
+          <Steps current={currentStep}>
+            {steps.map((step, index) => (
+              <Steps.Step key={index.toString()} title={step.title} />
+            ))}
+          </Steps>
+          <div style={{ marginTop: '20px' }}>{steps[currentStep].content}</div>
+          <div style={{ marginTop: '20px' }}>
+            {currentStep > 0 && (
+              <Button style={{ marginRight: '10px', color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }} onClick={prevStep}>
+                Previous
+              </Button>
+            )}
+            {currentStep < steps.length - 1 && (
+              <Button type="primary" onClick={nextStep} style={{ color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }}>
+                Next
+              </Button>
+            )}
+            {currentStep === steps.length - 1 && (
+              <Button type="primary" onClick={handleDone} style={{ color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }}>
+                Done
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      <NoMoreContent />
+    </>
   );
 };
 

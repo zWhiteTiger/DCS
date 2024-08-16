@@ -1,6 +1,5 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import Avatar from '@mui/material/Avatar';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
@@ -8,26 +7,50 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 import { useSelector } from 'react-redux';
-import { authSelector } from '../../Store/Slices/authSlice';
+import { authSelector, setIsLogout } from '../../Store/Slices/authSlice';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useAppDispatch } from '../../Store/Store';
 
 export default function AccountMenu() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const navigate = useNavigate();
+  const profileReducer = useSelector(authSelector);
+
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  const navigate = useNavigate();
+  const dispatch = useAppDispatch()
 
   const handleProfileNavigation = () => {
     navigate('/profile');
   };
 
-  const profileReducer = useSelector(authSelector)
+  const handleLogout = async () => {
+    try {
+
+      dispatch(setIsLogout())
+
+      await axios.post('http://localhost:4444/auth/logout', {}, {
+        withCredentials: true,
+      });
+      navigate('/auth/login'); // Redirect to login page or home after logout
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Optionally handle errors (e.g., show a notification)
+    }
+  };
+
+  const picturePath = profileReducer.result?.picture;
+  const imageSrc = picturePath
+    ? `http://localhost:4444${picturePath}`
+    : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
 
   return (
     <React.Fragment>
@@ -41,7 +64,9 @@ export default function AccountMenu() {
             aria-haspopup="true"
             aria-expanded={open ? 'true' : undefined}
           >
-            <Avatar sx={{ width: 40, height: 40 }}>M</Avatar>
+            <div style={{ width: '40px', height: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '100%' }}>
+              <img src={imageSrc} alt="Profile" style={{ maxWidth: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
           </IconButton>
         </Tooltip>
       </Box>
@@ -84,7 +109,9 @@ export default function AccountMenu() {
         <Box className='m-3'>
           <MenuItem onClick={handleClose}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <Avatar />
+              <div className='mr-5' style={{ width: '40px', height: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '100%' }}>
+                <img src={imageSrc} alt="User Avatar" style={{ maxWidth: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
               <div>
                 <Typography style={{ display: 'flex', color: '#1B2559' }}>
                   {profileReducer.result?.firstName} {profileReducer.result?.lastName}
@@ -108,7 +135,7 @@ export default function AccountMenu() {
               </div>
             </div>
           </MenuItem>
-          <MenuItem onClick={handleClose}>
+          <MenuItem onClick={() => { handleLogout(); handleClose(); }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <div>
                 <Typography style={{ display: 'flex', color: '#1B2559' }}>

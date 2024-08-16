@@ -2,13 +2,17 @@ import { Box, Grid, Typography, Card, CardContent, createTheme, ThemeProvider, u
 import { BiSolidUpArrow } from "react-icons/bi";
 
 import { LuHardDriveDownload } from "react-icons/lu";
-import { Button } from 'antd';
+import { Button, Divider } from 'antd';
 import useSelection from 'antd/es/table/hooks/useSelection';
 import { useSelector } from 'react-redux';
 import { authSelector } from '../../Store/Slices/authSlice';
 import Static from '../Static/Static';
 import Shortcuts from './Utility/Shortcuts';
 import Graph from '../Static/GraphStatic';
+import { profile } from '../../Hooks/useProfile';
+import { useEffect, useState } from 'react';
+import NameQuery from './Loader/NameQuery';
+import NoMoreContent from './Utility/NoMoreContent';
 
 type Props = {};
 
@@ -58,9 +62,34 @@ const shortcutsx = {
 };
 
 export default function Dashboard({ }: Props) {
-  const isMobile = useMediaQuery('(max-width:960px)');
 
-  const profileReducer = useSelector(authSelector)
+  const isMobile = useMediaQuery('(max-width:960px)');
+  const profileReducer = useSelector(authSelector);
+
+  const [loading, setLoading] = useState(true); // State to manage loading
+  const [name, setName] = useState<string | null>(null); // State to manage name
+
+  useEffect(() => {
+    // Simulate a name query with delay
+    const fetchName = async () => {
+      // Simulate an API call to fetch the name
+      const fetchedName = await new Promise<string>((resolve) =>
+        setTimeout(() => resolve(profileReducer?.result?.firstName || 'Default Name'), 1000) // Simulate fetching name in 1 second
+      );
+
+      setTimeout(() => {
+        setName(fetchedName);
+        setLoading(false);
+      }, 1000); // 3-second delay before showing the name
+    };
+
+    fetchName();
+  }, [profileReducer]);
+
+  const picturePath = profileReducer.result?.picture;
+  const imageSrc = picturePath
+    ? `http://localhost:4444${picturePath}`
+    : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
 
   return (
     <ThemeProvider theme={theme}>
@@ -80,9 +109,6 @@ export default function Dashboard({ }: Props) {
                       <CardContent sx={shortcutsx}>
 
                         <Shortcuts />
-
-                        <img src='http://localhost:4444/pdf/image.png' alt="User Avatar" style={{ maxWidth: '100%', height: 'auto' }} />
-
 
                       </CardContent>
                     </Card>
@@ -115,12 +141,16 @@ export default function Dashboard({ }: Props) {
           <Grid item xs={12} sm={6} md={4}>
             <Card sx={userinfo}>
               <CardContent className="m-3">
-                <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '100%' }}>
-                  <img src='https://www.bing.com/th?id=OIP.zb2bMkSw2aP62F8liqmASQHaE8&w=202&h=200&c=8&rs=1&qlt=90&o=6&pid=3.1&rm=2' alt="User Avatar" style={{ maxWidth: '100%', height: 'auto' }} />
+                <div style={{ width: '200px', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '100%' }}>
+                  <img src={imageSrc} alt="Profile" style={{ maxWidth: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <Box className="mt-5">
                   <Typography variant="h6" gutterBottom>
-                    {profileReducer.result?.firstName} {profileReducer.result?.lastName}
+                    {loading ? (
+                      <NameQuery /> // Show loading component
+                    ) : (
+                      `${profileReducer.result?.firstName} ${profileReducer.result?.lastName}`
+                    )}
                   </Typography>
                   <Typography variant="body1" color="textSecondary">
                     รหัสนักศึกษา: 123456
@@ -184,6 +214,7 @@ export default function Dashboard({ }: Props) {
           </div>
 
         </div>
+        <NoMoreContent />
       </>
     </ThemeProvider>
   );

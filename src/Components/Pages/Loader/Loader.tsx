@@ -4,21 +4,24 @@ import ContentLoader from "react-content-loader"
 const MyLoader = (props:any) => (
   <ContentLoader 
     speed={2}
-    width={340}
-    height={84}
-    viewBox="0 0 340 84"
-    backgroundColor="#f2f2f2"
-    foregroundColor="#ffffff"
+    width={1549}
+    height={90}
+    viewBox="0 0 1549 90"
+    backgroundColor="#d5d5d5"
+    foregroundColor="#f3f3f3"
     {...props}
   >
-    <rect x="67" y="3" rx="3" ry="3" width="67" height="11" /> 
-    <rect x="143" y="3" rx="3" ry="3" width="140" height="11" /> 
-    <rect x="194" y="51" rx="3" ry="3" width="53" height="11" /> 
-    <rect x="240" y="25" rx="3" ry="3" width="72" height="11" /> 
-    <rect x="85" y="51" rx="3" ry="3" width="100" height="11" /> 
-    <rect x="67" y="74" rx="3" ry="3" width="37" height="11" /> 
-    <rect x="85" y="26" rx="3" ry="3" width="140" height="11" /> 
-    <circle cx="38" cy="41" r="27" />
+    <rect x="15" y="15" rx="5" ry="5" width="60" height="60" /> 
+    <rect x="125" y="15" rx="5" ry="5" width="300" height="20" /> 
+    <rect x="125" y="50" rx="5" ry="5" width="150" height="10" /> 
+
+    <rect x="550" y="15" rx="5" ry="5" width="300" height="20" /> 
+    <rect x="550" y="50" rx="5" ry="5" width="150" height="10" /> 
+
+    <rect x="950" y="15" rx="5" ry="5" width="300" height="20" />
+    <rect x="950" y="50" rx="5" ry="5" width="150" height="10" /> 
+
+    <rect x="1400" y="20" rx="3" ry="3" width="120" height="40" />
   </ContentLoader>
 )
 

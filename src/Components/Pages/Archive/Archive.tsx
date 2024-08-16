@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, Typography, Grid } from "@mui/material";
-import { Button, Tooltip } from "antd";
+import { Button, Divider, Tooltip } from "antd";
 import { MdFileOpen } from "react-icons/md";
 import Static from "../../Static/Static";
 import Loader from "../Loader/Loader";
 import axios from "axios";
+import NoMoreContent from "../Utility/NoMoreContent";
 
 type Props = {};
 
@@ -47,7 +48,9 @@ export default function Archive({ }: Props) {
             </Typography>
             {loading ? (
               <div className="mx-auto w-full flex justify-center items-center h-[80%]">
-                <Loader />
+                <Card style={{ marginBottom: '5px', backgroundColor: "#fafafa", ...cardStyles }}>
+                  <Loader />
+                </Card>
               </div>
             ) : (
               <Grid container spacing={2}>
@@ -155,6 +158,7 @@ export default function Archive({ }: Props) {
           </CardContent>
         </Card>
       </div>
+      <NoMoreContent />
     </>
   );
 }
