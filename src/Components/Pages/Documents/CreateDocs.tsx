@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { Grid, Card, CardContent, Typography, Box, styled } from '@mui/material';
-import { Steps, Button, message, Divider } from 'antd';
-import Uploader from './Services/Uploader';
+import { Steps, Button, message } from 'antd';
+// import Uploader from './Services/Uploader';
 import PDFServices from './Services/PDFServices';
 import NoMoreContent from '../Utility/NoMoreContent';
 
 const CreateDocs: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [fileUrl, setFileUrl] = useState<string>('');
+  // const [setFileUrl] = useState<string>('');
 
-  const StyledCard = styled(Card)(({ theme }) => ({
+  const StyledCard = styled(Card)(({}) => ({
     border: '1px solid #d5d5d5',
     width: '100%',
     boxSizing: 'border-box',
@@ -26,7 +26,7 @@ const CreateDocs: React.FC = () => {
           </Grid>
           <Grid item xs={12}>
             <Box className="p-9">
-              <Uploader setFileUrl={setFileUrl} />
+              {/* <Uploader setFileUrl={setFileUrl} /> */}
             </Box>
           </Grid>
         </Grid>

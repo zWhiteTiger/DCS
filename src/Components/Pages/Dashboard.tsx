@@ -2,17 +2,16 @@ import { Box, Grid, Typography, Card, CardContent, createTheme, ThemeProvider, u
 import { BiSolidUpArrow } from "react-icons/bi";
 
 import { LuHardDriveDownload } from "react-icons/lu";
-import { Button, Divider } from 'antd';
-import useSelection from 'antd/es/table/hooks/useSelection';
+import { Button } from 'antd';
 import { useSelector } from 'react-redux';
 import { authSelector } from '../../Store/Slices/authSlice';
 import Static from '../Static/Static';
 import Shortcuts from './Utility/Shortcuts';
 import Graph from '../Static/GraphStatic';
-import { profile } from '../../Hooks/useProfile';
 import { useEffect, useState } from 'react';
 import NameQuery from './Loader/NameQuery';
 import NoMoreContent from './Utility/NoMoreContent';
+import IDQuery from './Loader/IDQuery';
 
 type Props = {};
 
@@ -67,7 +66,7 @@ export default function Dashboard({ }: Props) {
   const profileReducer = useSelector(authSelector);
 
   const [loading, setLoading] = useState(true); // State to manage loading
-  const [name, setName] = useState<string | null>(null); // State to manage name
+  const [_name, setName] = useState<string | null>(null); // State to manage name
 
   useEffect(() => {
     // Simulate a name query with delay
@@ -153,14 +152,22 @@ export default function Dashboard({ }: Props) {
                     )}
                   </Typography>
                   <Typography variant="body1" color="textSecondary">
-                    รหัสนักศึกษา: 123456
+                    {loading ? (
+                      <IDQuery /> // Show loading component
+                    ) : (
+                      `รหัสนักศึกษา: 123456`
+                    )}
                   </Typography>
                   <br />
                   <Typography variant="h6">
                     ตำแหน่ง
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    นักศึกษา
+                    {loading ? (
+                      <IDQuery /> // Show loading component
+                    ) : (
+                      `นักศึกษา`
+                    )}
                   </Typography>
                 </Box>
               </CardContent>

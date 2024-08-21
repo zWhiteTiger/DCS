@@ -1,4 +1,3 @@
-import React from 'react'
 import { Scatter } from '@ant-design/plots';
 type Props = {}
 
@@ -13,8 +12,8 @@ export default function Graph({}: Props) {
         stack: {
           y1: 'y',
         },
-        xField: (d) => 2021 - d.birth,
-        yField: (d) => (d.gender === 'M' ? 1 : -1),
+        xField: (d: any) => 2021 - d.birth,
+        yField: (d: any) => (d.gender === 'M' ? 1 : -1),
         colorField: 'gender',
         shapeField: 'point',
         scale: {
@@ -22,7 +21,7 @@ export default function Graph({}: Props) {
         },
         axis: {
           y: {
-            labelFormatter: (d) => `${Math.abs(+d)}`,
+            labelFormatter: (d: any) => `${Math.abs(+d)}`,
           },
         },
         legend: { color: { title: 'Gender' } },

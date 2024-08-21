@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import { Box, createTheme, CssBaseline, ThemeProvider, Toolbar } from '@mui/material';
 
 // Import your components here
 import Appbar from './Components/Sidebar/Appbar';
 import Sidebar from './Components/Sidebar/Sidebar';
-import { useDispatch, useSelector } from 'react-redux';
-import { authSelector } from './Store/Slices/authSlice';
+// import { useSelector } from 'react-redux';
+// import { authSelector } from './Store/Slices/authSlice';
 import { useProfile } from './Hooks/useProfile';
 import PrivateRoute from './Utility/PrivateRoute';
 import DraftDocs from './Components/Pages/Documents/DraftDocs';
@@ -19,7 +19,7 @@ import OverviewDocs from './Components/Pages/Documents/Overviews';
 import Archive from './Components/Pages/Archive/Archive';
 import Explore from './Components/Pages/Explore';
 import Dashboard from './Components/Pages/Dashboard';
-import { useAppDispatch } from './Store/Store';
+// import { useAppDispatch } from './Store/Store';
 import { pdfjs } from 'react-pdf';
 import Profile from './Components/Pages/Setting/Profile';
 
@@ -61,11 +61,11 @@ const theme = createTheme({
 });
 
 const App = () => {
-  const [pageTitle, setPageTitle] = useState('');
+  const [_pageTitle, setPageTitle] = useState('');
   const location = useLocation();
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
-  const authReducer = useSelector(authSelector)
-  const dispatch = useAppDispatch()
+  const [_isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+  // const _authReducer = useSelector(authSelector)
+  // const _dispatch = useAppDispatch()
   const { } = useProfile()
 
   

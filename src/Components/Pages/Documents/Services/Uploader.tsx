@@ -18,12 +18,12 @@ const Uploader: React.FC<UploaderProps> = ({ setFileUrl }) => {
     beforeUpload(file) {
       const isDocxOrPdf = file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
       if (!isDocxOrPdf) {
-        message.error('You can only upload DOCX or PDF files!');
+        message.error('ไม่รองรับสกุลไฟล์นี้, รองรับแค่ .DOCX และ .PDF เท่านั้น!');
         return Upload.LIST_IGNORE;
       }
       const isLt50M = file.size / 1024 / 1024 < 50;
       if (!isLt50M) {
-        message.error('File must be smaller than 50MB!');
+        message.error('ขนาดไฟล์ใหญ่เกินไป รองรับได้มากสุดแค่ 50MB เท่านั้น!');
         return Upload.LIST_IGNORE;
       }
       return true;
@@ -31,16 +31,16 @@ const Uploader: React.FC<UploaderProps> = ({ setFileUrl }) => {
     onChange(info) {
       const { status, response } = info.file;
       if (status === 'done') {
-        message.success(`${info.file.name} file uploaded successfully.`);
+        message.success(`อัพโหลด ${info.file.name} เสร็จสิ้น`);
         if (response?.url) {
           setFileUrl(response.url); // Set the file URL on successful upload
         }
       } else if (status === 'error') {
-        message.error(`${info.file.name} file upload failed.`);
+        message.error(`อัพโหลดไฟล์ ${info.file.name} ล้มเหลว`);
       }
     },
     onDrop(e) {
-      console.log('Dropped files', e.dataTransfer.files);
+      console.log('ลากวางไฟล์', e.dataTransfer.files);
     },
   };
 

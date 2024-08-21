@@ -1,4 +1,3 @@
-import * as React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
@@ -12,7 +11,6 @@ import { FaKey } from 'react-icons/fa';
 import { MdCreate } from 'react-icons/md';
 import axios from 'axios';
 import '../Styles/style.css';
-import { useLogin } from '../../../Hooks/useLogin';
 import { profile } from '../../../Hooks/useProfile';
 import { useAppDispatch } from '../../../Store/Store';
 import { setIsLogin, setProfile } from '../../../Store/Slices/authSlice';
@@ -40,22 +38,23 @@ export default function Login() {
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     try {
       const response = await axios.post('http://localhost:4444/auth/login', values, { withCredentials: true });
-
-      const { email } = await profile()
-      dispatch(setIsLogin())
-
-      navigate('/')
-
-      console.log(response.data)
-      if (response.status !== 201) {
-        showErrorModal('ไม่พบบัญชีนี้ในฐานข้อมูล', 'โปรตรวจสอบอีเมลลและรหัสผ่านของท่านใหม่และลองใหม่อีกครั้ง');
+  
+      if (response.status === 201) {
+        // Fetch the profile after a successful login
+        const profileData = await profile();
+        dispatch(setProfile(profileData));
+        dispatch(setIsLogin());
+  
+        navigate('/'); // Redirect to the dashboard or homepage
+      } else {
+        showErrorModal('ไม่พบบัญชีนี้ในฐานข้อมูล', 'โปรดตรวจสอบอีเมลและรหัสผ่านของท่านใหม่และลองอีกครั้ง');
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
           showErrorModal('ผิดพลาดในการเข้าสู่ระบบ', 'อีเมลหรือรหัสผ่านผิด');
         } else {
-          showErrorModal('ไม่พบบัญชีนี้ในฐานข้อมูล', 'โปรตรวจสอบอีเมลลและรหัสผ่านของท่านใหม่และลองใหม่อีกครั้ง');
+          showErrorModal('ไม่พบบัญชีนี้ในฐานข้อมูล', 'โปรดตรวจสอบอีเมลและรหัสผ่านของท่านใหม่และลองใหม่อีกครั้ง');
         }
       } else {
         console.error('Unexpected error:', error);

@@ -4,7 +4,6 @@ import { LuSearch } from 'react-icons/lu';
 import { useSelector } from 'react-redux';
 import { authSelector } from '../../Store/Slices/authSlice';
 import SearchBarBlack from './Utility/SearchBar_Black';
-import { Divider } from 'antd';
 import NoMoreContent from './Utility/NoMoreContent';
 
 const cardStyles = {

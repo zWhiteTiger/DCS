@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, CardContent, Grid, Typography, useMediaQuery } from '@mui/material';
 import { Statistic, StatisticProps } from 'antd';
 import { BiSolidUpArrow } from 'react-icons/bi';

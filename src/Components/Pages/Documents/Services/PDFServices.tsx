@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Document, Page } from 'react-pdf';
 import pdf from '../../../../1722508011417.pdf';
 import { GrZoomIn, GrZoomOut, GrFormPrevious, GrFormNext } from 'react-icons/gr';

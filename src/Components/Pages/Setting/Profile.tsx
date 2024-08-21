@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Upload, Button, Divider, message } from 'antd';
+import { useState } from 'react';
+import { Upload, Button, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { authSelector } from '../../../Store/Slices/authSlice';
@@ -30,12 +30,12 @@ export default function Profile({ }: Props) {
             const newImageSrc = `http://localhost:4444${info.file.response.path}`;
             setImageSrc(newImageSrc);
             message.success({
-                content: 'Upload successful',
+                content: 'อัพโหลดเสร็จสิ้น, กำลังเปลี่ยนรูปภาพ',
                 className: 'ant-message-custom-style',
             });
         } else if (info.file.status === 'error') {
             message.error({
-                content: 'Upload failed',
+                content: 'อัพโหลดล้มเหลว',
                 className: 'ant-message-custom-style',
             });
         } else if (info.file.status === 'uploading') {
@@ -51,7 +51,7 @@ export default function Profile({ }: Props) {
         }
     };
 
-    const userId = profileReducer.result?._id;
+    // const userId = profileReducer.result?._id;
     const userEmail = profileReducer.result?.email;
 
     const uploadProps = {

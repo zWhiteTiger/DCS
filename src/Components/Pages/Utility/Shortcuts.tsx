@@ -1,6 +1,5 @@
 import { Box, Typography } from '@mui/material'
 import { Button } from 'antd'
-import React from 'react'
 import { MdAutorenew, MdCreate, MdExplore } from 'react-icons/md'
 import { Link } from 'react-router-dom'
 

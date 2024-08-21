@@ -10,7 +10,7 @@ type Props = {
 }
 
 const Appbar: React.FC<Props> = ({ drawerWidth, handleDrawerToggle }) => {
-    const userImagePath = '/path/to/user/image.jpg';
+    // const userImagePath = '/path/to/user/image.jpg';
 
     return (
         <AppBar

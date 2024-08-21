@@ -30,7 +30,7 @@ export default function SearchBar() {
       </IconButton>
       <InputBase
         sx={{ ml: 1, flex: 1 }}
-        placeholder="Search"
+        placeholder="ค้นหา"
       />
     </Paper>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, Typography, Grid } from "@mui/material";
-import { Button, Divider, Tooltip } from "antd";
+import { Button, Tooltip } from "antd";
 import { MdFileOpen } from "react-icons/md";
 import Static from "../../Static/Static";
 import Loader from "../Loader/Loader";

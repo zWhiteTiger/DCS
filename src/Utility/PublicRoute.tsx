@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router'
 import { useSelector } from 'react-redux'
 import { authSelector } from '../Store/Slices/authSlice'
-import Cookies from 'js-cookie';
+// import Cookies from 'js-cookie';
 
 type Props = {}
 
