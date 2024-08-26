@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { Grid, Card, CardContent, Typography, Box, styled } from '@mui/material';
 import { Steps, Button, message } from 'antd';
-// import Uploader from './Services/Uploader';
-import PDFServices from './Services/PDFServices';
 import NoMoreContent from '../Utility/NoMoreContent';
+import PDFServices from './Services/PDFServices';
+import Uploader from './Services/Uploader';
 
 const CreateDocs: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  // const [setFileUrl] = useState<string>('');
+  const [fileUrl, setFileUrl] = useState<string>('');
+  const [approvers, setApprovers] = useState<string[]>([]);
 
-  const StyledCard = styled(Card)(({}) => ({
+  const StyledCard = styled(Card)(({ }) => ({
     border: '1px solid #d5d5d5',
     width: '100%',
     boxSizing: 'border-box',
@@ -22,11 +23,16 @@ const CreateDocs: React.FC = () => {
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <Typography variant="h4">ขั้นตอนที่ 1 อัพโหลดไฟล์</Typography>
-            <Typography>รองรับไฟล์สกุล .PDF และ .DOCX เท่านั้น และ ไฟล์จะต้องมีขนาดไม่เกิน 50 MB.</Typography>
+            <Typography>รองรับไฟล์สกุล .PDF เท่านั้น และ ไฟล์จะต้องมีขนาดไม่เกิน 50 MB.</Typography>
           </Grid>
           <Grid item xs={12}>
             <Box className="p-9">
-              {/* <Uploader setFileUrl={setFileUrl} /> */}
+              <Uploader 
+                setFileUrl={(url: string) => {
+                  setFileUrl(url);
+                  setCurrentStep(1); // Automatically move to Step 2
+                }} 
+              />
             </Box>
           </Grid>
         </Grid>
@@ -39,16 +45,16 @@ const CreateDocs: React.FC = () => {
           <Grid item xs={9}>
             <Typography variant="h4">ขั้นตอนที่ 2 แก้ไขเอกสาร</Typography>
             <Typography>แก้ไขเอกสารหรือเพิ่มผู้ลงนาม</Typography>
-            {/* Display PDF if fileUrl is set */}
             <StyledCard>
-              <PDFServices />
+              {fileUrl ? <PDFServices fileUrl={fileUrl} approvers={approvers} setApprovers={setApprovers} /> :
+                <Box className='flex justify-center' style={{backgroundColor: '#ec4649', color: '#FFFFFF', height: '100px'}}>
+                  <Typography className='mt-9'>กรุณาอัพโหลดไฟล์ก่อน</Typography>
+                </Box>
+              }
             </StyledCard>
           </Grid>
           <Grid item xs={3}>
             <Typography variant="h5">เลือกบล๊อคคำสั่ง</Typography>
-          </Grid>
-          <Grid item xs={9}>
-            {/* Content for Step 2 */}
           </Grid>
         </Grid>
       ),
@@ -63,9 +69,6 @@ const CreateDocs: React.FC = () => {
           </Grid>
           <Grid item xs={3}>
             <Typography variant="h5">รายชื่อผู้ลงนาม</Typography>
-          </Grid>
-          <Grid item xs={9}>
-            {/* Content for Step 3 */}
           </Grid>
         </Grid>
       ),
@@ -99,19 +102,23 @@ const CreateDocs: React.FC = () => {
           <div style={{ marginTop: '20px' }}>{steps[currentStep].content}</div>
           <div style={{ marginTop: '20px' }}>
             {currentStep > 0 && (
-              <Button style={{ marginRight: '10px', color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }} onClick={prevStep}>
-                Previous
-              </Button>
-            )}
-            {currentStep < steps.length - 1 && (
-              <Button type="primary" onClick={nextStep} style={{ color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }}>
-                Next
-              </Button>
-            )}
-            {currentStep === steps.length - 1 && (
-              <Button type="primary" onClick={handleDone} style={{ color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }}>
-                Done
-              </Button>
+              <>
+                {currentStep > 1 && (
+                  <Button size='large' style={{ marginRight: '10px', color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }} onClick={prevStep}>
+                    ก่อนหน้า
+                  </Button>
+                )}
+                {currentStep < steps.length - 1 && (
+                  <Button size='large' type="primary" onClick={nextStep} style={{ color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }}>
+                    ถัดไป
+                  </Button>
+                )}
+                {currentStep === steps.length - 1 && (
+                  <Button size='large' type="primary" onClick={handleDone} style={{ color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }}>
+                    เสร็จสิ้น
+                  </Button>
+                )}
+              </>
             )}
           </div>
         </CardContent>

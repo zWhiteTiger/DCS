@@ -84,27 +84,27 @@ const App = () => {
 
   useEffect(() => {
     const path = location.pathname;
-    let title = 'eDocument Controller System'; // Title default value
+    let title = 'Document Controller System'; // Title default value
     if (path === '/') {
-      title = 'Company • Dashboard';
+      title = 'DCS • ดาร์ชบอร์ด';
     } else if (path === '/explore') {
-      title = 'Company • Explore';
+      title = 'DCS • สำรวจ';
     } else if (path === '/archive') {
-      title = 'Company • Archive';
+      title = 'DCS • คลังเอกสาร';
     } else if (path === '/docs/create') {
-      title = 'Company • Create Document';
+      title = 'DCS • สร้างเอกสาร';
     } else if (path === '/docs/overviews') {
-      title = 'Company • Overviews';
+      title = 'DCS • ภาพรวม';
     } else if (path === '/docs/draft') {
-      title = 'Company • Draft Document';
+      title = 'DCS • ร่างเอกสาร';
     } else if (path === '/auth/login') {
-      title = 'Authentication • Login';
+      title = 'DCS • เข้าสู่ระบบ';
     } else if (path === '/auth/register') {
-      title = 'Authentication • Register';
+      title = 'DCS • สร้างบัญชีผู้ใช้';
     } else if (path === '/profile') {
       title = 'Authentication • Register';
     } else {
-      title = '404 • Page Not Found';
+      title = '404 • ไม่พบหน้านี้';
     }
     document.title = title; // Update document title
     setPageTitle(title); // Update state for page title

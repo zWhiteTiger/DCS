@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { authSelector } from '../../../Store/Slices/authSlice';
 import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
 import NoMoreContent from '../Utility/NoMoreContent';
+import UserDataEditor from './UserDataEditor';
 
 const { Dragger } = Upload;
 
@@ -13,6 +14,15 @@ const userinfo = {
     flexDirection: 'column',
     alignItems: 'center',
     textAlign: 'center',
+    borderRadius: '10px',
+    boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)',
+};
+
+const userEditor = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'start',
+    textAlign: 'start',
     borderRadius: '10px',
     boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)',
 };
@@ -76,7 +86,7 @@ export default function Profile({ }: Props) {
                                 <div style={{ width: '200px', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '100%', position: 'relative' }}>
                                     <img src={imageSrc} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     <Dragger {...uploadProps} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}>
-                                        <Button size='large' icon={<UploadOutlined />} style={{color: '#FFFFFF'}} type="link">
+                                        <Button icon={<UploadOutlined />} style={{ color: '#FFFFFF' }} type="link">
                                             Upload
                                         </Button>
                                     </Dragger>
@@ -100,14 +110,13 @@ export default function Profile({ }: Props) {
                         </Card>
                     </Grid>
                     <Grid item xs={12} sm={8}>
-                        <Card sx={userinfo} style={{ padding: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+                        <Card sx={userEditor} style={{ padding: '16px' }}>
                             <CardContent>
-                                <Typography variant="h6" gutterBottom>
-                                    Additional Information
+                                <Typography style={{ display: 'flex', color: '#1B2559' }} className='text-xl font-bold'>
+                                    แก้ไขข้อมูลผู้ใช้งาน
                                 </Typography>
-                                <Typography variant="body1" color="textSecondary">
-                                    Here you can add more details about the user or other relevant information.
-                                </Typography>
+
+                                <UserDataEditor />
                             </CardContent>
                         </Card>
                     </Grid>

@@ -1,15 +1,20 @@
-import { useState, useEffect, useRef } from 'react';
+// src/Services/PDFServices.tsx
+import React, { useState, useEffect, useRef } from 'react';
 import { Document, Page } from 'react-pdf';
-import pdf from '../../../../1722508011417.pdf';
 import { GrZoomIn, GrZoomOut, GrFormPrevious, GrFormNext } from 'react-icons/gr';
 import { Card, CardContent, Typography } from '@mui/material';
 
-type Props = {}
+type PDFServicesProps = {
+  fileUrl: string;
+  approvers: string[];
+  setApprovers: (approvers: string[]) => void;
+};
 
-export default function PDFServices({ }: Props) {
+
+const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprovers }) => {
   const [numPages, setNumPages] = useState<number>();
   const [pageNumber, setPageNumber] = useState<number>(1);
-  const [scale, setScale] = useState<number>(1.0); // Default scale to be set
+  const [scale, setScale] = useState<number>(1.0); 
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -31,7 +36,6 @@ export default function PDFServices({ }: Props) {
 
   useEffect(() => {
     if (containerWidth > 0) {
-      // Set default scale to fit 800px width
       setScale(800 / containerWidth);
     }
   }, [containerWidth]);
@@ -40,17 +44,15 @@ export default function PDFServices({ }: Props) {
     setNumPages(numPages);
   }
 
-  const maxWidth = 1075; // Maximum width in pixels
-  const minWidth = 800; // Minimum width in pixels
+  const maxWidth = 1075;
+  const minWidth = 800;
 
   const handleZoomIn = () => {
-    // Calculate the new scale to achieve a width within the limits
     const newScale = Math.min(scale + 0.1, maxWidth / containerWidth);
     setScale(newScale);
   };
 
   const handleZoomOut = () => {
-    // Calculate the new scale to achieve a width within the limits
     const newScale = Math.max(scale - 0.1, minWidth / containerWidth);
     setScale(newScale);
   };
@@ -65,7 +67,10 @@ export default function PDFServices({ }: Props) {
     }
   };
 
+  console.log(fileUrl)
+
   return (
+
     <Card style={{ background: '#000', color: '#FFF', width: '100%', position: 'relative' }}>
       <CardContent>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -76,7 +81,7 @@ export default function PDFServices({ }: Props) {
           ref={containerRef}
           style={{ marginTop: '20px', position: 'relative', width: '100%' }}
         >
-          <Document file={pdf} onLoadSuccess={onDocumentLoadSuccess}>
+          <Document file={`http://localhost:4444${fileUrl}`} onLoadSuccess={onDocumentLoadSuccess}>
             <Page
               renderAnnotationLayer={false}
               renderTextLayer={false}
@@ -99,7 +104,7 @@ export default function PDFServices({ }: Props) {
       </CardContent>
     </Card>
   );
-}
+};
 
 const buttonStyle = {
   display: 'flex',
@@ -116,3 +121,5 @@ const buttonStyle = {
   fontSize: '18px',
   cursor: 'pointer',
 };
+
+export default PDFServices;

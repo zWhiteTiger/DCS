@@ -155,7 +155,7 @@ export default function Dashboard({ }: Props) {
                     {loading ? (
                       <IDQuery /> // Show loading component
                     ) : (
-                      `รหัสนักศึกษา: 123456`
+                      `${profileReducer.result?.email}`
                     )}
                   </Typography>
                   <br />

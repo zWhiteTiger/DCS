@@ -13,7 +13,7 @@ export default function ERR404() {
           size='large'
           style={{ color: 'white', backgroundColor: 'black', fontFamily: 'Kanit' }}
         >
-          กลับไปยัง แดรชบอร์ด
+          กลับไปยัง ดาร์ชบอร์ด
         </Button>
         </Link>
       }

@@ -14,16 +14,16 @@ const Uploader: React.FC<UploaderProps> = ({ setFileUrl }) => {
   const props: UploadProps = {
     name: 'file',
     multiple: false,
-    action: 'http://localhost:4444/upload/file', // Your backend URL
+    action: 'http://localhost:4444/upload/file', // URL ของ Backend ของคุณ
     beforeUpload(file) {
-      const isDocxOrPdf = file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-      if (!isDocxOrPdf) {
-        message.error('ไม่รองรับสกุลไฟล์นี้, รองรับแค่ .DOCX และ .PDF เท่านั้น!');
+      const isPdf = file.type === 'application/pdf';
+      if (!isPdf) {
+        message.error('ไฟล์ต้องเป็น .PDF เท่านั้น!');
         return Upload.LIST_IGNORE;
       }
       const isLt50M = file.size / 1024 / 1024 < 50;
       if (!isLt50M) {
-        message.error('ขนาดไฟล์ใหญ่เกินไป รองรับได้มากสุดแค่ 50MB เท่านั้น!');
+        message.error('ขนาดไฟล์ต้องน้อยกว่า 50MB');
         return Upload.LIST_IGNORE;
       }
       return true;
@@ -33,14 +33,11 @@ const Uploader: React.FC<UploaderProps> = ({ setFileUrl }) => {
       if (status === 'done') {
         message.success(`อัพโหลด ${info.file.name} เสร็จสิ้น`);
         if (response?.url) {
-          setFileUrl(response.url); // Set the file URL on successful upload
+          setFileUrl(response.url); 
         }
       } else if (status === 'error') {
         message.error(`อัพโหลดไฟล์ ${info.file.name} ล้มเหลว`);
       }
-    },
-    onDrop(e) {
-      console.log('ลากวางไฟล์', e.dataTransfer.files);
     },
   };
 
@@ -53,7 +50,7 @@ const Uploader: React.FC<UploaderProps> = ({ setFileUrl }) => {
         คลิ๊กหรือลากวางไฟล์ลงตรงนี้
       </Typography>
       <Typography style={{ fontSize: '12px', color: '#5d5d5d', fontFamily: 'Kanit' }}>
-        รองรับไฟล์สกุล .PDF และ .DOCX เท่านั้น ขนาดไม่เกิน 50 MB.
+        รองรับไฟล์สกุล .PDF เท่านั้น ขนาดไม่เกิน 50 MB.
       </Typography>
     </Dragger>
   );
