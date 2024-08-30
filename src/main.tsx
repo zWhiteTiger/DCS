@@ -4,9 +4,11 @@ import App from './App.tsx'
 import './index.css'
 import InjectTailwind from './Utility/injectTailwind.tsx'
 import { BrowserRouter } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from 'react-query'
 import { Provider } from 'react-redux'
 import { store } from './Store/Store.ts'
+import { QueryClient, QueryClientProvider } from 'react-query'
+
+// import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient()
 
