@@ -137,7 +137,7 @@ const App = () => {
       <Box sx={sxStyle}>
         <CssBaseline />
 
-        {['/', '/explore', '/profile', '/setting', '/archive', '/docs/create', '/docs/overviews', '/docs/draft', '/management/user', '/management/system'].includes(location.pathname) && (
+        {['/', '/explore', '/profile', '/setting', '/archive', '/docs/create', '/docs/overviews', '/docs/draft',].includes(location.pathname) && (
           <>
             <Appbar drawerWidth={drawerWidth} handleDrawerToggle={handleDrawerToggle} />
             <Sidebar
