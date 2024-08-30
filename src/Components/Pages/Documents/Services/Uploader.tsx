@@ -8,13 +8,19 @@ const { Dragger } = Upload;
 
 type UploaderProps = {
   setFileUrl: (url: string) => void;
+  nextStep: () => void;
 };
 
-const Uploader: React.FC<UploaderProps> = ({ setFileUrl }) => {
+const Uploader: React.FC<UploaderProps> = ({ setFileUrl, nextStep }) => {
   const props: UploadProps = {
     name: 'file',
     multiple: false,
-    action: 'http://localhost:4444/upload/file', // URL ของ Backend ของคุณ
+    action: 'http://localhost:4444/doc', // URL ของ Backend ของคุณ
+    withCredentials: true,
+    accept: '.pdf,.docx',
+    data: (file) => ({
+      doc_name: file.name,
+    }),
     beforeUpload(file) {
       const isPdf = file.type === 'application/pdf';
       if (!isPdf) {
@@ -33,7 +39,8 @@ const Uploader: React.FC<UploaderProps> = ({ setFileUrl }) => {
       if (status === 'done') {
         message.success(`อัพโหลด ${info.file.name} เสร็จสิ้น`);
         if (response?.url) {
-          setFileUrl(response.url); 
+          setFileUrl(response.url);
+          nextStep()
         }
       } else if (status === 'error') {
         message.error(`อัพโหลดไฟล์ ${info.file.name} ล้มเหลว`);

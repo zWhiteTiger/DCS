@@ -17,6 +17,7 @@
     "@mui/material": "^5.16.6",
     "@mui/styled-engine-sc": "^6.0.0-alpha.18",
     "@reduxjs/toolkit": "^2.2.7",
+    "@tanstack/react-query": "^5.52.2",
     "@types/react-image-crop": "^8.1.6",
     "@types/react-lazy-load-image-component": "^1.6.4",
     "antd": "^5.20.1",
@@ -28,6 +29,8 @@
     "react-content-loader": "^7.0.2",
     "react-countup": "^6.5.3",
     "react-cropper": "^2.3.3",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.3.1",
     "react-easy-crop": "^5.0.8",
     "react-icons": "^5.2.1",
@@ -40,7 +43,8 @@
     "react-select": "^5.8.0",
     "react-slick": "^0.30.2",
     "slick-carousel": "^1.8.1",
-    "styled-components": "^6.1.12"
+    "styled-components": "^6.1.12",
+    "url-join": "^5.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

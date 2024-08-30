@@ -9,7 +9,7 @@ import Sidebar from './Components/Sidebar/Sidebar';
 // import { authSelector } from './Store/Slices/authSlice';
 import { useProfile } from './Hooks/useProfile';
 import PrivateRoute from './Utility/PrivateRoute';
-import DraftDocs from './Components/Pages/Documents/DraftDocs';
+import DraftDocs from './Components/Pages/Documents/Draft/DraftDocs';
 import CreateDocs from './Components/Pages/Documents/CreateDocs';
 import PublicRoute from './Utility/PublicRoute';
 import Register from './Components/Pages/Auth/Register';

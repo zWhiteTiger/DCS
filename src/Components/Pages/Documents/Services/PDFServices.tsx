@@ -14,7 +14,7 @@ type PDFServicesProps = {
 const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprovers }) => {
   const [numPages, setNumPages] = useState<number>();
   const [pageNumber, setPageNumber] = useState<number>(1);
-  const [scale, setScale] = useState<number>(1.0); 
+  const [scale, setScale] = useState<number>(1.0);
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -44,8 +44,8 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
     setNumPages(numPages);
   }
 
-  const maxWidth = 1075;
-  const minWidth = 800;
+  const maxWidth = 2000;
+  const minWidth = 1000;
 
   const handleZoomIn = () => {
     const newScale = Math.min(scale + 0.1, maxWidth / containerWidth);
@@ -67,11 +67,9 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
     }
   };
 
-  console.log(fileUrl)
-
   return (
 
-    <Card style={{ background: '#000', color: '#FFF', width: '100%', position: 'relative' }}>
+    <Card style={{ background: '#000', color: '#FFF', width: '100%', position: 'relative', overflow: 'hidden' }}>
       <CardContent>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6">ชื่อไฟล์ PDF</Typography>
@@ -79,7 +77,7 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
         </div>
         <div
           ref={containerRef}
-          style={{ marginTop: '20px', position: 'relative', width: '100%' }}
+          style={{ marginTop: '20px', position: 'relative', width: '100%', overflow: 'hidden' }}
         >
           <Document file={`http://localhost:4444${fileUrl}`} onLoadSuccess={onDocumentLoadSuccess}>
             <Page

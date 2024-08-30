@@ -16,6 +16,21 @@ const CreateDocs: React.FC = () => {
     boxSizing: 'border-box',
   }));
 
+  const nextStep = () => {
+    setCurrentStep(currentStep + 1);
+  };
+
+  const prevStep = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
+  const handleDone = () => {
+    message.success({
+      content: 'ดำเนินการเอกสารเสร็จสิ้น',
+      className: 'ant-message-custom-style',
+    });
+  };
+
   const steps = [
     {
       title: <Typography>อัพโหลดไฟล์</Typography>,
@@ -27,11 +42,12 @@ const CreateDocs: React.FC = () => {
           </Grid>
           <Grid item xs={12}>
             <Box className="p-9">
-              <Uploader 
+              <Uploader
+                nextStep={nextStep}
                 setFileUrl={(url: string) => {
                   setFileUrl(url);
                   setCurrentStep(1); // Automatically move to Step 2
-                }} 
+                }}
               />
             </Box>
           </Grid>
@@ -47,7 +63,7 @@ const CreateDocs: React.FC = () => {
             <Typography>แก้ไขเอกสารหรือเพิ่มผู้ลงนาม</Typography>
             <StyledCard>
               {fileUrl ? <PDFServices fileUrl={fileUrl} approvers={approvers} setApprovers={setApprovers} /> :
-                <Box className='flex justify-center' style={{backgroundColor: '#ec4649', color: '#FFFFFF', height: '100px'}}>
+                <Box className='flex justify-center' style={{ backgroundColor: '#ec4649', color: '#FFFFFF', height: '100px' }}>
                   <Typography className='mt-9'>กรุณาอัพโหลดไฟล์ก่อน</Typography>
                 </Box>
               }
@@ -55,6 +71,25 @@ const CreateDocs: React.FC = () => {
           </Grid>
           <Grid item xs={3}>
             <Typography variant="h5">เลือกบล๊อคคำสั่ง</Typography>
+            <Card
+              sx={{
+                border: '2px dashed #8000FF',
+                boxShadow: 'none', // ลบเงาออก
+                textAlign: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <CardContent>
+                <Typography style={{color: '#8000FF', fontWeight: 'bold', fontSize: '24px'}}>
+                  เพิ่มผู้ลงนาม
+                </Typography>
+                
+                <Typography>
+                  ฟหดหฟกด
+                </Typography>
+                
+              </CardContent>
+            </Card>
           </Grid>
         </Grid>
       ),
@@ -74,21 +109,6 @@ const CreateDocs: React.FC = () => {
       ),
     },
   ];
-
-  const nextStep = () => {
-    setCurrentStep(currentStep + 1);
-  };
-
-  const prevStep = () => {
-    setCurrentStep(currentStep - 1);
-  };
-
-  const handleDone = () => {
-    message.success({
-      content: 'ดำเนินการเอกสารเสร็จสิ้น',
-      className: 'ant-message-custom-style',
-    });
-  };
 
   return (
     <>
