@@ -26,6 +26,7 @@
     "lucide-react": "^0.424.0",
     "react": "^18.3.1",
     "react-avatar-editor": "^13.0.2",
+    "react-beautiful-dnd": "^13.1.1",
     "react-content-loader": "^7.0.2",
     "react-countup": "^6.5.3",
     "react-cropper": "^2.3.3",
@@ -48,6 +49,7 @@
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
+    "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-dom": "^18.3.0",
     "@types/react-slick": "^0.23.13",
     "@typescript-eslint/eslint-plugin": "^7.15.0",
