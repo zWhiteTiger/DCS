@@ -1,8 +1,9 @@
 import React from 'react';
-import { AppBar, Toolbar, IconButton, Box } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Box, Typography } from '@mui/material';
 import { LuMenu } from "react-icons/lu";
 import AccountMenu from './AccountMenu';
 import SearchBar from '../Pages/Utility/SearchBar';
+import { useLocation } from 'react-router-dom';
 
 type Props = {
     drawerWidth: number
@@ -11,6 +12,21 @@ type Props = {
 
 const Appbar: React.FC<Props> = ({ drawerWidth, handleDrawerToggle }) => {
     // const userImagePath = '/path/to/user/image.jpg';
+
+    const location = useLocation()
+
+    const pageNames: Record<string, string> = {
+        '/': 'หน้าหลัก',
+        '/explore': 'สำรวจเอกสาร',
+        '/profile': 'บัญชี',
+        '/archive': 'คลังเอกสาร',
+        '/docs/create': 'สร้างเอกสาร',
+        '/docs/overviews': 'ภาพรวมเอกสาร',
+        '/docs/draft': 'แบบร่างเอกสาร'
+    };
+
+    // Get the current page name based on the path
+    const pageName = pageNames[location.pathname] || 'Page';
 
     return (
         <AppBar
@@ -24,7 +40,17 @@ const Appbar: React.FC<Props> = ({ drawerWidth, handleDrawerToggle }) => {
                 position: 'absolute',
             }}
         >
+
             <Toolbar className='flex justify-between'>
+                <Box>
+                    <Typography style={{ color: '#0e3d96', fontSize: '28px', fontWeight: 'bold' }}>
+                        Document Control System Software
+                    </Typography>
+                    <Typography style={{ color: '#2a5dbd', fontSize: '20px' }}>
+                        โปรแกรมควบคุมเอกสารสโมสรนักศึกษา - {pageName}
+                    </Typography>
+                </Box>
+
                 <Box>
                     <IconButton
                         color="inherit"
@@ -41,7 +67,7 @@ const Appbar: React.FC<Props> = ({ drawerWidth, handleDrawerToggle }) => {
                         <SearchBar />
                     </Box>
                     {/* Profile section */}
-                    <AccountMenu/>
+                    <AccountMenu />
                     {/* Add space between profile and search bar */}
                 </Box>
             </Toolbar>
