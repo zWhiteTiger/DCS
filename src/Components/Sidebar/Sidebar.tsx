@@ -172,6 +172,7 @@ export default function Sidebar({
       sx={{
         width: { xl: drawerWidth },
         flexShrink: { sm: 0 },
+        zIndex: 0,
       }}
       aria-label="mailbox folders"
     >

@@ -9,8 +9,10 @@ import Loader from '../../Loader/Loader'
 import { authSelector } from '../../../../Store/Slices/authSlice'
 import { useSelector } from 'react-redux'
 import { httpClient } from '../../Utility/HttpClient'
+import PDFModal from '../PDFModal'; // นำเข้า PDFModal
 
-type Props = {}
+type Props = {
+};
 
 const fetchAPI = async () => {
     const response = await httpClient.get("doc");
@@ -35,17 +37,20 @@ export interface Document {
     __v: number;
 }
 
-
 export default function DraftList({ }: Props) {
 
     const profileReducer = useSelector(authSelector)
+
+    const [imageSrc, setImageSrc] = useState(profileReducer.result?.picture
+        ? `http://localhost:4444${profileReducer.result.picture}`
+        : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png');
 
     const { data, isLoading, error } = useQuery<Document[], any>("docs", fetchAPI, {
         select: (data) => data.filter(doc => doc.user_id === profileReducer.result?._id),
     })
 
     const queryClient = useQueryClient();
-    const { mutate , isLoading: isDeleting, error: deleteError } = useMutation(
+    const { mutate, isLoading: isDeleting, error: deleteError } = useMutation(
         (id: string) => deleteDoc(id),
         {
             onSuccess: () => {
@@ -112,10 +117,10 @@ export default function DraftList({ }: Props) {
                             return (
                                 <Card key={index} style={{ marginBottom: '5px', backgroundColor: cardBackgroundColor, ...cardStyles }}>
                                     <CardContent>
-                                        <Grid container spacing={3} alignItems="start" style={{alignItems: 'center'}}>
+                                        <Grid container spacing={3} alignItems="start" style={{ alignItems: 'center' }}>
                                             <Grid item xs={0}>
                                                 <div style={{ width: 'auto', height: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '20%' }}>
-                                                    <img src='https://www.bing.com/th?id=OIP.zb2bMkSw2aP62F8liqmASQHaE8&w=202&h=200&c=8&rs=1&qlt=90&o=6&pid=3.1&rm=2' alt="User Avatar" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
+                                                    <img src={imageSrc} alt="User Avatar" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
                                                 </div>
                                             </Grid>
                                             <Grid item xs={3}>
@@ -146,7 +151,7 @@ export default function DraftList({ }: Props) {
                                                 <Typography className="font-bold" style={{ marginBottom: '4px' }}>
                                                     สถานะ
                                                 </Typography>
-                                                <div style={{
+                                                <Typography style={{
                                                     backgroundColor:
                                                         data.isStatus === 'express' ? '#FFE6B6' : data.isStatus === 'draft' ? '#B6B6B6' : data.isStatus === 'read' ? '#AFFFEA' : data.isStatus === 'unread' ? '#CFC1FF' : data.isStatus === 'reject' ? '#FFC1C1' : '#6A50A7',
                                                     color: data.isStatus === 'express' ? '#DA9000' : data.isStatus === 'draft' ? '#FFFFFF' : data.isStatus === 'read' ? '#05CD99' : data.isStatus === 'unread' ? '#4318FF' : data.isStatus === 'reject' ? '#960000' : 'white',
@@ -159,26 +164,10 @@ export default function DraftList({ }: Props) {
                                                     justifyContent: 'center'
                                                 }}>
                                                     {data.isStatus}
-                                                </div>
+                                                </Typography>
                                             </Grid>
                                             <Grid item xs={1} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
-                                                <Tooltip title={<span style={tooltipStyle}>แก้ไขไฟล์</span>}>
-                                                    <Button
-                                                        type="primary"
-                                                        icon={<MdFileOpen />}
-                                                        size="large"
-                                                        style={{
-                                                            fontFamily: 'Kanit',
-                                                            color: 'white',
-                                                            backgroundColor: '#4318FF',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center'
-                                                        }}
-                                                    >
-                                                        แก้ไข
-                                                    </Button>
-                                                </Tooltip>
+                                                <PDFModal docsPath={data?.docs_path} />
                                             </Grid>
                                             <Grid item xs={1} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
                                                 <Tooltip title={<span style={tooltipStyle}>ลบไฟล์</span>}>

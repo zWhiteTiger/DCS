@@ -1,4 +1,3 @@
-// src/Services/PDFServices.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Document, Page } from 'react-pdf';
 import { GrZoomIn, GrZoomOut, GrFormPrevious, GrFormNext } from 'react-icons/gr';
@@ -10,12 +9,14 @@ type PDFServicesProps = {
   setApprovers: (approvers: string[]) => void;
 };
 
-
 const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprovers }) => {
   const [numPages, setNumPages] = useState<number>();
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
   const [containerWidth, setContainerWidth] = useState<number>(0);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [startPosition, setStartPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [scrollPosition, setScrollPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -36,7 +37,7 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
 
   useEffect(() => {
     if (containerWidth > 0) {
-      setScale(800 / containerWidth);
+      setScale(1075 / containerWidth);
     }
   }, [containerWidth]);
 
@@ -44,8 +45,8 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
     setNumPages(numPages);
   }
 
-  const maxWidth = 2000;
-  const minWidth = 1000;
+  const maxWidth = 2500;
+  const minWidth = 1075;
 
   const handleZoomIn = () => {
     const newScale = Math.min(scale + 0.1, maxWidth / containerWidth);
@@ -67,17 +68,65 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
     }
   };
 
-  return (
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setStartPosition({ x: e.clientX, y: e.clientY });
+  };
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && containerRef.current) {
+      const dx = e.clientX - startPosition.x;
+      const dy = e.clientY - startPosition.y;
+
+      containerRef.current.scrollLeft = scrollPosition.x - dx;
+      containerRef.current.scrollTop = scrollPosition.y - dy;
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (containerRef.current) {
+      setScrollPosition({ x: containerRef.current.scrollLeft, y: containerRef.current.scrollTop });
+    }
+    setIsDragging(false);
+  };
+
+  return (
     <Card style={{ background: '#000', color: '#FFF', width: '100%', position: 'relative', overflow: 'hidden' }}>
       <CardContent>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6">ชื่อไฟล์ PDF</Typography>
-          <Typography variant="h6">{`หน้า ${pageNumber} ของ ${numPages || 1}`}</Typography>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant="h6">{`หน้า ${pageNumber} ของ ${numPages || 1}`}</Typography>
+            <div style={{ display: 'flex', marginLeft: '20px' }}>
+              <button onClick={handleZoomIn} style={buttonStyle}><GrZoomIn /></button>
+              <button onClick={handleZoomOut} style={buttonStyle}><GrZoomOut /></button>
+              <button onClick={goToPreviousPage} disabled={pageNumber === 1} style={buttonStyle}>
+                <GrFormPrevious />
+              </button>
+              <button onClick={goToNextPage} disabled={pageNumber === numPages} style={buttonStyle}>
+                <GrFormNext />
+              </button>
+            </div>
+          </div>
         </div>
         <div
           ref={containerRef}
-          style={{ marginTop: '20px', position: 'relative', width: '100%', overflow: 'hidden' }}
+          style={{
+            marginTop: '20px',
+            position: 'relative',
+            width: '100%',
+            height: '750px',
+            maxHeight: '750px',
+            overflow: 'auto',
+            cursor: isDragging ? 'grabbing' : 'grab',
+            scrollbarWidth: 'thin', // For Firefox
+            scrollbarColor: '#007bff #333', // For Firefox
+          }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          className="custom-scrollbar" // For Chrome, Edge, and Safari
         >
           <Document file={`http://localhost:4444${fileUrl}`} onLoadSuccess={onDocumentLoadSuccess}>
             <Page
@@ -88,16 +137,6 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
               width={containerWidth}
             />
           </Document>
-          <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', flexDirection: 'column' }}>
-            <button onClick={handleZoomIn} style={buttonStyle}><GrZoomIn /></button>
-            <button onClick={handleZoomOut} style={buttonStyle}><GrZoomOut /></button>
-            <button onClick={goToPreviousPage} disabled={pageNumber === 1} style={buttonStyle}>
-              <GrFormPrevious />
-            </button>
-            <button onClick={goToNextPage} disabled={pageNumber === numPages} style={buttonStyle}>
-              <GrFormNext />
-            </button>
-          </div>
         </div>
       </CardContent>
     </Card>

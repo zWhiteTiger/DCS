@@ -34,6 +34,7 @@ const Appbar: React.FC<Props> = ({ drawerWidth, handleDrawerToggle }) => {
             sx={{
                 width: { xl: `calc(100% - ${drawerWidth}px)` },
                 ml: { xl: `${drawerWidth}px` },
+                zIndex: 1,
                 backgroundColor: 'rgba(0, 18, 52, 0)',
                 boxShadow: 'none', // Remove drop shadow
                 display: 'flex',
