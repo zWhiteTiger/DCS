@@ -10,7 +10,7 @@ export default function Shortcuts({ }: Props) {
         <>
             <Link to="/docs/create">
                 <Button type="link" style={{ width: '100%', height: '100%' }} className='my-4'>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <Box style={{ display: 'flex', alignItems: 'center' }}>
                         <MdCreate style={{
                             fontSize: '50px',
                             background: '#F6F8FD',
@@ -23,20 +23,20 @@ export default function Shortcuts({ }: Props) {
                             alignItems: 'center',
                             justifyContent: 'center'
                         }} />
-                        <div>
+                        <Box>
                             <Typography style={{ display: 'flex', color: '#1B2559' }}>
                                 สร้างหนังสือ
                             </Typography>
                             <Typography variant='body2' style={{ color: '#A3AED0' }}>
                                 สร้างหนังสือใหม่
                             </Typography>
-                        </div>
-                    </div>
+                        </Box>
+                    </Box>
                 </Button>
             </Link>
             <Link to="/explore">
                 <Button type="link" style={{ width: '100%', height: '100%' }} className='my-4'>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <Box style={{ display: 'flex', alignItems: 'center' }}>
                         <MdExplore style={{
                             fontSize: '50px',
                             background: '#F6F8FD',
@@ -49,20 +49,20 @@ export default function Shortcuts({ }: Props) {
                             alignItems: 'center',
                             justifyContent: 'center'
                         }} />
-                        <div>
+                        <Box>
                             <Typography style={{ display: 'flex', color: '#1B2559' }}>
                                 สำรวจหนังสือ
                             </Typography>
                             <Typography variant='body2' style={{ color: '#A3AED0' }}>
                                 สำรวจรายการหนังสือใหม่
                             </Typography>
-                        </div>
-                    </div>
+                        </Box>
+                    </Box>
                 </Button>
             </Link>
             <Link to="/docs/draft">
                 <Button type="link" style={{ width: '100%', height: '100%' }} className='my-4'>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <Box style={{ display: 'flex', alignItems: 'center' }}>
                         <MdAutorenew style={{
                             fontSize: '50px',
                             background: '#F6F8FD',
@@ -75,15 +75,15 @@ export default function Shortcuts({ }: Props) {
                             alignItems: 'center',
                             justifyContent: 'center'
                         }} />
-                        <div>
+                        <Box>
                             <Typography style={{ display: 'flex', color: '#1B2559' }}>
                                 เอกสารแบบร่าง
                             </Typography>
                             <Typography variant='body2' style={{ color: '#A3AED0' }}>
                                 สำรวจเอกสารแบบร่างทั้งหมด
                             </Typography>
-                        </div>
-                    </div>
+                        </Box>
+                    </Box>
                 </Button>
             </Link>
             <Box className='my-5' />

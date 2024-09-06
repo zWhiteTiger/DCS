@@ -71,7 +71,8 @@ const CreateDocs: React.FC = () => {
           </Grid>
           <Grid item xs={3}>
             <Typography variant="h5">เลือกบล๊อคคำสั่ง</Typography>
-            <Card
+
+            {/* <Card
               sx={{
                 border: '2px dashed #8000FF',
                 boxShadow: 'none', // ลบเงาออก
@@ -89,7 +90,8 @@ const CreateDocs: React.FC = () => {
                 </Typography>
                 
               </CardContent>
-            </Card>
+            </Card> */}
+
           </Grid>
         </Grid>
       ),

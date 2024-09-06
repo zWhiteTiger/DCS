@@ -105,7 +105,7 @@ export default function DraftList({ }: Props) {
                                     cardBackgroundColor = '#FBF0EF'; // Light red
                                     break;
                                 case 'draft':
-                                    cardBackgroundColor = '#D2D2D2'; // Light red
+                                    cardBackgroundColor = '#F3F3F3'; // Light red
                                     break;
                                 case 'express':
                                     cardBackgroundColor = '#FFFAEF'; // Light red

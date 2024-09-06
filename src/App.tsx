@@ -22,6 +22,11 @@ import Dashboard from './Components/Pages/Dashboard';
 // import { useAppDispatch } from './Store/Store';
 import { pdfjs } from 'react-pdf';
 import Profile from './Components/Pages/Setting/Profile';
+import { useSelector } from 'react-redux';
+import { authSelector } from './Store/Slices/authSlice';
+import { useAppDispatch } from './Store/Store';
+import axios from 'axios';
+import { httpClient } from './Components/Pages/Utility/HttpClient';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -66,21 +71,32 @@ const App = () => {
   const [_isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
   // const _authReducer = useSelector(authSelector)
   // const _dispatch = useAppDispatch()
-  const { } = useProfile()
+  // const { } = useProfile()
 
-  
+  const refresToken = async () => {
+    try {
+      const response = await axios.post('http://localhost:4444/auth/refresh/token', {}, { withCredentials: true })
+      console.log(response.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 1024);
-    };
+    refresToken()
+  }, [])
 
-    window.addEventListener('resize', handleResize);
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     setIsMobile(window.innerWidth <= 1024);
+  //   };
 
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
+  //   window.addEventListener('resize', handleResize);
+
+  //   return () => {
+  //     window.removeEventListener('resize', handleResize);
+  //   };
+  // }, []);
 
   useEffect(() => {
     const path = location.pathname;
@@ -164,25 +180,25 @@ const App = () => {
 
           <Routes>
             <Route element={<PrivateRoute />}>
-            <Route path='/' element={<Dashboard />} />
-            <Route path='/explore' element={<Explore />} />
-            <Route path='/archive' element={<Archive />} />
-            <Route path='/docs/create' element={<CreateDocs />} />
-            <Route path='/docs/overviews' element={<OverviewDocs />} />
-            <Route path='/docs/draft' element={<DraftDocs />} />
-            <Route path='/setting' element={<DraftDocs />} />
-            <Route path='/profile' element={<Profile />} />
-          </Route>
-          {/* Auth */}
-          <Route element={<PublicRoute />}>
-            <Route path='/auth/register' element={<Register />} />
-            <Route path='/auth/login' element={<Login />} />
-          </Route>
-          {/* Error Report */}
-          <Route path='*' element={<ERR404 />} />
-        </Routes >
+              <Route path='/' element={<Dashboard />} />
+              <Route path='/explore' element={<Explore />} />
+              <Route path='/archive' element={<Archive />} />
+              <Route path='/docs/create' element={<CreateDocs />} />
+              <Route path='/docs/overviews' element={<OverviewDocs />} />
+              <Route path='/docs/draft' element={<DraftDocs />} />
+              <Route path='/setting' element={<DraftDocs />} />
+              <Route path='/profile' element={<Profile />} />
+            </Route>
+            {/* Auth */}
+            <Route element={<PublicRoute />}>
+              <Route path='/auth/register' element={<Register />} />
+              <Route path='/auth/login' element={<Login />} />
+            </Route>
+            {/* Error Report */}
+            <Route path='*' element={<ERR404 />} />
+          </Routes >
+        </Box>
       </Box>
-    </Box>
     </ThemeProvider >
   );
 };

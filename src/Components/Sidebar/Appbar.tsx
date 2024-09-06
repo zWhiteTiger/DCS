@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppBar, Toolbar, IconButton, Box, Typography } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Box, Typography, useMediaQuery } from '@mui/material';
 import { LuMenu } from "react-icons/lu";
 import AccountMenu from './AccountMenu';
 import SearchBar from '../Pages/Utility/SearchBar';
@@ -12,6 +12,8 @@ type Props = {
 
 const Appbar: React.FC<Props> = ({ drawerWidth, handleDrawerToggle }) => {
     // const userImagePath = '/path/to/user/image.jpg';
+
+    const isMobile = useMediaQuery('(max-width:1024px)');
 
     const location = useLocation()
 
@@ -43,15 +45,17 @@ const Appbar: React.FC<Props> = ({ drawerWidth, handleDrawerToggle }) => {
         >
 
             <Toolbar className='flex justify-between'>
-                <Box>
-                    <Typography style={{ color: '#0e3d96', fontSize: '28px', fontWeight: 'bold' }}>
-                        Document Control System Software
-                    </Typography>
-                    <Typography style={{ color: '#2a5dbd', fontSize: '20px' }}>
-                        โปรแกรมควบคุมเอกสารสโมสรนักศึกษา - {pageName}
-                    </Typography>
-                </Box>
 
+                {!isMobile && ( // Render only if not in mobile mode
+                    <Box>
+                        <Typography style={{ color: '#0e3d96', fontSize: '28px', fontWeight: 'bold' }}>
+                            Document Control System Software
+                        </Typography>
+                        <Typography style={{ color: '#2a5dbd', fontSize: '20px' }}>
+                            โปรแกรมควบคุมเอกสารสโมสรนักศึกษา - {pageName}
+                        </Typography>
+                    </Box>
+                )}
                 <Box>
                     <IconButton
                         color="inherit"

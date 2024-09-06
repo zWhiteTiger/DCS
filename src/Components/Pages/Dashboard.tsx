@@ -120,17 +120,17 @@ export default function Dashboard({ }: Props) {
             <Card sx={cardStyles}>
               <CardContent>
                 <Box style={{ fontFamily: 'Kanit', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
+                  <Box>
                     <Typography style={{ display: 'flex', color: '#1B2559' }} className='text-xl font-bold'>
                       สถิติ
                     </Typography>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', color: '#05CD99' }}>
+                  </Box>
+                  <Box style={{ display: 'flex', alignItems: 'center', color: '#05CD99' }}>
                     <BiSolidUpArrow style={{ color: '#05CD99', marginRight: '0.5rem' }} />
                     <Typography variant="body1" className="text-lm">
                       +100.00%
                     </Typography>
-                  </div>
+                  </Box>
                 </Box>
                 <Graph />
               </CardContent>
@@ -140,9 +140,9 @@ export default function Dashboard({ }: Props) {
           <Grid item xs={12} sm={6} md={4}>
             <Card sx={userinfo}>
               <CardContent className="m-3">
-                <div style={{ width: '200px', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '100%' }}>
+                <Box style={{ width: '200px', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '100%' }}>
                   <img src={imageSrc} alt="Profile" style={{ maxWidth: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
+                </Box>
                 <Box className="mt-5">
                   <Typography variant="h6" gutterBottom>
                     {loading ? (
@@ -175,11 +175,11 @@ export default function Dashboard({ }: Props) {
           </Grid>
         </Grid>
         <Box className="m-6" />
-        <div>
-          <div style={{ overflowX: 'auto', display: 'flex' }}>
+        <Box>
+          <Box style={{ overflowX: 'auto', display: 'flex' }}>
             <Grid container spacing={3}>
               {/* Left Section */}
-              <Grid item xs={12} md={8}>
+              <Grid item xs={12} md={12}>
                 <Card sx={cardStyles} className='mb-5'>
                   <CardContent>
                     <Typography style={{ display: 'flex', color: '#1B2559' }} className='text-xl font-bold'>รายการเอกสาร</Typography>
@@ -207,20 +207,10 @@ export default function Dashboard({ }: Props) {
                   </CardContent>
                 </Card>
               </Grid>
-
-              {/* Right Section */}
-              <Grid item xs={12} md={4}>
-                <Card sx={cardStyles}>
-                  <CardContent>
-                    <Typography style={{ display: 'flex', color: '#1B2559' }} className='text-xl font-bold'>Time lines</Typography>
-                    <Typography>This is the content of the right card.</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
             </Grid>
-          </div>
+          </Box>
 
-        </div>
+        </Box>
         <NoMoreContent />
       </>
     </ThemeProvider>

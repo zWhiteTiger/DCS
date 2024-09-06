@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button, Modal, Tooltip } from 'antd';
 import { MdFileOpen } from 'react-icons/md';
 import PDFServices from './Services/PDFServices';
@@ -9,12 +9,12 @@ type PDFModalProps = {
 };
 
 const PDFModal = ({ docsPath }: PDFModalProps) => {
+
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [loadingButton, setLoadingButton] = useState<string | null>(null);
+    const [fileUrl, setFileUrl] = useState<string | null>(null); // ใช้ useState แทน useRef เพื่อควบคุมการเปลี่ยนแปลง
     const [approvers, setApprovers] = useState<string[]>([]);
-
-    const FileURL = `/pdf/${docsPath}`;
 
     const StyledCard = styled(Card)(() => ({
         border: '1px solid #d5d5d5',
@@ -22,7 +22,10 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
         boxSizing: 'border-box',
     }));
 
-    const showModal = () => setOpen(true);
+    const showModal = () => {
+        setOpen(true);
+        setFileUrl(`/pdf/${docsPath}`); // อัปเดต fileUrl เมื่อเปิด modal
+    };
 
     const handleOk = (button: string) => {
         setLoading(true);
@@ -34,7 +37,9 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
         }, 3000);
     };
 
-    const handleCancel = () => setOpen(false);
+    const handleCancel = () => {
+        setOpen(false);
+    };
 
     const tooltipStyle = { fontFamily: 'Kanit' };
 
@@ -94,7 +99,14 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
                 <Grid container spacing={2}>
                     <Grid item xs={9}>
                         <StyledCard>
-                            <PDFServices fileUrl={FileURL} approvers={approvers} setApprovers={setApprovers} />
+                            {fileUrl && (
+                                <PDFServices
+                                    key={fileUrl} // ใช้ fileUrl เป็น key เพื่อบังคับให้ re-render
+                                    fileUrl={fileUrl}
+                                    approvers={approvers}
+                                    setApprovers={setApprovers}
+                                />
+                            )}
                         </StyledCard>
                     </Grid>
                     <Grid item xs={3}>

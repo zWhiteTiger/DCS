@@ -2,15 +2,20 @@ import axios from "axios"
 import { useQuery } from "react-query"
 import { useAppDispatch } from "../Store/Store"
 import { setIsLogin, setProfile } from "../Store/Slices/authSlice"
+import { httpClient } from "../Components/Pages/Utility/HttpClient"
 
 export async function profile() {
 
     try {
+        const refres_token = await httpClient.post("/auth/token")
+        if (!refres_token.data) {
+            throw new Error
+        }
 
-        const response = await axios.get('http://localhost:4444/auth/profile', { withCredentials: true })
+        const response = await httpClient.get('auth/profile', { withCredentials: true })
         return response.data
     } catch (error) {
-       throw error
+        throw error
     }
 }
 
