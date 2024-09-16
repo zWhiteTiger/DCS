@@ -22,7 +22,7 @@ export default function UserDataEditor({ }: Props) {
             name="basic"
             labelCol={{ span: 8 }}
             wrapperCol={{ span: 16 }}
-            style={{ maxWidth: 600, width: 600 }}
+            style={{ maxWidth: 600 }}
             initialValues={{ remember: true }}
             onFinish={onFinish}
             onFinishFailed={onFinishFailed}
@@ -30,27 +30,19 @@ export default function UserDataEditor({ }: Props) {
         >
             <Form.Item<FieldType>
                 name="firstName"
-                rules={[{ required: true, message: 'Please input your username!' }]}
+                rules={[{ required: true, message: 'กรองชื่อที่จะแก้ไข' }]}
             >
                 <Input placeholder='ชื่อจริง' />
             </Form.Item>
 
             <Form.Item<FieldType>
                 name="lastName"
-                rules={[{ required: true, message: 'Please input your username!' }]}
+                rules={[{ required: true, message: 'กรองนามสกุลที่จะแก้ไข' }]}
             >
                 <Input placeholder='นามสกุล' />
             </Form.Item>
 
-            {/* <Form.Item<FieldType>
-                name="password"
-                rules={[{ required: true, message: 'Please input your password!' }]}
-            >
-                <Input.Password placeholder='' />
-            </Form.Item> */}
-
-
-            <Form.Item wrapperCol={{ offset: 13, span: 16 }}>
+            <Form.Item>
                 <Button type="primary" htmlType="submit">
                     บันทึก
                 </Button>

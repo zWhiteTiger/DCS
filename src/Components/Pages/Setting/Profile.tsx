@@ -6,6 +6,7 @@ import { authSelector } from '../../../Store/Slices/authSlice';
 import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
 import NoMoreContent from '../Utility/NoMoreContent';
 import UserDataEditor from './UserDataEditor';
+import Signature from './Signature';
 
 const { Dragger } = Upload;
 
@@ -87,7 +88,7 @@ export default function Profile({ }: Props) {
                                     <img src={imageSrc} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     <Dragger {...uploadProps} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}>
                                         <Button icon={<UploadOutlined />} style={{ color: '#FFFFFF' }} type="link">
-                                            Upload
+                                            เปลี่ยนรูปประจำตัว
                                         </Button>
                                     </Dragger>
                                 </div>
@@ -110,15 +111,44 @@ export default function Profile({ }: Props) {
                         </Card>
                     </Grid>
                     <Grid item xs={12} sm={8}>
-                        <Card sx={userEditor} style={{ padding: '16px' }}>
-                            <CardContent>
-                                <Typography style={{ display: 'flex', color: '#1B2559' }} className='text-xl font-bold'>
-                                    แก้ไขข้อมูลผู้ใช้งาน
-                                </Typography>
+                        <Grid container spacing={2} direction="row">
+                            <Grid item xs={12} sm={6}>
+                                <Card sx={userEditor} style={{ padding: '16px' }}>
+                                    <CardContent>
+                                        <Typography style={{ display: 'flex', color: '#1B2559' }} className='text-xl font-bold'>
+                                            แก้ไขข้อมูลผู้ใช้งาน
+                                        </Typography>
+                                        <UserDataEditor />
+                                    </CardContent>
+                                </Card>
+                                <Box className="mt-5" />
+                                <Card sx={userEditor} style={{ padding: '16px' }}>
+                                    <CardContent>
+                                        <Typography style={{ display: 'flex', color: '#1B2559' }} className='text-xl font-bold'>
+                                            เปลี่ยนรหัสผ่าน
+                                        </Typography>
+                                        <Button>
+                                            Change Password
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <Card sx={userEditor} style={{ padding: '16px' }}>
+                                    <CardContent>
+                                        <Typography style={{ display: 'flex', color: '#1B2559' }} className='text-xl font-bold'>
+                                            ลายเซนต์
+                                        </Typography>
 
-                                <UserDataEditor />
-                            </CardContent>
-                        </Card>
+                                        <Signature />
+
+                                        <Typography style={{ color: '#1B2559' }}>
+                                            ลายเซนต์จะต้องเป็นภาพสกุลไฟล์ .PNG ที่ไม่มีพื้นหลัง
+                                        </Typography>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Grid>
             </Box>

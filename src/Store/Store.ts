@@ -1,9 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { useDispatch } from 'react-redux'
 import authReducer from './Slices/authSlice'
+import docsReducer from './Slices/DocSlice'
+
 
 const reducer = {
-    authReducer
+    authReducer,
+    docsReducer
 }
 
 

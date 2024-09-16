@@ -32,30 +32,30 @@ axios.interceptors.request.use(
     }
 )
 
-axios.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-        const originalRequest = error.config
-        // const refreshToken = Cookies.get(cookieKey.refreshToken)
+// axios.interceptors.response.use(
+//     (response) => response,
+//     async (error) => {
+//         const originalRequest = error.config
+//         // const refreshToken = Cookies.get(cookieKey.refreshToken)
 
-        if (
-            error.response?.status === 401 &&
-            !originalRequest._retry
-        ) {
-            originalRequest._retry = true
+//         if (
+//             error.response?.status === 401 &&
+//             !originalRequest._retry
+//         ) {
+//             originalRequest._retry = true
 
-            try {
-                await axios.post('auth/refresh/token')
+//             try {
+//                 await axios.post('auth/refresh/token')
 
-                // Retry the original request with the new token
-                return axios(originalRequest)
-            } catch (refreshError) {
-                // Handle refresh token error or redirect to login
-                return Promise.reject(refreshError)
-            }
-        }
-        return Promise.reject(error)
-    }
-)
+//                 // Retry the original request with the new token
+//                 return axios(originalRequest)
+//             } catch (refreshError) {
+//                 // Handle refresh token error or redirect to login
+//                 return Promise.reject(refreshError)
+//             }
+//         }
+//         return Promise.reject(error)
+//     }
+// )
 
 export const httpClient = axios

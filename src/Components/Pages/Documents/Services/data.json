@@ -1,0 +1,13 @@
+{
+  "userID": {
+    "signature_path": "/path/to/signature.png",
+    "firstName": "NAME",
+    "lastName": "LASTNAME",
+    "approve": "false",
+    "position": [
+      100,
+      200
+    ],
+    "page": 5
+  }
+}

@@ -3,6 +3,9 @@ import { Button, Modal, Tooltip } from 'antd';
 import { MdFileOpen } from 'react-icons/md';
 import PDFServices from './Services/PDFServices';
 import { Box, Card, CardContent, Grid, styled, Typography } from '@mui/material';
+import { useAppDispatch } from '../../../Store/Store';
+import { docAsync, docSelector } from '../../../Store/Slices/DocSlice';
+import { useSelector } from 'react-redux';
 
 type PDFModalProps = {
     docsPath: string;  // Type for docsPath
@@ -15,6 +18,10 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
     const [loadingButton, setLoadingButton] = useState<string | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null); // ใช้ useState แทน useRef เพื่อควบคุมการเปลี่ยนแปลง
     const [approvers, setApprovers] = useState<string[]>([]);
+
+    const docReducer = useSelector(docSelector)
+
+    const dispatch = useAppDispatch()
 
     const StyledCard = styled(Card)(() => ({
         border: '1px solid #d5d5d5',
@@ -43,6 +50,10 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
 
     const tooltipStyle = { fontFamily: 'Kanit' };
 
+    useEffect(() => {
+        dispatch(docAsync(docsPath))
+    }, [dispatch, docsPath])
+
     return (
         <>
             <Tooltip title={<span style={tooltipStyle}>แก้ไขไฟล์</span>}>
@@ -68,7 +79,7 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
                 open={open}
                 onCancel={handleCancel}
                 width={1550}
-                style={{ zIndex: 1, marginTop: '-70px' }}
+                style={{ zIndex: 1, marginTop: '-70px', border: 'none', boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)', }}
                 maskClosable={false}
                 footer={[
                     <Button
@@ -111,23 +122,7 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
                     </Grid>
                     <Grid item xs={3}>
                         <Typography variant="h5">เลือกบล๊อคคำสั่ง</Typography>
-                        <Card
-                            sx={{
-                                border: '2px dashed #8000FF',
-                                boxShadow: 'none',
-                                textAlign: 'center',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <CardContent>
-                                <Typography style={{ color: '#8000FF', fontWeight: 'bold', fontSize: '24px' }}>
-                                    เพิ่มผู้ลงนาม
-                                </Typography>
-                                <Typography>
-                                    ฟหดหฟกด
-                                </Typography>
-                            </CardContent>
-                        </Card>
+
                     </Grid>
                 </Grid>
             </Modal>
