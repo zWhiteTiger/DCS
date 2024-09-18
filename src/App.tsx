@@ -27,11 +27,7 @@ import { authSelector } from './Store/Slices/authSlice';
 import { useAppDispatch } from './Store/Store';
 import axios from 'axios';
 import { httpClient } from './Components/Pages/Utility/HttpClient';
-<<<<<<< HEAD
-import UserManagement from './Components/Pages/Setting/UserManagement';
-=======
 import ForgotPassword from './Components/Pages/Auth/Forgot_Pass';
->>>>>>> e089e037d1d42e4468a90c039df7bfd67b7829d6
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -124,8 +120,6 @@ const App = () => {
       title = 'DCS • สร้างบัญชีผู้ใช้';
     } else if (path === '/profile') {
       title = 'Authentication • Register';
-    } else if (path === '/u/manager') {
-      title = 'DCS • จัดการบัญชีผู้ใช้งาน';
     } else {
       title = '404 • ไม่พบหน้านี้';
     }
@@ -160,11 +154,7 @@ const App = () => {
       <Box sx={sxStyle}>
         <CssBaseline />
 
-<<<<<<< HEAD
-        {['/', '/explore', '/profile', '/setting', '/archive', '/docs/create', '/u/manager', '/docs/draft',].includes(location.pathname) && (
-=======
         {['/', '/explore', '/profile', '/setting', '/archive', '/docs/create', '/docs/overviews', '/auth/forgetpassword', '/docs/draft',].includes(location.pathname) && (
->>>>>>> e089e037d1d42e4468a90c039df7bfd67b7829d6
           <>
             <Appbar drawerWidth={drawerWidth} handleDrawerToggle={handleDrawerToggle} />
             <Sidebar
@@ -182,7 +172,7 @@ const App = () => {
             flexGrow: 1,
             mt: 0,
             width: {
-              sm: `calc(100% - ${drawerWidth}px)`,
+              sm: 'calc(100% - ${drawerWidth}px)',
               xs: '100%', // Adjust the width for smaller screens
             },
           }}
@@ -195,6 +185,7 @@ const App = () => {
               <Route path='/explore' element={<Explore />} />
               <Route path='/archive' element={<Archive />} />
               <Route path='/docs/create' element={<CreateDocs />} />
+              <Route path='/docs/overviews' element={<OverviewDocs />} />
               <Route path='/docs/draft' element={<DraftDocs />} />
               <Route path='/setting' element={<DraftDocs />} />
               <Route path='/profile' element={<Profile />} />
@@ -207,7 +198,6 @@ const App = () => {
             </Route>
             {/* Error Report */}
             <Route path='*' element={<ERR404 />} />
-            <Route path='u/manager' element={<UserManagement />} />
           </Routes >
         </Box>
       </Box>
