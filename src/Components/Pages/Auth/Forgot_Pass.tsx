@@ -5,15 +5,10 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button, Checkbox, Form, Input, Modal } from 'antd';
+import { Button, Form, Input, Modal } from 'antd';
 import type { FormProps } from 'antd';
-import { FaKey } from 'react-icons/fa';
-import { MdCreate } from 'react-icons/md';
 import axios from 'axios';
 import '../Styles/style.css';
-import { profile } from '../../../Hooks/useProfile';
-import { useAppDispatch } from '../../../Store/Store';
-import { setIsLogin, setProfile } from '../../../Store/Slices/authSlice';
 
 const antdTheme = createTheme({
   typography: {
@@ -24,38 +19,21 @@ const antdTheme = createTheme({
   },
 });
 
-export default function Login() {
+export default function ForgotPassword() {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch()
-
-  // const {
-  //   mutate,
-  //   isSuccess,
-  //   isError,
-  //   error
-  // } = useLogin()
 
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     try {
-      const response = await axios.post('http://localhost:4444/auth/login', values, { withCredentials: true });
-  
-      if (response.status === 201) {
-        // Fetch the profile after a successful login
-        const profileData = await profile();
-        dispatch(setProfile(profileData));
-        dispatch(setIsLogin());
-  
-        navigate('/'); // Redirect to the dashboard or homepage
+      const response = await axios.post('http://localhost:4444/auth/forgot-password', values);
+
+      if (response.status === 200) {
+        showSuccessModal('สำเร็จ', 'ลิงก์รีเซ็ตรหัสผ่านได้ถูกส่งไปที่อีเมลของท่านแล้ว');
       } else {
-        showErrorModal('ไม่พบบัญชีนี้ในฐานข้อมูล', 'โปรดตรวจสอบอีเมลและรหัสผ่านของท่านใหม่และลองอีกครั้ง');
+        showErrorModal('ไม่พบอีเมลนี้ในระบบ', 'โปรดตรวจสอบอีเมลของท่านและลองอีกครั้ง');
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401) {
-          showErrorModal('ผิดพลาดในการเข้าสู่ระบบ', 'อีเมลหรือรหัสผ่านผิด');
-        } else {
-          showErrorModal('ไม่พบบัญชีนี้ในฐานข้อมูล', 'โปรดตรวจสอบอีเมลและรหัสผ่านของท่านใหม่และลองใหม่อีกครั้ง');
-        }
+        showErrorModal('เกิดข้อผิดพลาด', 'ไม่สามารถส่งอีเมลได้ โปรดลองอีกครั้ง');
       } else {
         console.error('Unexpected error:', error);
       }
@@ -77,10 +55,22 @@ export default function Login() {
     });
   };
 
+  const showSuccessModal = (title: string, subtitle: string) => {
+    Modal.success({
+      title,
+      content: subtitle,
+      okText: 'ตกลง',
+      okButtonProps: {
+        style: { color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }
+      },
+      onOk() {
+        navigate('/auth/login'); // Navigate back to login page after success
+      },
+    });
+  };
+
   type FieldType = {
     email?: string;
-    password?: string;
-    remember?: boolean;
   };
 
   return (
@@ -112,13 +102,12 @@ export default function Login() {
             }}
           >
             <Typography className='mt-10' component="h1" variant="h5">
-              เข้าสู่ระบบ
+              ลืมรหัสผ่าน
             </Typography>
             <Form
               className='mt-10'
-              name="loginForm"
+              name="forgotPasswordForm"
               style={{ maxWidth: 600 }}
-              initialValues={{ remember: false }}
               onFinish={onFinish}
               onFinishFailed={onFinishFailed}
               autoComplete="off"
@@ -131,35 +120,8 @@ export default function Login() {
                   size='large'
                   style={{ fontFamily: 'Kanit' }}
                   placeholder="อีเมล"
-                // defaultValue={"nattawut.sa@ksu.ac.th"}
                 />
               </Form.Item>
-
-              <Form.Item
-                name="password"
-                rules={[{ required: true, message: 'โปรดป้อนรหัสผ่าน' }]}
-              >
-                <Input.Password
-                  size="large"
-                  style={{ fontFamily: 'Kanit' }} // Change font for the input field
-                  className="custom-input-password" // Add a custom class for styling
-                  placeholder="รหัสผ่าน"
-                // defaultValue="1430501488302"
-                />
-              </Form.Item>
-
-              <Form.Item<FieldType>
-                name="remember"
-                valuePropName="checked"
-              >
-                <Checkbox
-                  style={{ fontFamily: 'Kanit' }}
-                >
-                  โปรดจดจำ ฉัน
-                </Checkbox>
-              </Form.Item>
-
-              <Box className="my-10 w-[350px]" />
 
               <Form.Item style={{ textAlign: 'center' }}>
                 <Button
@@ -168,29 +130,18 @@ export default function Login() {
                   htmlType="submit"
                   style={{ color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }}
                 >
-                  เข้าสู่ระบบ
+                  ส่งคำขอลืมรหัสผ่าน
                 </Button>
               </Form.Item>
             </Form>
 
             <Box className="mt-10">
               <Box className="flex justify-start my-2">
-                <Link to="/auth/forgetpassword" style={{ marginRight: '10px' }}>
+                <Link to="/auth/login">
                   <Button
-                    icon={<FaKey />}
                     size='large'
                     style={{ fontFamily: 'Kanit', color: 'black' }}
-                    type="link">ลืมรหัสผ่าน?</Button>
-                </Link>
-              </Box>
-              <Box className="w-[350px]"></Box>
-              <Box className="flex justify-start my-2">
-                <Link to="/auth/register">
-                  <Button
-                    icon={<MdCreate />}
-                    size='large'
-                    style={{ fontFamily: 'Kanit', color: 'black' }}
-                    type="link">ยังไม่มีบัญชี?, สร้างบัญชีใหม่</Button>
+                    type="link">กลับไปที่หน้าเข้าสู่ระบบ</Button>
                 </Link>
               </Box>
             </Box>
