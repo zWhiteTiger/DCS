@@ -27,7 +27,11 @@ import { authSelector } from './Store/Slices/authSlice';
 import { useAppDispatch } from './Store/Store';
 import axios from 'axios';
 import { httpClient } from './Components/Pages/Utility/HttpClient';
+<<<<<<< HEAD
 import UserManagement from './Components/Pages/Setting/UserManagement';
+=======
+import ForgotPassword from './Components/Pages/Auth/Forgot_Pass';
+>>>>>>> e089e037d1d42e4468a90c039df7bfd67b7829d6
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -156,7 +160,11 @@ const App = () => {
       <Box sx={sxStyle}>
         <CssBaseline />
 
+<<<<<<< HEAD
         {['/', '/explore', '/profile', '/setting', '/archive', '/docs/create', '/u/manager', '/docs/draft',].includes(location.pathname) && (
+=======
+        {['/', '/explore', '/profile', '/setting', '/archive', '/docs/create', '/docs/overviews', '/auth/forgetpassword', '/docs/draft',].includes(location.pathname) && (
+>>>>>>> e089e037d1d42e4468a90c039df7bfd67b7829d6
           <>
             <Appbar drawerWidth={drawerWidth} handleDrawerToggle={handleDrawerToggle} />
             <Sidebar
@@ -195,6 +203,7 @@ const App = () => {
             <Route element={<PublicRoute />}>
               <Route path='/auth/register' element={<Register />} />
               <Route path='/auth/login' element={<Login />} />
+              <Route path='/auth/forgetpassword' element={<ForgotPassword />} />
             </Route>
             {/* Error Report */}
             <Route path='*' element={<ERR404 />} />
