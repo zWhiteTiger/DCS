@@ -9,7 +9,7 @@ import logo from '/logo/logo.png';
 import { MyNavLink } from '../Pages/Utility/NavLink';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { useState } from 'react';
-import { FaRegIdBadge } from 'react-icons/fa6';
+import { BsGear, BsGearFill } from "react-icons/bs";
 
 
 type Props = {
@@ -65,12 +65,6 @@ export default function Sidebar({
 
   const docsMenuItems = [
     {
-      path: '/docs/overviews',
-      icon1: <PiListMagnifyingGlassFill size={'1.5em'} className='text-isActive' />, // is active
-      icon2: <PiListMagnifyingGlass size={'1.5em'} className='text-IconColor' />, // none active
-      title: 'ภาพรวม',
-    },
-    {
       path: '/docs/create',
       icon1: <HiDocumentPlus size={'1.5em'} className='text-isActive' />, // is active
       icon2: <HiOutlineDocumentPlus size={'1.5em'} className='text-IconColor' />, // none active
@@ -83,6 +77,15 @@ export default function Sidebar({
       title: 'แบบร่าง',
     },
   ];
+
+  const secondaryMenu = [
+    {
+      path: '/u/manager',
+      icon1: <BsGearFill size={'1.5em'} className='text-isActive' />, // is active
+      icon2: <BsGear size={'1.5em'} className='text-IconColor' />, // none active
+      title: 'จัดการบัญชีผู้ใช้งาน',
+    },
+  ]
 
   const drawer = (
     <div>
@@ -162,6 +165,30 @@ export default function Sidebar({
             ))}
           </List>
         </Collapse>
+        <Box className="m-2" />
+        {secondaryMenu.map((item) => (
+          <Box key={item.path}>
+            <ListItem
+              disablePadding
+              to={item.path}
+              component={MyNavLink}
+              activeClassName="Mui-selected"
+              exact
+            >
+              <ListItemButton>
+                <ListItemIcon>
+                  {location.pathname === item.path ? item.icon1 : item.icon2}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.title}
+                  sx={{
+                    color: location.pathname === item.path ? '#FFF' : '#A3AED0',
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </Box>
+        ))}
       </List>
     </div>
   );

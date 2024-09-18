@@ -24,7 +24,8 @@ const Appbar: React.FC<Props> = ({ drawerWidth, handleDrawerToggle }) => {
         '/archive': 'คลังเอกสาร',
         '/docs/create': 'สร้างเอกสาร',
         '/docs/overviews': 'ภาพรวมเอกสาร',
-        '/docs/draft': 'แบบร่างเอกสาร'
+        '/docs/draft': 'แบบร่างเอกสาร',
+        '/u/manager': 'จัดการผู้ใช้งาน'
     };
 
     // Get the current page name based on the path

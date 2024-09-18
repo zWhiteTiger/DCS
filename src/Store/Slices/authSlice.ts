@@ -7,6 +7,7 @@ type Profile = {
     lastName: string
     _id: string
     picture: string
+    signature: string
 }
 
 type AuthState = {

@@ -21,6 +21,8 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
 
     const docReducer = useSelector(docSelector)
 
+    console.log(docReducer.result?.docsPath)
+
     const dispatch = useAppDispatch()
 
     const StyledCard = styled(Card)(() => ({
