@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Document, Page } from 'react-pdf';
 import { GrFormPrevious, GrFormNext } from 'react-icons/gr';
-import { Box, Card, CardContent, Typography } from '@mui/material';
-import { Button, Input } from 'antd';
+import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
+import { AutoComplete, Button, Col, Input, Row } from 'antd';
 import { FaPenNib } from 'react-icons/fa';
 import Draggable from 'react-draggable';
 import { ImCross } from "react-icons/im";
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { docSelector } from '../../../../Store/Slices/DocSlice';
+import { httpClient } from '../../Utility/HttpClient';
 
 type PDFServicesProps = {
   fileUrl: string | null;
@@ -17,14 +18,32 @@ type PDFServicesProps = {
 };
 
 type Shape = {
-  id: number;
+  id: string;
   type: 'rectangle' | 'circle';
   x: number;
   y: number;
   width: number;
   height: number;
-  page: number; // เพิ่มข้อมูลหน้าที่การ์ดถูกสร้าง
+  page: number; // Page where the card was created
+  firstName: string;
+  lastName: string;
 };
+
+type OptionType = {
+  id: string;
+  value: string; // Email
+  firstName: string;
+  lastName: string;
+};
+
+interface Card {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  position: { x: number; y: number }[];
+  page: number;
+}
 
 const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprovers }) => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -35,8 +54,15 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
   const [scale, setScale] = useState<number>(1); // Default scale is 1
   const [containerWidth, setContainerWidth] = useState<number>(1077); // Initial width of 1077px
   const containerRef = useRef<HTMLDivElement>(null);
-  const [selectedCardId, setSelectedCardId] = useState<number | null>(null); // Track selected card
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null); // Track selected card
   const [shapes, setShapes] = useState<Shape[]>([]); // Track added shapes
+
+  const [selectedUser, setSelectedUser] = useState<OptionType | null>(null);
+  const [selectedEmail, setSelectedEmail] = useState('');
+
+  const [autoCompleteValue, setAutoCompleteValue] = useState<string>('');
+
+  const [options, setOptions] = useState<OptionType[]>([]);
 
   const docReducer = useSelector(docSelector)
 
@@ -73,7 +99,7 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
   };
 
 
-  const maxWidth = 2000;
+  const maxWidth = 1980;
   const minWidth = 1077; // Start from 1077px
 
   useEffect(() => {
@@ -129,197 +155,352 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
       }
     };
   }, []);
-
-
   // ---------------------------------------การ์ด----------------------------------------
-
-
-  // Add the "parent" card when button is clicked
-  const addRectangle = () => {
-    const newShape: Shape = {
-      id: shapes.length + 1,
-      type: 'rectangle',
-      x: 445,
-      y: 600,
-      width: 200,
-      height: 100,
-      page: pageNumber, // บันทึกหมายเลขหน้าปัจจุบัน
-    };
-    setShapes((prevShapes) => [...prevShapes, newShape]);
+  const handleUserSelector = (value: string) => {
+    setSelectedEmail(value);
   };
 
-  // Update position of the card
-  const updateShapePosition = (id: number, x: number, y: number) => {
-    setShapes((prevShapes) =>
-      prevShapes.map((shape) => (shape.id === id ? { ...shape, x, y } : shape))
-    );
-
-    // ส่งตำแหน่งที่อัปเดตไปยังเซิร์ฟเวอร์
-    // await axios.post('/approval/${id}', { id, x, y });
+  const fetchDocId = async () => {
+    try {
+      const response = await axios.get(`/doc/${docReducer.result?.docsPath}`);
+      return response.data._id;  // Assuming the doc_id is returned from this endpoint
+    } catch (error) {
+      console.error("Error fetching document ID:", error);
+      throw error;  // Throw an error if the doc_id can't be fetched
+    }
   };
+
+  const addRectangle = async () => {
+    try {
+      const doc_id = await fetchDocId(); // Fetch the doc_id from the document collection
+
+      const response = await httpClient.post('/approval/create', {
+        doc_id, // Use the fetched doc_id
+        email: selectedEmail,
+        position: [{ x: 445, y: 600 }], // Initial card position as an array
+        page: pageNumber, // The page number where the card is created
+      });
+
+      const cardId = response.data._id; // Use the _id from MongoDB
+
+      const newShape: Shape = {
+        id: cardId, // Use the card ID directly
+        type: 'rectangle',
+        x: 445,
+        y: 600,
+        width: 200,
+        height: 100,
+        page: pageNumber,
+        firstName: response.data.firstName || 'N/A',
+        lastName: response.data.lastName || 'N/A',
+      };
+
+      setShapes((prevShapes) => [...prevShapes, newShape]);
+      console.log('Card created successfully with ID:', cardId);
+
+      // Clear the state and input field
+      setSelectedEmail(''); // Clear the selected email
+      setAutoCompleteValue(''); // Clear the AutoComplete input value
+    } catch (error) {
+      console.error("Error creating card:", error);
+    }
+  };
+
+
+
+  const updateShapePosition = async (id: string, x: number, y: number, page: number) => {
+    try {
+      const doc_id = await fetchDocId();  // Fetch the doc_id
+
+      // Ensure the id is not null
+      if (id) {
+        await httpClient.patch(`/approval/${id}`, {
+          doc_id,  // Use the fetched doc_id
+          position: [{ x, y }],  // Position should be an array of coordinates
+          page,  // Pass the page number
+        });
+
+        // Update the shape's position locally
+        setShapes((prevShapes) =>
+          prevShapes.map((shape) =>
+            shape.id === id ? { ...shape, x, y } : shape
+          )
+        );
+        console.log('Shape position updated successfully');
+      }
+    } catch (error) {
+      console.error("Error updating shape position:", error);
+    }
+  };
+
+  const handleDeleteCard = async (id: string) => {
+    try {
+      setShapes((prevShapes) => prevShapes.filter((shape) => shape.id !== id));  // Remove from frontend state
+      await axios.delete(`/approval/${id}`);  // Delete approval in the backend
+      console.log(id)
+    } catch (error) {
+      console.error("Error deleting approval", error);
+    }
+  };
+
+  const fetchUsers = async (searchTerm: string) => {
+    try {
+      const response = await axios.get(`/user/search?term=${searchTerm}`);
+      return response.data;  // Return the list of users
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      return [];
+    }
+  };
+
+  // AutoComplete options logic
+  const getPanelValue = async (text: string) => {
+    const users = await fetchUsers(text);  // Fetch users from the backend
+    return users.map((user: any) => ({
+      value: user.email,  // Use email as the value
+      label: `${user.firstName} ${user.lastName} (${user.email})`,  // Display name and email as the label
+      id: user._id,  // Store the user ID
+    }));
+  };
+
+  // const [userDetails, setUserDetails] = useState<{ firstName: string; lastName: string } | null>(null);
+
+  // // Handle the selection from AutoComplete
+  // const handleUserSelect = async (value: string, option: OptionType) => {
+  //   if (!selectedCardId) {
+  //     console.error('No card selected. Please select a card first.');
+  //     return; // Exit if no card is selected
+  //   }
+
+  //   setSelectedUser(option); // Set the selected user
+  //   setUserDetails({ firstName: option.firstName, lastName: option.lastName }); // Set user details
+
+  //   const doc_id = await fetchDocId(); // Fetch the doc_id
+
+  //   // Now patch the data with the selected user's details
+  //   try {
+  //     await axios.patch(`/approval/${selectedCardId}`, {
+  //       doc_id,
+  //       card_id: selectedCardId, // Include the selected card ID
+  //       firstName: option.firstName, // Use the first name of the selected user
+  //       lastName: option.lastName, // Use the last name of the selected user
+  //       email: option.value, // Use the email of the selected user
+  //       position: [{ x: 445, y: 600 }], // Position can be adjusted as needed
+  //       page: pageNumber,
+  //     });
+
+  //     console.log('User details updated successfully for the selected card.');
+  //   } catch (error) {
+  //     console.error("Error updating user details:", error);
+  //   }
+  // };
 
   // Handle clicking to select the card
-  const handleCardClick = (id: number) => {
+  const handleCardClick = (id: string) => {
     setSelectedCardId(id); // Set the selected card
   };
 
-  // Delete card by clicking the delete button on the card
-  const handleDeleteCard = (id: number) => {
-    // await axios.delete(`/approval/${id}`);
+  // Fetch cards for the current document
+  const fetchCards = async () => {
+    try {
+      const response = await axios.get(`/approval/${docReducer.result?._id}`);
+      const cards: Card[] = response.data;
 
-    setShapes((prevShapes) => prevShapes.filter((shape) => shape.id !== id));
+      // Map the cards to the Shape type
+      setShapes(cards.map((card: any) => ({
+        id: card._id,  // Now the string id will work
+        type: 'rectangle',
+        x: card.position[0].x,
+        y: card.position[0].y,
+        width: 200,
+        height: 100,
+        page: card.page,
+        firstName: card.firstName,
+        lastName: card.lastName,
+      })));
+    } catch (error) {
+      console.error("Error fetching cards:", error);
+    }
   };
 
-  // Handle pressing the Delete key to remove the selected card
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Delete' && selectedCardId !== null) {
-        handleDeleteCard(selectedCardId); // Delete the selected card
-      }
-    };
+    if (fileUrl) {
+      fetchCards();
+    }
+  }, [fileUrl]);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [selectedCardId]);
 
   return (
-    <Card style={{ background: '#000', color: '#FFF', position: 'relative', overflow: 'hidden' }}>
-      <CardContent>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <Grid container spacing={2}>
+      <Grid item xs={9}>
+        <Card style={{ background: '#000', color: '#FFF', position: 'relative', overflow: 'hidden' }}>
+          <CardContent>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
 
-          <Input
-            placeholder='Rename'
-            prefix={<FaPenNib />}
-            size='large'
-            style={{ width: '300px' }}
-            defaultValue={docReducer.result?.docName} />
+              <Input
+                placeholder='Rename'
+                prefix={<FaPenNib />}
+                size='large'
+                style={{ width: '300px' }}
+                defaultValue={docReducer.result?.docName} />
 
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Typography variant="h6">{`หน้า ${pageNumber} ของ ${numPages || 1}`}</Typography>
-            <div style={{ display: 'flex', marginLeft: '20px' }}>
-              <button onClick={goToPreviousPage} disabled={pageNumber === 1} style={buttonStyle}>
-                <GrFormPrevious />
-              </button>
-              <button onClick={goToNextPage} disabled={pageNumber === numPages} style={buttonStyle}>
-                <GrFormNext />
-              </button>
-              <button onClick={addRectangle}>Add Draggable Card</button>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="h6">{`หน้า ${pageNumber} ของ ${numPages || 1}`}</Typography>
+                <div style={{ display: 'flex', marginLeft: '20px' }}>
+                  <button onClick={goToPreviousPage} disabled={pageNumber === 1} style={buttonStyle}>
+                    <GrFormPrevious />
+                  </button>
+                  <button onClick={goToNextPage} disabled={pageNumber === numPages} style={buttonStyle}>
+                    <GrFormNext />
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div
-          ref={containerRef}
-          style={{
-            marginTop: '20px',
-            position: 'relative', // Required for bounds to work
-            width: '100%',
-            height: '750px',
-            maxHeight: '750px',
-            overflow: 'auto',
-            scrollbarWidth: 'thin', // For Firefox
-            scrollbarColor: '#5D5D5D #333', // For Firefox
-          }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          className="custom-scrollbar" // For Chrome, Edge, and Safari
-        >
-          <Document file={`http://localhost:4444${fileUrl}`} onLoadSuccess={onDocumentLoadSuccess}>
-            <Page
-              renderAnnotationLayer={false}
-              renderTextLayer={false}
-              pageNumber={pageNumber}
-              scale={scale}
-              width={containerWidth}
-            />
-          </Document>
+            <div
+              ref={containerRef}
+              style={{
+                marginTop: '20px',
+                position: 'relative', // Required for bounds to work
+                width: '100%',
+                height: '750px',
+                maxHeight: '750px',
+                overflow: 'auto',
+                scrollbarWidth: 'thin', // For Firefox
+                scrollbarColor: '#5D5D5D #333', // For Firefox
+              }}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              className="custom-scrollbar" // For Chrome, Edge, and Safari
+            >
+              <Document file={`http://localhost:4444${fileUrl}`} onLoadSuccess={onDocumentLoadSuccess}>
+                <Page
+                  renderAnnotationLayer={false}
+                  renderTextLayer={false}
+                  pageNumber={pageNumber}
+                  scale={scale}
+                  width={containerWidth}
+                />
+              </Document>
 
-          {/* Render each draggable card */}
-          {shapes
-            .filter((shape) => shape.page === pageNumber) // แสดงการ์ดเฉพาะหน้าปัจจุบัน
-            .map((shape) => (
-              <Draggable
-                key={shape.id}
-                bounds={{
-                  left: 0,
-                  top: 0,
-                  right: containerRef.current ? containerRef.current.scrollWidth - shape.width : 0,
-                  bottom: containerRef.current ? containerRef.current.scrollHeight - shape.height : 0,
-                }}
-                defaultPosition={{ x: shape.x, y: shape.y }}
-                onStop={(_e, data) => {
-                  // ปรับพิกัดเมื่อหยุดลาก
-                  updateShapePosition(shape.id, data.x, data.y);
-                }}
-                onMouseDown={(e: MouseEvent) => {
-                  e.stopPropagation(); // ป้องกันการลาก PDF
-                }}
-              >
-                <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCardClick(shape.id); // เลือกการ์ด
-                  }}
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                    top: 0,
-                    width: `${shape.width}px`,
-                    height: `${shape.height}px`,
-                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                    border: '2px dashed #8000FF',
-                    borderRadius: '7px',
-                    cursor: 'grab',
-                  }}
-                >
-                  <Box
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      height: '100%',
-                      gap: '10px',
+              {/* Render each draggable card */}
+              {shapes
+                .filter((shape) => shape.page === pageNumber) // แสดงการ์ดเฉพาะหน้าปัจจุบัน
+                .map((shape) => (
+                  <Draggable
+                    key={shape.id}
+                    bounds={{
+                      left: 0,
+                      top: 0,
+                      right: containerRef.current ? containerRef.current.scrollWidth - shape.width : 0,
+                      bottom: containerRef.current ? containerRef.current.scrollHeight - shape.height : 0,
+                    }}
+                    defaultPosition={{ x: shape.x, y: shape.y }}
+                    onStop={(_e, data) => {
+                      // Update the shape position and send the data to server
+                      updateShapePosition(shape.id, data.x, data.y, pageNumber);
+                    }}
+                    onMouseDown={(e: MouseEvent) => {
+                      e.stopPropagation(); // ป้องกันการลาก PDF
                     }}
                   >
-                    <Typography style={{ color: "#4318FF", fontWeight: "bold", fontSize: "16px" }}>
-                      ผู้ลงนาม
-                    </Typography>
-                    <Button type="primary" style={{ color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }}>
-                      เพิ่มผู้ลงนาม
-                    </Button>
-                  </Box>
-
-                  {selectedCardId === shape.id && (
-                    <button
+                    <div
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteCard(shape.id);
+                        handleCardClick(shape.id); // เลือกการ์ด
                       }}
                       style={{
                         position: 'absolute',
-                        top: '2px',
-                        right: '0px',
-                        color: '#FF0000',
-                        border: 'none',
-                        borderRadius: '50%',
-                        width: '25px',
-                        height: '25px',
+                        left: 0,
+                        top: 0,
+                        width: `${shape.width}px`,
+                        height: `${shape.height}px`,
+                        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                        border: '2px dashed #8000FF',
+                        borderRadius: '7px',
+                        cursor: 'grab',
                       }}
                     >
-                      <ImCross />
-                    </button>
-                  )}
-                </div>
-              </Draggable>
-            ))}
-        </div>
+                      <Box
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          height: '100%',
+                          gap: '10px',
+                        }}
+                      >
+                        <Typography style={{ color: "#4318FF", fontWeight: "bold", fontSize: "16px" }}>
+                          ผู้ลงนาม
+                        </Typography>
 
-      </CardContent>
-    </Card>
+                        <Typography style={{ color: "#FFF", fontSize: "12px", marginTop: '10px' }}>
+                          {shape.firstName} {shape.lastName}
+                        </Typography>
+                      </Box>
+
+                      {selectedCardId === shape.id && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteCard(shape.id);
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: '2px',
+                            right: '0px',
+                            color: '#FF0000',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '25px',
+                            height: '25px',
+                          }}
+                        >
+                          <ImCross />
+                        </button>
+                      )}
+                    </div>
+                  </Draggable>
+                ))}
+            </div>
+
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={3}>
+        <Typography variant="h5">เพิ่มผู้ลงนาม</Typography>
+        <Row gutter={16} align="middle">
+          <Col span={24}>
+            <Box className="my-2">
+              <AutoComplete
+                size='large'
+                options={options}
+                style={{ width: '100%' }} // Full width
+                placeholder="ค้นหาโดยใช้ชื่อ หรือ อีเมล"
+                onSearch={async (text) => setOptions(await getPanelValue(text))}
+                onSelect={handleUserSelector} // Update selected email on selection
+                value={autoCompleteValue} // Control the input field value
+                onChange={(value) => setAutoCompleteValue(value)} // Update input value as the user types
+              />
+            </Box>
+          </Col>
+          <Col>
+            <Box className="my-2">
+              <Button
+                size='large'
+                type="primary"
+                onClick={addRectangle} // Trigger the addRectangle function on click
+              >
+                เพิ่มผู้ลงนาม
+              </Button>
+            </Box>
+          </Col>
+        </Row>
+      </Grid>
+    </Grid>
+
   );
 };
 

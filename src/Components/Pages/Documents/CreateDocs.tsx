@@ -11,9 +11,8 @@ const CreateDocs: React.FC = () => {
   const [approvers, setApprovers] = useState<string[]>([]);
 
   const StyledCard = styled(Card)(({ }) => ({
-    border: '1px solid #d5d5d5',
-    width: '100%',
-    boxSizing: 'border-box',
+    borderRadius: '10px',
+    boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)', // Drop shadow with color #FFF
   }));
 
   const nextStep = () => {
@@ -57,43 +56,17 @@ const CreateDocs: React.FC = () => {
     {
       title: <Typography>แก้ไข</Typography>,
       content: (
-        <Grid container spacing={2}>
-          <Grid item xs={9}>
-            <Typography variant="h4">ขั้นตอนที่ 2 แก้ไขเอกสาร</Typography>
-            <Typography>แก้ไขเอกสารหรือเพิ่มผู้ลงนาม</Typography>
-            <StyledCard>
-              {fileUrl ? <PDFServices fileUrl={fileUrl} approvers={approvers} setApprovers={setApprovers} /> :
-                <Box className='flex justify-center' style={{ backgroundColor: '#ec4649', color: '#FFFFFF', height: '100px' }}>
-                  <Typography className='mt-9'>กรุณาอัพโหลดไฟล์ก่อน</Typography>
-                </Box>
-              }
-            </StyledCard>
-          </Grid>
-          <Grid item xs={3}>
-            <Typography variant="h5">เลือกบล๊อคคำสั่ง</Typography>
-
-            {/* <Card
-              sx={{
-                border: '2px dashed #8000FF',
-                boxShadow: 'none', // ลบเงาออก
-                textAlign: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <CardContent>
-                <Typography style={{color: '#8000FF', fontWeight: 'bold', fontSize: '24px'}}>
-                  เพิ่มผู้ลงนาม
-                </Typography>
-                
-                <Typography>
-                  ฟหดหฟกด
-                </Typography>
-                
-              </CardContent>
-            </Card> */}
-
-          </Grid>
-        </Grid>
+        <Box>
+          <Typography variant="h4">ขั้นตอนที่ 2 แก้ไขเอกสาร</Typography>
+          <Typography>แก้ไขเอกสารหรือเพิ่มผู้ลงนาม</Typography>
+          <StyledCard>
+            {fileUrl ? <PDFServices fileUrl={fileUrl} approvers={approvers} setApprovers={setApprovers} /> :
+              <Box className='flex justify-center' style={{ backgroundColor: '#ec4649', color: '#FFFFFF', height: '100px' }}>
+                <Typography className='mt-9'>กรุณาอัพโหลดไฟล์ก่อน</Typography>
+              </Box>
+            }
+          </StyledCard>
+        </Box>
       ),
     },
     {

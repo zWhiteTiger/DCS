@@ -26,9 +26,8 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
     const dispatch = useAppDispatch()
 
     const StyledCard = styled(Card)(() => ({
-        border: '1px solid #d5d5d5',
-        width: '100%',
-        boxSizing: 'border-box',
+        borderRadius: '10px',
+        boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)', // Drop shadow with color #FFF
     }));
 
     const showModal = () => {
@@ -84,21 +83,7 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
                 style={{ zIndex: 1, marginTop: '-70px', border: 'none', boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)', }}
                 maskClosable={false}
                 footer={[
-                    <Button
-                        key="back"
-                        onClick={handleCancel}
-                        loading={loadingButton === 'back' && loading}
-                    >
-                        Cancel
-                    </Button>,
-                    <Button
-                        key="save"
-                        type="primary"
-                        loading={loadingButton === 'save' && loading}
-                        onClick={() => handleOk('save')}
-                    >
-                        Save
-                    </Button>,
+
                     <Button
                         key="submit"
                         type="primary"
@@ -109,24 +94,16 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
                     </Button>,
                 ]}
             >
-                <Grid container spacing={2}>
-                    <Grid item xs={9}>
-                        <StyledCard>
-                            {fileUrl && (
-                                <PDFServices
-                                    key={fileUrl} // ใช้ fileUrl เป็น key เพื่อบังคับให้ re-render
-                                    fileUrl={fileUrl}
-                                    approvers={approvers}
-                                    setApprovers={setApprovers}
-                                />
-                            )}
-                        </StyledCard>
-                    </Grid>
-                    <Grid item xs={3}>
-                        <Typography variant="h5">เลือกบล๊อคคำสั่ง</Typography>
-
-                    </Grid>
-                </Grid>
+                <StyledCard>
+                    {fileUrl && (
+                        <PDFServices
+                            key={fileUrl} // ใช้ fileUrl เป็น key เพื่อบังคับให้ re-render
+                            fileUrl={fileUrl}
+                            approvers={approvers}
+                            setApprovers={setApprovers}
+                        />
+                    )}
+                </StyledCard>
             </Modal>
         </>
     );

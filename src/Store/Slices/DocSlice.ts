@@ -4,6 +4,7 @@ import axios from "axios";
 import { httpClient } from "../../Components/Pages/Utility/HttpClient";
 
 type Document = {
+    _id: string;
     docName: string;
     userId: string;
     docsPath: string;

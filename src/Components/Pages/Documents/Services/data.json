@@ -1,12 +1,12 @@
 {
   "userID": {
     "signature_path": "/path/to/signature.png",
-    "firstName": "NAME",
-    "lastName": "LASTNAME",
     "approve": "false",
     "position": [
-      100,
-      200
+      {
+        "x": 100,
+        "y": 100
+      }
     ],
     "page": 5
   }
