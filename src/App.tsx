@@ -76,7 +76,7 @@ const App = () => {
 
   const refresToken = async () => {
     try {
-      const response = await axios.post('http://localhost:4444/auth/refresh/token', {}, { withCredentials: true })
+      const response = await axios.post(`${import.meta.env.VITE_URL}/auth/refresh/token`, {}, { withCredentials: true })
       console.log(response.data)
     } catch (error) {
       console.log(error)
@@ -101,27 +101,27 @@ const App = () => {
 
   useEffect(() => {
     const path = location.pathname;
-    let title = 'Document Controller System'; // Title default value
+    let title = `${import.meta.env.VITE_SERVICES_NAME}`; // Title default value
     if (path === '/') {
-      title = 'DCS • ดาร์ชบอร์ด';
+      title = `${import.meta.env.VITE_SERVICES_NAME} • ดาร์ชบอร์ด`;
     } else if (path === '/explore') {
-      title = 'DCS • สำรวจ';
+      title = `${import.meta.env.VITE_SERVICES_NAME} • สำรวจ`;
     } else if (path === '/archive') {
-      title = 'DCS • คลังเอกสาร';
+      title = `${import.meta.env.VITE_SERVICES_NAME} • คลังเอกสาร`;
     } else if (path === '/docs/create') {
-      title = 'DCS • สร้างเอกสาร';
+      title = `${import.meta.env.VITE_SERVICES_NAME} • สร้างเอกสาร`;
     } else if (path === '/docs/overviews') {
-      title = 'DCS • ภาพรวม';
+      title = `${import.meta.env.VITE_SERVICES_NAME} • ภาพรวม`;
     } else if (path === '/docs/draft') {
-      title = 'DCS • ร่างเอกสาร';
+      title = `${import.meta.env.VITE_SERVICES_NAME} • ร่างเอกสาร`;
     } else if (path === '/auth/login') {
-      title = 'DCS • เข้าสู่ระบบ';
+      title = `${import.meta.env.VITE_SERVICES_NAME} • เข้าสู่ระบบ`;
     } else if (path === '/auth/register') {
-      title = 'DCS • สร้างบัญชีผู้ใช้';
+      title = `${import.meta.env.VITE_SERVICES_NAME} • สร้างบัญชีผู้ใช้`;
     } else if (path === '/profile') {
-      title = 'Authentication • Register';
+      title = `${import.meta.env.VITE_SERVICES_NAME} • โปรไฟล์`;
     } else {
-      title = '404 • ไม่พบหน้านี้';
+      title = `404 • ไม่พบหน้านี้`;
     }
     document.title = title; // Update document title
     setPageTitle(title); // Update state for page title

@@ -33,12 +33,12 @@ type Props = {};
 export default function Profile({ }: Props) {
     const profileReducer = useSelector(authSelector);
     const [imageSrc, setImageSrc] = useState(profileReducer.result?.picture
-        ? `http://localhost:4444${profileReducer.result.picture}`
+        ? `${import.meta.env.VITE_URL}${profileReducer.result.picture}`
         : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png');
 
     const handleFileChange = (info: any) => {
         if (info.file.status === 'done') {
-            const newImageSrc = `http://localhost:4444${info.file.response.path}`;
+            const newImageSrc = `${import.meta.env.VITE_URL}${info.file.response.path}`;
             setImageSrc(newImageSrc);
             message.success({
                 content: 'อัพโหลดเสร็จสิ้น, กำลังเปลี่ยนรูปภาพ',
@@ -67,7 +67,7 @@ export default function Profile({ }: Props) {
 
     const uploadProps = {
         name: 'file',
-        action: `http://localhost:4444/upload/profile`,
+        action: `${import.meta.env.VITE_URL}/upload/profile`,
         data: {
             email: userEmail,
         },

@@ -37,7 +37,7 @@ export default function AccountMenu() {
 
       dispatch(setIsLogout())
 
-      await axios.post('http://localhost:4444/auth/logout', {}, {
+      await axios.post(`${import.meta.env.VITE_URL}/auth/logout`, {}, {
         withCredentials: true,
       });
       navigate('/auth/login'); // Redirect to login page or home after logout
@@ -49,7 +49,7 @@ export default function AccountMenu() {
 
   const picturePath = profileReducer.result?.picture;
   const imageSrc = picturePath
-    ? `http://localhost:4444${picturePath}`
+    ? `${import.meta.env.VITE_URL}${picturePath}`
     : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
 
   return (

@@ -15,7 +15,7 @@ const Uploader: React.FC<UploaderProps> = ({ setFileUrl, nextStep }) => {
   const props: UploadProps = {
     name: 'file',
     multiple: false,
-    action: 'http://localhost:4444/doc', // URL ของ Backend ของคุณ
+    action: `${import.meta.env.VITE_URL}/doc`, // URL ของ Backend ของคุณ
     withCredentials: true,
     accept: '.pdf,.docx',
     data: (file) => ({

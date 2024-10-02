@@ -5,7 +5,7 @@ import { Login } from '../Types/auth.type'
 // import { setToken } from '../Store/Slices/authSlice';
 
 async function login(email: string, password: string) {
-    const response = await axios.post('http://localhost:4444/auth/login',
+    const response = await axios.post(`${import.meta.env.VITE_URL}/auth/login`,
         {
             email,
             password

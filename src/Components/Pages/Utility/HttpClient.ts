@@ -5,7 +5,7 @@ const NETWORK_CONNECTION_MESSAGE = 'Cannot connect to server, Please try again.'
 const NOT_CONNECT_NETWORK = 'NOT_CONNECT_NETWORK'
 const isAbsoluteURLRegex = /^(?:\w+:)///
 
-const apiUrl = "http://localhost:4444"
+const apiUrl = `${import.meta.env.VITE_URL}`;
 
 axios.defaults.withCredentials = true
 axios.interceptors.request.use(async (config: any) => {

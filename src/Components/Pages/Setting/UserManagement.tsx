@@ -41,7 +41,7 @@ export default function UserManagement({ }: Props) {
     const profileReducer = useSelector(authSelector);
 
     const [imageSrc, setImageSrc] = useState(profileReducer.result?.picture
-        ? `http://localhost:4444${profileReducer.result.picture}`
+        ? `${import.meta.env.VITE_URL}${profileReducer.result.picture}`
         : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png');
 
     const { data, isLoading, error } = useQuery<Document[], any>("docs", fetchAPI, {

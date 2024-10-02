@@ -43,7 +43,7 @@ export default function Register() {
 
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     try {
-      const response = await fetch('http://localhost:4444/auth/register', {
+      const response = await fetch(`${import.meta.env.VITE_URL}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

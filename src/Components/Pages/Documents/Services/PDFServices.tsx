@@ -57,7 +57,6 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null); // Track selected card
   const [shapes, setShapes] = useState<Shape[]>([]); // Track added shapes
 
-  const [selectedUser, setSelectedUser] = useState<OptionType | null>(null);
   const [selectedEmail, setSelectedEmail] = useState('');
 
   const [autoCompleteValue, setAutoCompleteValue] = useState<string>('');
@@ -263,38 +262,6 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
     }));
   };
 
-  // const [userDetails, setUserDetails] = useState<{ firstName: string; lastName: string } | null>(null);
-
-  // // Handle the selection from AutoComplete
-  // const handleUserSelect = async (value: string, option: OptionType) => {
-  //   if (!selectedCardId) {
-  //     console.error('No card selected. Please select a card first.');
-  //     return; // Exit if no card is selected
-  //   }
-
-  //   setSelectedUser(option); // Set the selected user
-  //   setUserDetails({ firstName: option.firstName, lastName: option.lastName }); // Set user details
-
-  //   const doc_id = await fetchDocId(); // Fetch the doc_id
-
-  //   // Now patch the data with the selected user's details
-  //   try {
-  //     await axios.patch(`/approval/${selectedCardId}`, {
-  //       doc_id,
-  //       card_id: selectedCardId, // Include the selected card ID
-  //       firstName: option.firstName, // Use the first name of the selected user
-  //       lastName: option.lastName, // Use the last name of the selected user
-  //       email: option.value, // Use the email of the selected user
-  //       position: [{ x: 445, y: 600 }], // Position can be adjusted as needed
-  //       page: pageNumber,
-  //     });
-
-  //     console.log('User details updated successfully for the selected card.');
-  //   } catch (error) {
-  //     console.error("Error updating user details:", error);
-  //   }
-  // };
-
   // Handle clicking to select the card
   const handleCardClick = (id: string) => {
     setSelectedCardId(id); // Set the selected card
@@ -374,7 +341,7 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
               onMouseLeave={handleMouseUp}
               className="custom-scrollbar" // For Chrome, Edge, and Safari
             >
-              <Document file={`http://localhost:4444${fileUrl}`} onLoadSuccess={onDocumentLoadSuccess}>
+              <Document file={`${import.meta.env.VITE_URL}${fileUrl}`} onLoadSuccess={onDocumentLoadSuccess}>
                 <Page
                   renderAnnotationLayer={false}
                   renderTextLayer={false}

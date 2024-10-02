@@ -24,7 +24,7 @@ export default function ForgotPassword() {
 
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     try {
-      const response = await axios.post('http://localhost:4444/auth/forgot-password', values);
+      const response = await axios.post(`${import.meta.env.VITE_URL}/auth/forgot-password`, values);
 
       if (response.status === 200) {
         showSuccessModal('สำเร็จ', 'ลิงก์รีเซ็ตรหัสผ่านได้ถูกส่งไปที่อีเมลของท่านแล้ว');

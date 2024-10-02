@@ -11,12 +11,12 @@ export default function Signature({ }: Props) {
 
     const profileReducer = useSelector(authSelector);
     const [imageSrc, setImageSrc] = useState(profileReducer.result?.signature
-        ? `http://localhost:4444/signature/${profileReducer.result.signature}` 
-        : 'http://localhost:4444/signature/NoSignature/NoSignature.png');
+        ? `${import.meta.env.VITE_URL}/signature/${profileReducer.result.signature}` 
+        : `${import.meta.env.VITE_URL}/signature/NoSignature/NoSignature.png`);
 
     const handleFileChange = (info: any) => {
         if (info.file.status === 'done') {
-            const newImageSrc = `http://localhost:4444${info.file.response.path}`;
+            const newImageSrc = `${import.meta.env.VITE_URL}${info.file.response.path}`;
             setImageSrc(newImageSrc);
             message.success({
                 content: 'อัพโหลดเสร็จสิ้น, กำลังเปลี่ยนรูปภาพ',
@@ -45,7 +45,7 @@ export default function Signature({ }: Props) {
 
     const uploadProps = {
         name: 'file',
-        action: `http://localhost:4444/upload/signature`,
+        action: `${import.meta.env.VITE_URL}/upload/signature`,
         data: {
             email: userEmail,
         },

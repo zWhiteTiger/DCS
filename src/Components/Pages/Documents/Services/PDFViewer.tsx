@@ -72,22 +72,6 @@ const PDFViewer: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprover
     };
   }, []);
 
-  const handleZoomOut = () => {
-    setScale((prev) => {
-      const newScale = Math.max(prev - 0.2, 1); // Minimum scale of 1
-      const width = 1077 * newScale; // Starting width of 1077px
-      return width <= minWidth ? newScale : prev;
-    });
-  };
-
-  const handleZoomIn = () => {
-    setScale((prev) => {
-      const newScale = Math.min(prev + 0.2, 3); // Maximum scale of 3
-      const width = 1077 * newScale; // Starting width of 1077px
-      return width >= maxWidth ? newScale : prev;
-    });
-  };
-
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
     setContainerWidth(1077); // รีเซ็ตความกว้างเป็น 1077
@@ -173,7 +157,7 @@ const PDFViewer: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprover
           onMouseLeave={handleMouseUp}
           className="custom-scrollbar" // For Chrome, Edge, and Safari
         >
-          <Document file={`http://localhost:4444${fileUrl}`} onLoadSuccess={onDocumentLoadSuccess}>
+          <Document file={`${import.meta.env.VITE_URL}${fileUrl}`} onLoadSuccess={onDocumentLoadSuccess}>
             <Page
               renderAnnotationLayer={false}
               renderTextLayer={false}
