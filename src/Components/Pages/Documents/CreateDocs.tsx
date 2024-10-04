@@ -8,7 +8,6 @@ import Uploader from './Services/Uploader';
 const CreateDocs: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [fileUrl, setFileUrl] = useState<string>('');
-  const [approvers, setApprovers] = useState<string[]>([]);
 
   const StyledCard = styled(Card)(({ }) => ({
     borderRadius: '10px',
@@ -60,7 +59,7 @@ const CreateDocs: React.FC = () => {
           <Typography variant="h4">ขั้นตอนที่ 2 แก้ไขเอกสาร</Typography>
           <Typography>แก้ไขเอกสารหรือเพิ่มผู้ลงนาม</Typography>
           <StyledCard>
-            {fileUrl ? <PDFServices fileUrl={fileUrl} approvers={approvers} setApprovers={setApprovers} /> :
+            {fileUrl ? <PDFServices fileUrl={fileUrl} /> :
               <Box className='flex justify-center' style={{ backgroundColor: '#ec4649', color: '#FFFFFF', height: '100px' }}>
                 <Typography className='mt-9'>กรุณาอัพโหลดไฟล์ก่อน</Typography>
               </Box>

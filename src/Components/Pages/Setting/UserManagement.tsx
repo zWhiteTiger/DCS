@@ -1,7 +1,5 @@
-import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
-import React, { useState } from 'react';
-import NoMoreContent from '../Utility/NoMoreContent';
-import UserSearch from './UserSearch';
+import { Card, CardContent, Grid, Typography } from '@mui/material';
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { authSelector } from '../../../Store/Slices/authSlice';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
@@ -40,7 +38,7 @@ export default function UserManagement({ }: Props) {
 
     const profileReducer = useSelector(authSelector);
 
-    const [imageSrc, setImageSrc] = useState(profileReducer.result?.picture
+    const [imageSrc, _setImageSrc] = useState(profileReducer.result?.picture
         ? `${import.meta.env.VITE_URL}${profileReducer.result.picture}`
         : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png');
 
@@ -49,7 +47,7 @@ export default function UserManagement({ }: Props) {
     });
 
     const queryClient = useQueryClient();
-    const { mutate, isLoading: isDeleting, error: deleteError } = useMutation(
+    const { mutate, isLoading: _isDeleting, error: _deleteError } = useMutation(
         (id: string) => deleteUser(id),
         {
             onSuccess: () => {

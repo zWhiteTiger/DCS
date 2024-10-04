@@ -28,13 +28,6 @@ export default function Login() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch()
 
-  // const {
-  //   mutate,
-  //   isSuccess,
-  //   isError,
-  //   error
-  // } = useLogin()
-
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     try {
       const response = await axios.post(`${import.meta.env.VITE_URL}/auth/login`, values, { withCredentials: true });

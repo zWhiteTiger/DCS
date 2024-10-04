@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../Store";
-import axios from "axios";
 import { httpClient } from "../../Components/Pages/Utility/HttpClient";
 
 type Document = {

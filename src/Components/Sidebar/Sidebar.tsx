@@ -1,7 +1,7 @@
-import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Collapse, Button } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
+import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Collapse } from '@mui/material';
+import { useLocation } from 'react-router-dom';
 import { BiSolidDashboard } from 'react-icons/bi';
-import { PiCompassFill, PiListMagnifyingGlass, PiListMagnifyingGlassFill } from 'react-icons/pi';
+import { PiCompassFill } from 'react-icons/pi';
 import { LuCompass, LuLayoutDashboard, LuArchive } from 'react-icons/lu';
 import { HiDocumentText, HiOutlineDocumentText, HiDocumentPlus, HiOutlineDocumentPlus } from 'react-icons/hi2';
 import { HiArchive } from 'react-icons/hi';

@@ -13,8 +13,6 @@ import { httpClient } from '../../Utility/HttpClient';
 
 type PDFServicesProps = {
   fileUrl: string | null;
-  approvers: string[];
-  setApprovers: (approvers: string[]) => void;
 };
 
 type Shape = {
@@ -45,7 +43,7 @@ interface Card {
   page: number;
 }
 
-const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprovers }) => {
+const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl }) => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [startPosition, setStartPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [scrollPosition, setScrollPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -64,6 +62,8 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
   const [options, setOptions] = useState<OptionType[]>([]);
 
   const docReducer = useSelector(docSelector)
+
+  const docPath = fileUrl?.split('/').pop(); // จะได้ <filename>.pdf
 
   const goToPreviousPage = () => {
     setPageNumber(prevPage => Math.max(prevPage - 1, 1));
@@ -154,6 +154,7 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
       }
     };
   }, []);
+
   // ---------------------------------------การ์ด----------------------------------------
   const handleUserSelector = (value: string) => {
     setSelectedEmail(value);
@@ -161,7 +162,7 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
 
   const fetchDocId = async () => {
     try {
-      const response = await axios.get(`/doc/${docReducer.result?.docsPath}`);
+      const response = await axios.get(`/doc/${docPath}`);
       return response.data._id;  // Assuming the doc_id is returned from this endpoint
     } catch (error) {
       console.error("Error fetching document ID:", error);
@@ -204,8 +205,6 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
       console.error("Error creating card:", error);
     }
   };
-
-
 
   const updateShapePosition = async (id: string, x: number, y: number, page: number) => {
     try {
@@ -295,7 +294,6 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprov
       fetchCards();
     }
   }, [fileUrl]);
-
 
   return (
     <Grid container spacing={2}>

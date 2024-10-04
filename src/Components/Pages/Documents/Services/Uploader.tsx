@@ -1,9 +1,8 @@
-import React from 'react';
-import { Upload, message, Typography } from 'antd';
+import React, { useState } from 'react';
+import { Upload, message, Typography, Spin } from 'antd';
 import { UploadProps } from 'antd/es/upload';
 import Box from '@mui/material/Box';
 import { LuHardDriveUpload } from 'react-icons/lu';
-
 const { Dragger } = Upload;
 
 type UploaderProps = {
@@ -12,6 +11,8 @@ type UploaderProps = {
 };
 
 const Uploader: React.FC<UploaderProps> = ({ setFileUrl, nextStep }) => {
+  const [loading, setLoading] = useState(false);  // เพิ่ม state สำหรับการควบคุมสถานะการอัพโหลด
+
   const props: UploadProps = {
     name: 'file',
     multiple: false,
@@ -32,34 +33,39 @@ const Uploader: React.FC<UploaderProps> = ({ setFileUrl, nextStep }) => {
         message.error('ขนาดไฟล์ต้องน้อยกว่า 50MB');
         return Upload.LIST_IGNORE;
       }
+      setLoading(true); // เริ่มการแสดงผลสถานะการอัพโหลด
       return true;
     },
     onChange(info) {
       const { status, response } = info.file;
       if (status === 'done') {
         message.success(`อัพโหลด ${info.file.name} เสร็จสิ้น`);
+        setLoading(false);  // อัพโหลดเสร็จสิ้น ปิดสถานะการโหลด
         if (response?.url) {
           setFileUrl(response.url);
-          nextStep()
+          nextStep();  // ไปยังสเต็ปถัดไป
         }
       } else if (status === 'error') {
         message.error(`อัพโหลดไฟล์ ${info.file.name} ล้มเหลว`);
+        setLoading(false);  // หากอัพโหลดล้มเหลว ปิดสถานะการโหลด
       }
     },
   };
 
   return (
-    <Dragger {...props}>
-      <Box className="flex justify-center my-5">
-        <LuHardDriveUpload style={{ fontSize: '50px', color: 'blue' }} />
-      </Box>
-      <Typography style={{ fontSize: '18px', color: '#000', fontFamily: 'Kanit' }}>
-        คลิ๊กหรือลากวางไฟล์ลงตรงนี้
-      </Typography>
-      <Typography style={{ fontSize: '12px', color: '#5d5d5d', fontFamily: 'Kanit' }}>
-        รองรับไฟล์สกุล .PDF เท่านั้น ขนาดไม่เกิน 50 MB.
-      </Typography>
-    </Dragger>
+    <Spin spinning={loading} tip="กำลังอัพโหลด...">  {/* เพิ่ม Spin component เพื่อแสดงการโหลด */}
+      <Dragger {...props}>
+        <Box className="flex justify-center my-5">
+          <LuHardDriveUpload style={{ fontSize: '50px', color: 'blue' }} />
+        </Box>
+        <Typography style={{ fontSize: '18px', color: '#000', fontFamily: 'Kanit' }}>
+          คลิ๊กหรือลากวางไฟล์ลงตรงนี้
+        </Typography>
+        <Typography style={{ fontSize: '12px', color: '#5d5d5d', fontFamily: 'Kanit' }}>
+          รองรับไฟล์สกุล .PDF เท่านั้น ขนาดไม่เกิน 50 MB.
+        </Typography>
+      </Dragger>
+    </Spin>
   );
 };
 

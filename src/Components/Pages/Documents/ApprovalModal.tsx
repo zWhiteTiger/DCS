@@ -1,21 +1,19 @@
 import { useEffect, useState } from 'react';
-import { Button, Modal, Tooltip } from 'antd';
+import { Button, Divider, Modal, Tooltip } from 'antd';
 import { MdFileOpen } from 'react-icons/md';
-import PDFServices from './Services/PDFServices';
-import { Card, styled } from '@mui/material';
+import { Box, Card, Grid, styled } from '@mui/material';
 import { useAppDispatch } from '../../../Store/Store';
 import { docAsync, docSelector } from '../../../Store/Slices/DocSlice';
 import { useSelector } from 'react-redux';
+import PDFViewer from './Services/PDFViewer';
 
 type PDFModalProps = {
     docsPath: string;  // Type for docsPath
 };
 
-const PDFModal = ({ docsPath }: PDFModalProps) => {
+const ApprovalModal = ({ docsPath }: PDFModalProps) => {
 
-    const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
-    const [loadingButton, setLoadingButton] = useState<string | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null); // ใช้ useState แทน useRef เพื่อควบคุมการเปลี่ยนแปลง
 
     const docReducer = useSelector(docSelector)
@@ -32,16 +30,6 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
     const showModal = () => {
         setOpen(true);
         setFileUrl(`/pdf/${docsPath}`); // อัปเดต fileUrl เมื่อเปิด modal
-    };
-
-    const handleOk = (button: string) => {
-        setLoading(true);
-        setLoadingButton(button);
-        setTimeout(() => {
-            setLoading(false);
-            setLoadingButton(null);
-            setOpen(false);
-        }, 3000);
     };
 
     const handleCancel = () => {
@@ -82,28 +70,40 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
                 style={{ zIndex: 1, marginTop: '-70px', border: 'none', boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)', }}
                 maskClosable={false}
                 footer={[
-
-                    <Button
-                        key="submit"
-                        type="primary"
-                        loading={loadingButton === 'submit' && loading}
-                        onClick={() => handleOk('submit')}
-                    >
-                        Public
-                    </Button>,
                 ]}
             >
-                <StyledCard>
-                    {fileUrl && (
-                        <PDFServices
-                            key={fileUrl} // ใช้ fileUrl เป็น key เพื่อบังคับให้ re-render
-                            fileUrl={fileUrl}
-                        />
-                    )}
-                </StyledCard>
+
+                <Grid container spacing={2}>
+                    <Grid item xs={12} sm={9}>
+                        <StyledCard>
+                            {fileUrl && (
+                                <PDFViewer
+                                    fileUrl={fileUrl}
+                                />
+                            )}
+                        </StyledCard>
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                        <Box className="my-2 p-5">
+                            <Divider variant="dashed" dashed >การลงนาม</Divider>
+
+                            <Box className="p-5 flex justify-between">
+                                <Button size="large" style={{ background: "#3fcf38", color: "#FFFFFF", width: "125px" }}>
+                                    ลงนาม
+                                </Button>
+                                <Button size="large" style={{ background: "#cf3b38", color: "#FFFFFF", width: "125px" }}>
+                                    ปฏิเสธ
+                                </Button>
+                            </Box>
+
+                            <Divider variant="dashed" dashed >รายชื่อผู้ลงนาม</Divider>
+
+                        </Box>
+                    </Grid>
+                </Grid>
             </Modal>
         </>
     );
 };
 
-export default PDFModal;
+export default ApprovalModal;

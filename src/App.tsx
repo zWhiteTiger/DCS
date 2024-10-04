@@ -5,9 +5,6 @@ import { Box, createTheme, CssBaseline, ThemeProvider, Toolbar } from '@mui/mate
 // Import your components here
 import Appbar from './Components/Sidebar/Appbar';
 import Sidebar from './Components/Sidebar/Sidebar';
-// import { useSelector } from 'react-redux';
-// import { authSelector } from './Store/Slices/authSlice';
-import { useProfile } from './Hooks/useProfile';
 import PrivateRoute from './Utility/PrivateRoute';
 import DraftDocs from './Components/Pages/Documents/Draft/DraftDocs';
 import CreateDocs from './Components/Pages/Documents/CreateDocs';
@@ -15,18 +12,12 @@ import PublicRoute from './Utility/PublicRoute';
 import Register from './Components/Pages/Auth/Register';
 import Login from './Components/Pages/Auth/Login';
 import ERR404 from './Components/Pages/Errors/ERR404';
-import OverviewDocs from './Components/Pages/Documents/Overviews';
 import Archive from './Components/Pages/Archive/Archive';
 import Explore from './Components/Pages/Explore';
 import Dashboard from './Components/Pages/Dashboard';
-// import { useAppDispatch } from './Store/Store';
 import { pdfjs } from 'react-pdf';
 import Profile from './Components/Pages/Setting/Profile';
-import { useSelector } from 'react-redux';
-import { authSelector } from './Store/Slices/authSlice';
-import { useAppDispatch } from './Store/Store';
 import axios from 'axios';
-import { httpClient } from './Components/Pages/Utility/HttpClient';
 import ForgotPassword from './Components/Pages/Auth/Forgot_Pass';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -69,10 +60,7 @@ const theme = createTheme({
 const App = () => {
   const [_pageTitle, setPageTitle] = useState('');
   const location = useLocation();
-  const [_isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
-  // const _authReducer = useSelector(authSelector)
-  // const _dispatch = useAppDispatch()
-  // const { } = useProfile()
+  const [_isMobile, _setIsMobile] = useState(window.innerWidth <= 1024);
 
   const refresToken = async () => {
     try {
@@ -185,7 +173,6 @@ const App = () => {
               <Route path='/explore' element={<Explore />} />
               <Route path='/archive' element={<Archive />} />
               <Route path='/docs/create' element={<CreateDocs />} />
-              <Route path='/docs/overviews' element={<OverviewDocs />} />
               <Route path='/docs/draft' element={<DraftDocs />} />
               <Route path='/setting' element={<DraftDocs />} />
               <Route path='/profile' element={<Profile />} />

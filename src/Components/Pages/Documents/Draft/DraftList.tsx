@@ -1,15 +1,13 @@
-import { Card, CardContent, Grid } from '@mui/material'
+import { Card, CardContent, Grid, Typography } from '@mui/material'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
-import { Typography, Tooltip, Button } from 'antd'
-import axios from 'axios'
-import React, { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { IoTrashBin } from "react-icons/io5";
-import { MdFileOpen } from 'react-icons/md'
 import Loader from '../../Loader/Loader'
 import { authSelector } from '../../../../Store/Slices/authSlice'
 import { useSelector } from 'react-redux'
 import { httpClient } from '../../Utility/HttpClient'
 import PDFModal from '../PDFModal'; // นำเข้า PDFModal
+import { Button, Tooltip } from 'antd';
 
 type Props = {
 };
@@ -41,16 +39,16 @@ export default function DraftList({ }: Props) {
 
     const profileReducer = useSelector(authSelector)
 
-    const [imageSrc, setImageSrc] = useState(profileReducer.result?.picture
+    const [imageSrc, _setImageSrc] = useState(profileReducer.result?.picture
         ? `${import.meta.env.VITE_URL}${profileReducer.result.picture}`
         : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png');
 
     const { data, isLoading, error } = useQuery<Document[], any>("docs", fetchAPI, {
-        select: (data) => data.filter(doc => doc.user_id === profileReducer.result?._id),
-    })
+        select: (data) => data.filter(doc => !doc.public), // กรองเฉพาะเอกสารที่ public เป็น false
+    });
 
     const queryClient = useQueryClient();
-    const { mutate, isLoading: isDeleting, error: deleteError } = useMutation(
+    const { mutate, isLoading: _isDeleting, error: _deleteError } = useMutation(
         (id: string) => deleteDoc(id),
         {
             onSuccess: () => {

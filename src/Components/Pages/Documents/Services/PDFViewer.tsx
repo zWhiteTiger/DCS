@@ -1,17 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Document, Page } from 'react-pdf';
-import { GrZoomIn, GrZoomOut, GrFormPrevious, GrFormNext } from 'react-icons/gr';
+import { GrFormPrevious, GrFormNext } from 'react-icons/gr';
 import { Card, CardContent, Typography } from '@mui/material';
-import { Input } from 'antd';
-import { FaPenNib } from 'react-icons/fa';
 
 type PDFServicesProps = {
   fileUrl: string | null;
-  approvers: string[];
-  setApprovers: (approvers: string[]) => void;
 };
 
-const PDFViewer: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprovers }) => {
+const PDFViewer: React.FC<PDFServicesProps> = ({ fileUrl }) => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [startPosition, setStartPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [scrollPosition, setScrollPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -111,19 +107,16 @@ const PDFViewer: React.FC<PDFServicesProps> = ({ fileUrl, approvers, setApprover
     };
   }, []);
 
-  
+
 
   return (
     <Card style={{ background: '#000', color: '#FFF', width: '100%', position: 'relative', overflow: 'hidden' }}>
       <CardContent>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
 
-          <Input
-            placeholder='Rename'
-            prefix={<FaPenNib />}
-            size='large'
-            style={{ width: '300px' }}
-            defaultValue="26888888" />
+          <Typography variant='h5' style={{ padding: 7 }}>
+            FileName
+          </Typography>
 
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <Typography variant="h6">{`หน้า ${pageNumber} ของ ${numPages || 1}`}</Typography>

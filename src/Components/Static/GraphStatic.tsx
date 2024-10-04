@@ -1,8 +1,6 @@
 import { Column } from '@ant-design/plots';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs'; // For handling dates
-import { useSelector } from 'react-redux';
-import { docSelector } from '../../Store/Slices/DocSlice';
 
 type MonthData = {
   month: string;
@@ -14,8 +12,6 @@ type Props = {};
 export default function Graph({ }: Props) {
   // Set the type explicitly as an array of MonthData objects
   const [monthlyData, setMonthlyData] = useState<MonthData[]>([]);
-
-  const docReducer = useSelector(docSelector)
 
   useEffect(() => {
     // Fetch document data from your API

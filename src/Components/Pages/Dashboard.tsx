@@ -1,8 +1,5 @@
 import { Box, Grid, Typography, Card, CardContent, createTheme, ThemeProvider, useMediaQuery } from '@mui/material';
 import { BiSolidUpArrow } from "react-icons/bi";
-
-import { LuHardDriveDownload } from "react-icons/lu";
-import { Button } from 'antd';
 import { useSelector } from 'react-redux';
 import { authSelector } from '../../Store/Slices/authSlice';
 import Static from '../Static/Static';
@@ -12,16 +9,30 @@ import { useEffect, useState } from 'react';
 import NameQuery from './Loader/NameQuery';
 import NoMoreContent from './Utility/NoMoreContent';
 import IDQuery from './Loader/IDQuery';
+import ApprovalModal from './Documents/ApprovalModal';
+import { httpClient } from './Utility/HttpClient';
+import { useQuery } from 'react-query';
+import Loader from './Loader/Loader';
 
 type Props = {};
 
-const bookData = [
-  { idBook: 'AEA-000110-STD', title: 'หนังสือ1', date: '18/4/2567' },
-  { idBook: 'AEA-000111-STD', title: 'หนังสือ2', date: '17/4/2567' },
-  { idBook: 'AEA-000112-STD', title: 'หนังสือ3', date: '16/4/2567' },
-  { idBook: 'AEA-000113-STD', title: 'หนังสือ4', date: '15/4/2567' },
-  { idBook: 'AEA-000114-STD', title: 'หนังสือ5', date: '14/4/2567' },
-];
+export interface Document {
+  _id: string;
+  doc_name: string;
+  user_id: string;
+  deleted_at: null;
+  isStatus: string;
+  docs_path: string;
+  public: boolean;
+  created_at: Date;
+  updated_at: Date;
+  __v: number;
+}
+
+const fetchAPI = async () => {
+  const response = await httpClient.get("doc"); // Fetch documents
+  return response.data;
+};
 
 // Define a custom theme with Mitr font
 const theme = createTheme({
@@ -36,12 +47,6 @@ const theme = createTheme({
 const cardStyles = {
   borderRadius: '10px',
   boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)', // Drop shadow with color #FFF
-};
-
-const ListcardStyles = {
-  borderRadius: '10px',
-  backgroundColor: '#EFF4FB',
-  boxShadow: '0px 0px 10px rgba(255,255,255,0.8)', // Drop shadow with color #EFF4FB
 };
 
 const userinfo = {
@@ -65,6 +70,14 @@ export default function Dashboard({ }: Props) {
   const isMobile = useMediaQuery('(max-width:960px)');
   const profileReducer = useSelector(authSelector);
 
+  // Fetch and filter documents
+  const { data, isLoading, error } = useQuery<Document[], any>("docs", fetchAPI, {
+    select: (data) => data.filter(doc => doc.public === true && doc.isStatus === "express"), // Filter public documents with express status
+  });
+
+  if (error) {
+    return <div>An error occurred</div>;
+  }
   const [loading, setLoading] = useState(true); // State to manage loading
   const [_name, setName] = useState<string | null>(null); // State to manage name
 
@@ -89,6 +102,10 @@ export default function Dashboard({ }: Props) {
   const imageSrc = picturePath
     ? `${import.meta.env.VITE_URL}${picturePath}`
     : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+
+  const tooltipStyle = {
+    fontFamily: 'Kanit'
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -182,28 +199,106 @@ export default function Dashboard({ }: Props) {
               <Grid item xs={12} md={12}>
                 <Card sx={cardStyles} className='mb-5'>
                   <CardContent>
-                    <Typography style={{ display: 'flex', color: '#1B2559' }} className='text-xl font-bold'>รายการเอกสาร</Typography>
+                    <Typography style={{ display: 'flex', color: '#1B2559' }} className='text-xl font-bold mb-5'>รายการเอกสาร</Typography>
 
-                    {bookData.map((book, index) => (
-                      <Card key={index} className='mt-3' sx={{ ...ListcardStyles, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                        <Button className='m-3'
-                          icon={<LuHardDriveDownload />}
-                          size='large'
-                          style={{ fontFamily: 'Kanit', color: 'white', backgroundColor: '#4318FF' }}
-                        >.PDF</Button>
-                        <Grid container spacing={2}>
-                          <Grid item xs={4}>
-                            <Typography sx={{ marginLeft: '5px' }}>{book.idBook}</Typography>
-                          </Grid>
-                          <Grid item xs={4}>
-                            <Typography sx={{ marginLeft: '5px' }}>{book.title}</Typography>
-                          </Grid>
-                          <Grid item xs={4} sx={{ textAlign: 'right' }}>
-                            <Typography sx={{ marginRight: '25px' }}>{book.date}</Typography>
-                          </Grid>
+                    {isLoading ? (
+                      <div className="mx-auto w-full flex justify-center items-center h-[80%]">
+                        <Card style={{ marginBottom: '5px', backgroundColor: "#fafafa", ...cardStyles }}>
+                          <Loader />
+                        </Card>
+                      </div>
+                    ) : (
+                      <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                          {data?.map((item: any, index: number) => {
+                            let data = {
+                              ...item,
+                              status: 'unread'
+                            };
+                            let cardBackgroundColor;
+                            switch (data.isStatus) {
+                              case 'read':
+                                cardBackgroundColor = '#F1FBEF'; // Light green
+                                break;
+                              case 'unread':
+                                cardBackgroundColor = '#EFF4FB'; // Light blue
+                                break;
+                              case 'reject':
+                                cardBackgroundColor = '#FBF0EF'; // Light red
+                                break;
+                              case 'draft':
+                                cardBackgroundColor = '#F3F3F3'; // Light red
+                                break;
+                              case 'express':
+                                cardBackgroundColor = '#FFFAEF'; // Light red
+                                break;
+                              default:
+                                cardBackgroundColor = 'inherit';
+                            }
+
+                            return (
+                              <Card key={index} style={{ marginBottom: '5px', backgroundColor: cardBackgroundColor, ...cardStyles }}>
+                                <CardContent>
+                                  <Grid container spacing={3} alignItems="start" style={{ alignItems: 'center' }}>
+                                    <Grid item xs={0}>
+                                      <div style={{ width: 'auto', height: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '20%' }}>
+                                        <img src={imageSrc} alt="User Avatar" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
+                                      </div>
+                                    </Grid>
+                                    <Grid item xs={3}>
+                                      <Typography className="font-bold">
+                                        {data.doc_name}
+                                      </Typography>
+                                      <Typography style={tooltipStyle}>
+                                        {data.docs_path}
+                                      </Typography>
+                                    </Grid>
+                                    <Grid item xs={3}>
+                                      <Typography className="font-bold">
+                                        {profileReducer.result?.firstName} {profileReducer.result?.lastName}
+                                      </Typography>
+                                      <Typography style={tooltipStyle}>
+                                        {profileReducer.result?.email}
+                                      </Typography>
+                                    </Grid>
+                                    <Grid item xs={2}>
+                                      <Typography className="font-bold">
+                                        วันที่
+                                      </Typography>
+                                      <Typography style={tooltipStyle}>
+                                        {data.created_at}
+                                      </Typography>
+                                    </Grid>
+                                    <Grid item xs={1} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                      <Typography className="font-bold" style={{ marginBottom: '4px' }}>
+                                        สถานะ
+                                      </Typography>
+                                      <Typography style={{
+                                        backgroundColor:
+                                          data.isStatus === 'express' ? '#FFE6B6' : data.isStatus === 'draft' ? '#B6B6B6' : data.isStatus === 'read' ? '#AFFFEA' : data.isStatus === 'unread' ? '#CFC1FF' : data.isStatus === 'reject' ? '#FFC1C1' : '#6A50A7',
+                                        color: data.isStatus === 'express' ? '#DA9000' : data.isStatus === 'draft' ? '#FFFFFF' : data.isStatus === 'read' ? '#05CD99' : data.isStatus === 'unread' ? '#4318FF' : data.isStatus === 'reject' ? '#960000' : 'white',
+                                        padding: '1px 5px',
+                                        borderRadius: '4px',
+                                        fontSize: '12px',
+                                        height: '100%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                      }}>
+                                        {data.isStatus}
+                                      </Typography>
+                                    </Grid>
+                                    <Grid item xs={2} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
+                                      <ApprovalModal docsPath={data?.docs_path} />
+                                    </Grid>
+                                  </Grid>
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
                         </Grid>
-                      </Card>
-                    ))}
+                      </Grid>
+                    )}
                   </CardContent>
                 </Card>
               </Grid>
