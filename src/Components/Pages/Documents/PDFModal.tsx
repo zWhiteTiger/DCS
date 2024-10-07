@@ -4,8 +4,7 @@ import { MdFileOpen } from 'react-icons/md';
 import PDFServices from './Services/PDFServices';
 import { Card, styled } from '@mui/material';
 import { useAppDispatch } from '../../../Store/Store';
-import { docAsync, docSelector } from '../../../Store/Slices/DocSlice';
-import { useSelector } from 'react-redux';
+import { docAsync } from '../../../Store/Slices/DocSlice';
 
 type PDFModalProps = {
     docsPath: string;  // Type for docsPath
@@ -17,10 +16,6 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
     const [open, setOpen] = useState(false);
     const [loadingButton, setLoadingButton] = useState<string | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null); // ใช้ useState แทน useRef เพื่อควบคุมการเปลี่ยนแปลง
-
-    const docReducer = useSelector(docSelector)
-
-    console.log(docReducer.result?.docsPath)
 
     const dispatch = useAppDispatch()
 
@@ -52,7 +47,7 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
 
     useEffect(() => {
         dispatch(docAsync(docsPath))
-    }, [dispatch, docsPath])
+    }, [docsPath])
 
     return (
         <>

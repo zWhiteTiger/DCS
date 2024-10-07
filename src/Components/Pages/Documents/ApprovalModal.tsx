@@ -16,6 +16,9 @@ const ApprovalModal = ({ docsPath }: PDFModalProps) => {
     const [open, setOpen] = useState(false);
     const [fileUrl, setFileUrl] = useState<string | null>(null); // ใช้ useState แทน useRef เพื่อควบคุมการเปลี่ยนแปลง
 
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); // Modal for confirmation
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false); // Modal for rejection
+
     const docReducer = useSelector(docSelector)
 
     console.log(docReducer.result?.docsPath)
@@ -34,6 +37,24 @@ const ApprovalModal = ({ docsPath }: PDFModalProps) => {
 
     const handleCancel = () => {
         setOpen(false);
+    };
+
+    const handleConfirm = () => {
+        setIsConfirmModalOpen(true); // Open the confirm modal
+    };
+
+    const handleReject = () => {
+        setIsRejectModalOpen(true); // Open the reject modal
+    };
+
+    const handleConfirmOk = () => {
+        // Add your confirm action here
+        setIsConfirmModalOpen(false);
+    };
+
+    const handleRejectOk = () => {
+        // Add your reject action here
+        setIsRejectModalOpen(false);
     };
 
     const tooltipStyle = { fontFamily: 'Kanit' };
@@ -69,8 +90,7 @@ const ApprovalModal = ({ docsPath }: PDFModalProps) => {
                 width={1550}
                 style={{ zIndex: 1, marginTop: '-70px', border: 'none', boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)', }}
                 maskClosable={false}
-                footer={[
-                ]}
+                footer={[]}
             >
 
                 <Grid container spacing={2}>
@@ -88,19 +108,50 @@ const ApprovalModal = ({ docsPath }: PDFModalProps) => {
                             <Divider variant="dashed" dashed >การลงนาม</Divider>
 
                             <Box className="p-5 flex justify-between">
-                                <Button size="large" style={{ background: "#3fcf38", color: "#FFFFFF", width: "125px" }}>
+                                <Button
+                                    size="large"
+                                    style={{ background: "#3fcf38", color: "#FFFFFF", width: "125px" }}
+                                    onClick={handleConfirm}
+                                >
                                     ลงนาม
                                 </Button>
-                                <Button size="large" style={{ background: "#cf3b38", color: "#FFFFFF", width: "125px" }}>
+                                <Button
+                                    size="large"
+                                    style={{ background: "#cf3b38", color: "#FFFFFF", width: "125px" }}
+                                    onClick={handleReject}
+                                >
                                     ปฏิเสธ
                                 </Button>
                             </Box>
 
                             <Divider variant="dashed" dashed >รายชื่อผู้ลงนาม</Divider>
-
                         </Box>
                     </Grid>
                 </Grid>
+            </Modal>
+
+            {/* Confirm Document Modal */}
+            <Modal
+                title="ยืนยันการลงนาม"
+                open={isConfirmModalOpen}
+                onOk={handleConfirmOk}
+                onCancel={() => setIsConfirmModalOpen(false)}
+                okText="ยืนยัน"
+                cancelText="ยกเลิก"
+            >
+                <p>คุณแน่ใจว่าต้องการยืนยันการลงนามในเอกสารนี้หรือไม่?</p>
+            </Modal>
+
+            {/* Reject Document Modal */}
+            <Modal
+                title="ปฏิเสธเอกสาร"
+                open={isRejectModalOpen}
+                onOk={handleRejectOk}
+                onCancel={() => setIsRejectModalOpen(false)}
+                okText="ยืนยัน"
+                cancelText="ยกเลิก"
+            >
+                <p>คุณแน่ใจว่าต้องการปฏิเสธเอกสารนี้หรือไม่?</p>
             </Modal>
         </>
     );

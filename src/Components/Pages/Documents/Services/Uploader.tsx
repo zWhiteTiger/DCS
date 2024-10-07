@@ -3,6 +3,8 @@ import { Upload, message, Typography, Spin } from 'antd';
 import { UploadProps } from 'antd/es/upload';
 import Box from '@mui/material/Box';
 import { LuHardDriveUpload } from 'react-icons/lu';
+import { useAppDispatch } from '../../../../Store/Store';
+import { setPath } from '../../../../Store/Slices/pathSlice';
 const { Dragger } = Upload;
 
 type UploaderProps = {
@@ -12,6 +14,7 @@ type UploaderProps = {
 
 const Uploader: React.FC<UploaderProps> = ({ setFileUrl, nextStep }) => {
   const [loading, setLoading] = useState(false);  // เพิ่ม state สำหรับการควบคุมสถานะการอัพโหลด
+  const disPatch = useAppDispatch();
 
   const props: UploadProps = {
     name: 'file',
@@ -43,6 +46,7 @@ const Uploader: React.FC<UploaderProps> = ({ setFileUrl, nextStep }) => {
         setLoading(false);  // อัพโหลดเสร็จสิ้น ปิดสถานะการโหลด
         if (response?.url) {
           setFileUrl(response.url);
+          disPatch(setPath(response.url));
           nextStep();  // ไปยังสเต็ปถัดไป
         }
       } else if (status === 'error') {

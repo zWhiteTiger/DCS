@@ -121,8 +121,6 @@ const PDFViewer: React.FC<PDFServicesProps> = ({ fileUrl }) => {
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <Typography variant="h6">{`หน้า ${pageNumber} ของ ${numPages || 1}`}</Typography>
             <div style={{ display: 'flex', marginLeft: '20px' }}>
-              {/* <button onClick={handleZoomIn} style={buttonStyle}><GrZoomIn /></button>
-              <button onClick={handleZoomOut} style={buttonStyle}><GrZoomOut /></button> */}
               <button onClick={goToPreviousPage} disabled={pageNumber === 1} style={buttonStyle}>
                 <GrFormPrevious />
               </button>

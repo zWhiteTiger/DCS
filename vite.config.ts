@@ -7,4 +7,10 @@ export default defineConfig({
   server: {
     port: 2430,
   },
+  optimizeDeps: {
+    exclude: [
+      'chunk-UCE6Z6MK.js', // exclude problematic files
+      'chunk-EUBIMDDS.js'
+    ]
+  }
 })

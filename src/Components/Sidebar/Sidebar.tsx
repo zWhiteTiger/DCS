@@ -80,7 +80,7 @@ export default function Sidebar({
 
   const secondaryMenu = [
     {
-      path: '/u/manager',
+      path: '/user/management',
       icon1: <BsGearFill size={'1.5em'} className='text-isActive' />, // is active
       icon2: <BsGear size={'1.5em'} className='text-IconColor' />, // none active
       title: 'จัดการบัญชีผู้ใช้งาน',
@@ -135,7 +135,7 @@ export default function Sidebar({
               color: openDocs ? 'blue' : '#A3AED0',
             }}
           />
-          {openDocs ? <ExpandLess style={{ color: 'blue' }} /> : <ExpandMore />}
+          {openDocs ? <ExpandLess style={{ color: 'blue' }} /> : <ExpandMore style={{ color: '#A3AED0' }} />}
         </ListItemButton>
         <Collapse in={openDocs} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>

@@ -3,11 +3,11 @@ import { RootState } from "../Store";
 import { httpClient } from "../../Components/Pages/Utility/HttpClient";
 
 type Document = {
-    _id: string;
-    docName: string;
-    userId: string;
-    docsPath: string;
-    public: boolean;
+    _id?: string;
+    docName?: string;
+    userId?: string;
+    docsPath?: string;
+    public?: boolean;
 }
 
 type State = {
@@ -25,14 +25,20 @@ const initialState: State = {
 }
 
 export const docAsync = createAsyncThunk('docAsync', async (docsPath: string) => {
-    const response = await httpClient.get(`doc/${docsPath}`)
+    const response = await httpClient.get(`/doc/${docsPath}`)
     return response.data
 })
 
 const docsSlice = createSlice({
     name: 'doc',
     initialState,
-    reducers: {},
+    reducers: {
+        setDocPath: (state: State, actions: PayloadAction<string>) => {
+            state.result = {
+                docsPath: actions.payload,
+            }
+        },
+    },
     extraReducers(builder) {
         builder.addCase(docAsync.fulfilled, (state: State, action: PayloadAction<Document>) => {
             state.isPending = false
@@ -55,6 +61,6 @@ const docsSlice = createSlice({
     },
 });
 
-export const { } = docsSlice.actions;
+export const {setDocPath } = docsSlice.actions;
 export const docSelector = (state: RootState) => state.docsReducer;
 export default docsSlice.reducer;

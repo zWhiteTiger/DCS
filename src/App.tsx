@@ -75,18 +75,6 @@ const App = () => {
     refresToken()
   }, [])
 
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     setIsMobile(window.innerWidth <= 1024);
-  //   };
-
-  //   window.addEventListener('resize', handleResize);
-
-  //   return () => {
-  //     window.removeEventListener('resize', handleResize);
-  //   };
-  // }, []);
-
   useEffect(() => {
     const path = location.pathname;
     let title = `${import.meta.env.VITE_SERVICES_NAME}`; // Title default value
@@ -98,7 +86,7 @@ const App = () => {
       title = `${import.meta.env.VITE_SERVICES_NAME} • คลังเอกสาร`;
     } else if (path === '/docs/create') {
       title = `${import.meta.env.VITE_SERVICES_NAME} • สร้างเอกสาร`;
-    } else if (path === '/docs/overviews') {
+    } else if (path === '/user/management') {
       title = `${import.meta.env.VITE_SERVICES_NAME} • ภาพรวม`;
     } else if (path === '/docs/draft') {
       title = `${import.meta.env.VITE_SERVICES_NAME} • ร่างเอกสาร`;
@@ -142,7 +130,7 @@ const App = () => {
       <Box sx={sxStyle}>
         <CssBaseline />
 
-        {['/', '/explore', '/profile', '/setting', '/archive', '/docs/create', '/docs/overviews', '/auth/forgetpassword', '/docs/draft',].includes(location.pathname) && (
+        {['/', '/explore', '/profile', '/setting', '/archive', '/docs/create', '/user/management', '/auth/forgetpassword', '/docs/draft',].includes(location.pathname) && (
           <>
             <Appbar drawerWidth={drawerWidth} handleDrawerToggle={handleDrawerToggle} />
             <Sidebar
@@ -178,6 +166,8 @@ const App = () => {
               <Route path='/profile' element={<Profile />} />
             </Route>
             {/* Auth */}
+            <Route path='/user/management' element={<h1>Hello</h1>} />
+
             <Route element={<PublicRoute />}>
               <Route path='/auth/register' element={<Register />} />
               <Route path='/auth/login' element={<Login />} />
