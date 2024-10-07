@@ -33,7 +33,7 @@ const initialState: State = {
     isError: false,
 }
 
-export const approveAsync = createAsyncThunk('approveAsync', async (id: string, { dispatch }) => {
+export const approveAsync = createAsyncThunk('approveAsync', async (id: string, {  }) => {
     const response = await httpClient.get(`approval/${id}`)
     return response.data
 })
