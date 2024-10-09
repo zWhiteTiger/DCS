@@ -1,5 +1,5 @@
 import { Box, Grid, Typography, Card, CardContent, createTheme, ThemeProvider, useMediaQuery } from '@mui/material';
-import { BiSolidUpArrow } from "react-icons/bi";
+import { BiSolidDownArrow, BiSolidUpArrow } from "react-icons/bi";
 import { useSelector } from 'react-redux';
 import { authSelector } from '../../Store/Slices/authSlice';
 import Static from '../Static/Static';
@@ -69,6 +69,7 @@ export default function Dashboard({ }: Props) {
 
   const isMobile = useMediaQuery('(max-width:960px)');
   const profileReducer = useSelector(authSelector);
+  const [percentageChange, setPercentageChange] = useState<number | null>(null);
 
   // Fetch and filter documents
   const { data, isLoading, error } = useQuery<Document[], any>("docs", fetchAPI, {
@@ -142,14 +143,19 @@ export default function Dashboard({ }: Props) {
                       สถิติ
                     </Typography>
                   </Box>
-                  <Box style={{ display: 'flex', alignItems: 'center', color: '#05CD99' }}>
-                    <BiSolidUpArrow style={{ color: '#05CD99', marginRight: '0.5rem' }} />
+                  <Box style={{ display: 'flex', alignItems: 'center', color: percentageChange !== null && percentageChange >= 0 ? '#05CD99' : '#FF0000' }}>
+                    {percentageChange !== null && percentageChange >= 0 ? (
+                      <BiSolidUpArrow style={{ color: '#05CD99', marginRight: '0.5rem' }} />
+                    ) : (
+                      <BiSolidDownArrow style={{ color: '#FF0000', marginRight: '0.5rem' }} />
+                    )}
                     <Typography variant="body1" className="text-lm">
-                      +100.00%
+                      {percentageChange !== null ? `${percentageChange.toFixed(2)}%` : 'No data'}
                     </Typography>
                   </Box>
                 </Box>
-                <Graph />
+                {/* Pass the setter to Graph to calculate and update the percentageChange */}
+                <Graph setPercentageChange={setPercentageChange} />
               </CardContent>
             </Card>
 

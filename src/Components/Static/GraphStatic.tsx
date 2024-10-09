@@ -7,41 +7,49 @@ type MonthData = {
   count: number;
 };
 
-type Props = {};
+type Props = {
+  setPercentageChange: (change: number | null) => void;
+};
 
-export default function Graph({ }: Props) {
-  // Set the type explicitly as an array of MonthData objects
+export default function Graph({ setPercentageChange }: Props) {
   const [monthlyData, setMonthlyData] = useState<MonthData[]>([]);
 
   useEffect(() => {
-    // Fetch document data from your API
     fetch(`${import.meta.env.VITE_URL}/doc`)
       .then((response) => response.json())
       .then((data) => {
-        const currentYear = dayjs().year(); // Get the current year
+        const currentYear = dayjs().year();
 
-        // Initialize an array with 12 months and set all counts to 0
         const months: MonthData[] = Array.from({ length: 12 }, (_, i) => ({
-          month: dayjs().month(i).format('MMM'), // Format month name
+          month: dayjs().month(i).format('MMM'),
           count: 0,
         }));
 
-        // Filter documents for the current year
         const currentYearDocuments = data.filter((doc: any) => {
           return dayjs(doc.create_at).year() === currentYear;
         });
 
-        // Count documents for each month
         currentYearDocuments.forEach((doc: any) => {
-          const docMonth = dayjs(doc.createdAt).month(); // Get the month index (0-11)
-          months[docMonth].count += 1; // Increment the count for the respective month
+          const docMonth = dayjs(doc.createdAt).month();
+          months[docMonth].count += 1;
         });
 
-        setMonthlyData(months); // Set the final data with counts for all months
-      });
-  }, []);
+        setMonthlyData(months);
 
-  // Configuration for the Column plot
+        // Calculate percentage change for the current month vs previous month
+        const currentMonthIndex = dayjs().month();
+        const currentMonthCount = months[currentMonthIndex].count;
+        const previousMonthCount = months[currentMonthIndex - 1]?.count || 0;
+
+        if (previousMonthCount > 0) {
+          const change = ((currentMonthCount - previousMonthCount) / previousMonthCount) * 100;
+          setPercentageChange(change);
+        } else {
+          setPercentageChange(currentMonthCount > 0 ? 100 : null);
+        }
+      });
+  }, [setPercentageChange]);
+
   const config = {
     data: monthlyData,
     xField: 'month',
@@ -49,18 +57,14 @@ export default function Graph({ }: Props) {
     group: false,
     autofit: true,
     label: {
-      // Only show labels for counts greater than 0 and append "เอกสาร" in Thai
       content: (d: any) => d.count > 0 ? `${d.count} เอกสาร` : '',
       style: {
         fill: '#4318FF'
       },
-      position: 'middle', // Label in the middle of the bar
+      position: 'middle',
     },
     columnStyle: (d: any) => {
-      // Hide the bar if the count is 0 (render it as an empty slot)
-      return d.count === 0
-        ? { fill: 'transparent' }  // Transparent bar for count 0
-        : { fill: '#4318FF' };     // Blue color for other bars
+      return d.count === 0 ? { fill: 'transparent' } : { fill: '#4318FF' };
     },
     style: {
       radius: 100,
@@ -76,7 +80,7 @@ export default function Graph({ }: Props) {
       title: {
         text: 'Document Count',
       },
-      min: 0, // Ensure the Y-axis starts at 0
+      min: 0,
     },
   };
 
