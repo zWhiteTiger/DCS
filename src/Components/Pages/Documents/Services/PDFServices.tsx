@@ -1,187 +1,196 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Document, Page } from 'react-pdf';
-import { GrFormPrevious, GrFormNext } from 'react-icons/gr';
-import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
-import { AutoComplete, Button, Col, Input, Row } from 'antd';
-import { FaPenNib } from 'react-icons/fa';
-import Draggable from 'react-draggable';
-import { ImCross } from "react-icons/im";
-import { useSelector } from 'react-redux';
-import axios from 'axios';
-import { docSelector } from '../../../../Store/Slices/DocSlice';
-import { httpClient } from '../../Utility/HttpClient';
+import React, { useState, useEffect, useRef } from 'react'
+import { Document, Page } from 'react-pdf'
+import { GrFormPrevious, GrFormNext } from 'react-icons/gr'
+import { Box, Card, CardContent, Grid, Typography } from '@mui/material'
+import { AutoComplete, Button, Col, Input, Row } from 'antd'
+import { FaPenNib } from 'react-icons/fa'
+import Draggable from 'react-draggable'
+import { ImCross } from 'react-icons/im'
+import { useSelector } from 'react-redux'
+import axios from 'axios'
+import { docSelector } from '../../../../Store/Slices/DocSlice'
+import { httpClient } from '../../Utility/HttpClient'
 
 type PDFServicesProps = {
-  fileUrl: string | null;
-};
-
-type Shape = {
-  id: string;
-  type: 'rectangle' | 'circle';
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  page: number; // Page where the card was created
-  firstName: string;
-  lastName: string;
-};
-
-type OptionType = {
-  id: string;
-  value: string; // Email
-  firstName: string;
-  lastName: string;
-};
-
-interface Card {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  position: { x: number; y: number }[];
-  page: number;
+  fileUrl: string | null
+  docId?: string | null
 }
 
-const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl }) => {
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [startPosition, setStartPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [scrollPosition, setScrollPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [numPages, setNumPages] = useState<number>();
-  const [pageNumber, setPageNumber] = useState<number>(1);
-  const [scale, setScale] = useState<number>(1); // Default scale is 1
-  const [containerWidth, setContainerWidth] = useState<number>(1077); // Initial width of 1077px
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(null); // Track selected card
-  const [shapes, setShapes] = useState<Shape[]>([]); // Track added shapes
+type Shape = {
+  id: string
+  type: 'rectangle' | 'circle'
+  x: number
+  y: number
+  width: number
+  height: number
+  page: number // Page where the card was created
+  firstName: string
+  lastName: string
+}
 
-  const [selectedEmail, setSelectedEmail] = useState('');
+type OptionType = {
+  id: string
+  value: string // Email
+  firstName: string
+  lastName: string
+}
 
-  const [autoCompleteValue, setAutoCompleteValue] = useState<string>('');
+interface Card {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  position: { x: number; y: number }[]
+  page: number
+}
 
-  const [options, setOptions] = useState<OptionType[]>([]);
+const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
+  const [isDragging, setIsDragging] = useState<boolean>(false)
+  const [startPosition, setStartPosition] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  })
+  const [scrollPosition, setScrollPosition] = useState<{
+    x: number
+    y: number
+  }>({ x: 0, y: 0 })
+  const [numPages, setNumPages] = useState<number>()
+  const [pageNumber, setPageNumber] = useState<number>(1)
+  const [scale, setScale] = useState<number>(1) // Default scale is 1
+  const [containerWidth, setContainerWidth] = useState<number>(1077) // Initial width of 1077px
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null) // Track selected card
+  const [shapes, setShapes] = useState<Shape[]>([]) // Track added shapes
+
+  const [selectedEmail, setSelectedEmail] = useState('')
+
+  const [autoCompleteValue, setAutoCompleteValue] = useState<string>('')
+
+  const [options, setOptions] = useState<OptionType[]>([])
 
   const docReducer = useSelector(docSelector)
 
-  const docPath = fileUrl?.split('/').pop(); // จะได้ <filename>.pdf
+  const docPath = fileUrl?.split('/').pop() // จะได้ <filename>.pdf
 
   const goToPreviousPage = () => {
-    setPageNumber(prevPage => Math.max(prevPage - 1, 1));
-  };
+    setPageNumber((prevPage) => Math.max(prevPage - 1, 1))
+  }
 
   const goToNextPage = () => {
     if (numPages) {
-      setPageNumber(prevPage => Math.min(prevPage + 1, numPages));
+      setPageNumber((prevPage) => Math.min(prevPage + 1, numPages))
     }
-  };
+  }
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setStartPosition({ x: e.clientX, y: e.clientY });
-  };
+    setIsDragging(true)
+    setStartPosition({ x: e.clientX, y: e.clientY })
+  }
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isDragging && containerRef.current) {
-      const dx = e.clientX - startPosition.x;
-      const dy = e.clientY - startPosition.y;
+      const dx = e.clientX - startPosition.x
+      const dy = e.clientY - startPosition.y
 
-      containerRef.current.scrollLeft = scrollPosition.x - dx;
-      containerRef.current.scrollTop = scrollPosition.y - dy;
+      containerRef.current.scrollLeft = scrollPosition.x - dx
+      containerRef.current.scrollTop = scrollPosition.y - dy
     }
-  };
+  }
 
   const handleMouseUp = () => {
     if (containerRef.current) {
-      setScrollPosition({ x: containerRef.current.scrollLeft, y: containerRef.current.scrollTop });
+      setScrollPosition({
+        x: containerRef.current.scrollLeft,
+        y: containerRef.current.scrollTop,
+      })
     }
-    setIsDragging(false);
-  };
+    setIsDragging(false)
+  }
 
-
-  const maxWidth = 1980;
-  const minWidth = 1077; // Start from 1077px
+  const maxWidth = 1980
+  const minWidth = 1077 // Start from 1077px
 
   useEffect(() => {
     const updateWidth = () => {
       if (containerRef.current) {
-        setContainerWidth(containerRef.current.clientWidth);
+        setContainerWidth(containerRef.current.clientWidth)
       }
-    };
+    }
 
-    updateWidth();
-    window.addEventListener('resize', updateWidth);
+    updateWidth()
+    window.addEventListener('resize', updateWidth)
 
     return () => {
-      window.removeEventListener('resize', updateWidth);
-    };
-  }, []);
+      window.removeEventListener('resize', updateWidth)
+    }
+  }, [])
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
-    setContainerWidth(1077); // รีเซ็ตความกว้างเป็น 1077
-    setScale(1); // รีเซ็ตค่า scale เป็น 1
-  };
+    setNumPages(numPages)
+    setContainerWidth(1077) // รีเซ็ตความกว้างเป็น 1077
+    setScale(1) // รีเซ็ตค่า scale เป็น 1
+  }
 
   // Handle CTRL + Scroll Zoom
   useEffect(() => {
     const handleWheelZoom = (e: WheelEvent) => {
       if (e.ctrlKey) {
-        e.preventDefault();
+        e.preventDefault()
         setScale((prev) => {
-          let newScale = prev;
+          let newScale = prev
           if (e.deltaY > 0) {
-            newScale = Math.max(prev - 0.1, 1); // Zoom out
+            newScale = Math.max(prev - 0.1, 1) // Zoom out
           } else {
-            newScale = Math.min(prev + 0.1, 3); // Zoom in
+            newScale = Math.min(prev + 0.1, 3) // Zoom in
           }
-          const width = 1077 * newScale; // Starting width of 1077px
+          const width = 1077 * newScale // Starting width of 1077px
           if (width >= minWidth && width <= maxWidth) {
-            return newScale;
+            return newScale
           }
-          return prev; // Keep previous scale if out of bounds
-        });
+          return prev // Keep previous scale if out of bounds
+        })
       }
-    };
+    }
 
-    const pdfContainer = containerRef.current;
+    const pdfContainer = containerRef.current
     if (pdfContainer) {
-      pdfContainer.addEventListener('wheel', handleWheelZoom);
+      pdfContainer.addEventListener('wheel', handleWheelZoom)
     }
 
     return () => {
       if (pdfContainer) {
-        pdfContainer.removeEventListener('wheel', handleWheelZoom);
+        pdfContainer.removeEventListener('wheel', handleWheelZoom)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   // ---------------------------------------การ์ด----------------------------------------
   const handleUserSelector = (value: string) => {
-    setSelectedEmail(value);
-  };
+    setSelectedEmail(value)
+  }
 
   const fetchDocId = async () => {
     try {
-      const response = await axios.get(`/doc/${docPath}`);
-      return response.data._id;  // Assuming the doc_id is returned from this endpoint
+      const response = await axios.get(`/doc/${docPath}`)
+      return response.data._id // Assuming the doc_id is returned from this endpoint
     } catch (error) {
-      console.error("Error fetching document ID:", error);
-      throw error;  // Throw an error if the doc_id can't be fetched
+      console.error('Error fetching document ID:', error)
+      throw error // Throw an error if the doc_id can't be fetched
     }
-  };
+  }
 
   const addRectangle = async () => {
     try {
-      const doc_id = await fetchDocId(); // Fetch the doc_id from the document collection
+      const doc_id = await fetchDocId() // Fetch the doc_id from the document collection
 
       const response = await httpClient.post('/approval/create', {
         doc_id, // Use the fetched doc_id
         email: selectedEmail,
         position: [{ x: 445, y: 600 }], // Initial card position as an array
         page: pageNumber, // The page number where the card is created
-      });
+      })
 
-      const cardId = response.data._id; // Use the _id from MongoDB
+      const cardId = response.data._id // Use the _id from MongoDB
 
       const newShape: Shape = {
         id: cardId, // Use the card ID directly
@@ -193,129 +202,160 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl }) => {
         page: pageNumber,
         firstName: response.data.firstName || 'N/A',
         lastName: response.data.lastName || 'N/A',
-      };
+      }
 
-      setShapes((prevShapes) => [...prevShapes, newShape]);
-      console.log('Card created successfully with ID:', cardId);
+      setShapes((prevShapes) => [...prevShapes, newShape])
+      console.log('Card created successfully with ID:', cardId)
 
       // Clear the state and input field
-      setSelectedEmail(''); // Clear the selected email
-      setAutoCompleteValue(''); // Clear the AutoComplete input value
+      setSelectedEmail('') // Clear the selected email
+      setAutoCompleteValue('') // Clear the AutoComplete input value
     } catch (error) {
-      console.error("Error creating card:", error);
+      console.error('Error creating card:', error)
     }
-  };
+  }
 
-  const updateShapePosition = async (id: string, x: number, y: number, page: number) => {
+  const updateShapePosition = async (
+    id: string,
+    x: number,
+    y: number,
+    page: number,
+  ) => {
     try {
-      const doc_id = await fetchDocId();  // Fetch the doc_id
+      const doc_id = await fetchDocId() // Fetch the doc_id
 
       // Ensure the id is not null
       if (id) {
         await httpClient.patch(`/approval/${id}`, {
-          doc_id,  // Use the fetched doc_id
-          position: [{ x, y }],  // Position should be an array of coordinates
-          page,  // Pass the page number
-        });
+          doc_id, // Use the fetched doc_id
+          position: [{ x, y }], // Position should be an array of coordinates
+          page, // Pass the page number
+        })
 
         // Update the shape's position locally
         setShapes((prevShapes) =>
           prevShapes.map((shape) =>
-            shape.id === id ? { ...shape, x, y } : shape
-          )
-        );
-        console.log('Shape position updated successfully');
+            shape.id === id ? { ...shape, x, y } : shape,
+          ),
+        )
+        console.log('Shape position updated successfully')
       }
     } catch (error) {
-      console.error("Error updating shape position:", error);
+      console.error('Error updating shape position:', error)
     }
-  };
+  }
 
   const handleDeleteCard = async (id: string) => {
     try {
-      setShapes((prevShapes) => prevShapes.filter((shape) => shape.id !== id));  // Remove from frontend state
-      await axios.delete(`/approval/${id}`);  // Delete approval in the backend
+      setShapes((prevShapes) => prevShapes.filter((shape) => shape.id !== id)) // Remove from frontend state
+      await axios.delete(`/approval/${id}`) // Delete approval in the backend
       console.log(id)
     } catch (error) {
-      console.error("Error deleting approval", error);
+      console.error('Error deleting approval', error)
     }
-  };
+  }
 
   const fetchUsers = async (searchTerm: string) => {
     try {
-      const response = await axios.get(`/user/search?term=${searchTerm}`);
-      return response.data;  // Return the list of users
+      const response = await axios.get(`/user/search?term=${searchTerm}`)
+      return response.data // Return the list of users
     } catch (error) {
-      console.error("Error fetching users:", error);
-      return [];
+      console.error('Error fetching users:', error)
+      return []
     }
-  };
+  }
 
   // AutoComplete options logic
   const getPanelValue = async (text: string) => {
-    const users = await fetchUsers(text);  // Fetch users from the backend
+    const users = await fetchUsers(text) // Fetch users from the backend
     return users.map((user: any) => ({
-      value: user.email,  // Use email as the value
-      label: `${user.firstName} ${user.lastName} (${user.email})`,  // Display name and email as the label
-      id: user._id,  // Store the user ID
-    }));
-  };
+      value: user.email, // Use email as the value
+      label: `${user.firstName} ${user.lastName} (${user.email})`, // Display name and email as the label
+      id: user._id, // Store the user ID
+    }))
+  }
 
   // Handle clicking to select the card
   const handleCardClick = (id: string) => {
-    setSelectedCardId(id); // Set the selected card
-  };
+    setSelectedCardId(id) // Set the selected card
+  }
 
   // Fetch cards for the current document
   const fetchCards = async () => {
     try {
-      const response = await httpClient.get(`/approval?=${docPath}`);
-      const cards: Card[] = response.data;
-
+      const response = await httpClient.get(`/approval/${docId}`)
+      const cards: Card[] = response.data
+      console.log(cards)
       // Map the cards to the Shape type
-      setShapes(cards.map((card: any) => ({
-        id: card._id,  // Now the string id will work
-        type: 'rectangle',
-        x: card.position[0].x,
-        y: card.position[0].y,
-        width: 200,
-        height: 100,
-        page: card.page,
-        firstName: card.firstName,
-        lastName: card.lastName,
-      })));
+      setShapes(
+        cards.map((card: any) => ({
+          id: card._id, // Now the string id will work
+          type: 'rectangle',
+          x: card.position[0].x,
+          y: card.position[0].y,
+          width: 200,
+          height: 100,
+          page: card.page,
+          firstName: card.firstName,
+          lastName: card.lastName,
+        })),
+      )
     } catch (error) {
-      console.error("Error fetching cards:", error);
+      console.error('Error fetching cards:', error)
     }
-  };
+  }
 
   useEffect(() => {
-    if (fileUrl) {
-      fetchCards();
+    console.log(`doc id: ${docId}`)
+    if (docId) {
+      fetchCards()
     }
-  }, [fileUrl]);
+  }, [docId])
 
   return (
     <Grid container spacing={2}>
       <Grid item xs={9}>
-        <Card style={{ background: '#000', color: '#FFF', position: 'relative', overflow: 'hidden' }}>
+        <Card
+          style={{
+            background: '#000',
+            color: '#FFF',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
           <CardContent>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <Input
                 placeholder='Rename'
                 prefix={<FaPenNib />}
                 size='large'
                 style={{ width: '300px' }}
-                defaultValue={docReducer.result?.docName} />
+                defaultValue={docReducer.result?.docName}
+              />
 
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="h6">{`หน้า ${pageNumber} ของ ${numPages || 1}`}</Typography>
+                <Typography variant='h6'>{`หน้า ${pageNumber} ของ ${
+                  numPages || 1
+                }`}</Typography>
                 <div style={{ display: 'flex', marginLeft: '20px' }}>
-                  <button onClick={goToPreviousPage} disabled={pageNumber === 1} style={buttonStyle}>
+                  <button
+                    onClick={goToPreviousPage}
+                    disabled={pageNumber === 1}
+                    style={buttonStyle}
+                  >
                     <GrFormPrevious />
                   </button>
-                  <button onClick={goToNextPage} disabled={pageNumber === numPages} style={buttonStyle}>
+                  <button
+                    onClick={goToNextPage}
+                    disabled={pageNumber === numPages}
+                    style={buttonStyle}
+                  >
                     <GrFormNext />
                   </button>
                 </div>
@@ -337,9 +377,12 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl }) => {
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
-              className="custom-scrollbar" // For Chrome, Edge, and Safari
+              className='custom-scrollbar' // For Chrome, Edge, and Safari
             >
-              <Document file={`${import.meta.env.VITE_URL}${fileUrl}`} onLoadSuccess={onDocumentLoadSuccess}>
+              <Document
+                file={`${import.meta.env.VITE_URL}${fileUrl}`}
+                onLoadSuccess={onDocumentLoadSuccess}
+              >
                 <Page
                   renderAnnotationLayer={false}
                   renderTextLayer={false}
@@ -358,22 +401,26 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl }) => {
                     bounds={{
                       left: 0,
                       top: 0,
-                      right: containerRef.current ? containerRef.current.scrollWidth - shape.width : 0,
-                      bottom: containerRef.current ? containerRef.current.scrollHeight - shape.height : 0,
+                      right: containerRef.current
+                        ? containerRef.current.scrollWidth - shape.width
+                        : 0,
+                      bottom: containerRef.current
+                        ? containerRef.current.scrollHeight - shape.height
+                        : 0,
                     }}
                     defaultPosition={{ x: shape.x, y: shape.y }}
                     onStop={(_e, data) => {
                       // Update the shape position and send the data to server
-                      updateShapePosition(shape.id, data.x, data.y, pageNumber);
+                      updateShapePosition(shape.id, data.x, data.y, pageNumber)
                     }}
                     onMouseDown={(e: MouseEvent) => {
-                      e.stopPropagation(); // ป้องกันการลาก PDF
+                      e.stopPropagation() // ป้องกันการลาก PDF
                     }}
                   >
                     <div
                       onClick={(e) => {
-                        e.stopPropagation();
-                        handleCardClick(shape.id); // เลือกการ์ด
+                        e.stopPropagation()
+                        handleCardClick(shape.id) // เลือกการ์ด
                       }}
                       style={{
                         position: 'absolute',
@@ -397,11 +444,23 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl }) => {
                           gap: '10px',
                         }}
                       >
-                        <Typography style={{ color: "#4318FF", fontWeight: "bold", fontSize: "16px" }}>
+                        <Typography
+                          style={{
+                            color: '#4318FF',
+                            fontWeight: 'bold',
+                            fontSize: '16px',
+                          }}
+                        >
                           ผู้ลงนาม
                         </Typography>
 
-                        <Typography style={{ color: "#FFF", fontSize: "12px", marginTop: '10px' }}>
+                        <Typography
+                          style={{
+                            color: '#FFF',
+                            fontSize: '12px',
+                            marginTop: '10px',
+                          }}
+                        >
                           {shape.firstName} {shape.lastName}
                         </Typography>
                       </Box>
@@ -409,8 +468,8 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl }) => {
                       {selectedCardId === shape.id && (
                         <button
                           onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteCard(shape.id);
+                            e.stopPropagation()
+                            handleDeleteCard(shape.id)
                           }}
                           style={{
                             position: 'absolute',
@@ -430,20 +489,19 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl }) => {
                   </Draggable>
                 ))}
             </div>
-
           </CardContent>
         </Card>
       </Grid>
       <Grid item xs={3}>
-        <Typography variant="h5">เพิ่มผู้ลงนาม</Typography>
-        <Row gutter={16} align="middle">
+        <Typography variant='h5'>เพิ่มผู้ลงนาม</Typography>
+        <Row gutter={16} align='middle'>
           <Col span={24}>
-            <Box className="my-2">
+            <Box className='my-2'>
               <AutoComplete
                 size='large'
                 options={options}
                 style={{ width: '100%' }} // Full width
-                placeholder="ค้นหาโดยใช้ชื่อ หรือ อีเมล"
+                placeholder='ค้นหาโดยใช้ชื่อ หรือ อีเมล'
                 onSearch={async (text) => setOptions(await getPanelValue(text))}
                 onSelect={handleUserSelector} // Update selected email on selection
                 value={autoCompleteValue} // Control the input field value
@@ -452,10 +510,10 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl }) => {
             </Box>
           </Col>
           <Col>
-            <Box className="my-2">
+            <Box className='my-2'>
               <Button
                 size='large'
-                type="primary"
+                type='primary'
                 onClick={addRectangle} // Trigger the addRectangle function on click
               >
                 เพิ่มผู้ลงนาม
@@ -465,9 +523,8 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl }) => {
         </Row>
       </Grid>
     </Grid>
-
-  );
-};
+  )
+}
 
 const buttonStyle = {
   display: 'flex',
@@ -483,6 +540,6 @@ const buttonStyle = {
   color: 'white',
   fontSize: '80px',
   cursor: 'pointer',
-};
+}
 
-export default PDFServices;
+export default PDFServices

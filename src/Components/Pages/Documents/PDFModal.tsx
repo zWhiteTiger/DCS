@@ -8,9 +8,10 @@ import { docAsync } from '../../../Store/Slices/DocSlice';
 
 type PDFModalProps = {
     docsPath: string;  // Type for docsPath
+    docId: string;
 };
 
-const PDFModal = ({ docsPath }: PDFModalProps) => {
+const PDFModal = ({ docsPath, docId }: PDFModalProps) => {
 
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
@@ -93,6 +94,7 @@ const PDFModal = ({ docsPath }: PDFModalProps) => {
                         <PDFServices
                             key={fileUrl} // ใช้ fileUrl เป็น key เพื่อบังคับให้ re-render
                             fileUrl={fileUrl}
+                            docId={docId}
                         />
                     )}
                 </StyledCard>

@@ -165,7 +165,7 @@ export default function DraftList({ }: Props) {
                                                 </Typography>
                                             </Grid>
                                             <Grid item xs={1} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
-                                                <PDFModal docsPath={data?.docs_path} />
+                                                <PDFModal docId={data._id} docsPath={data?.docs_path} />
                                             </Grid>
                                             <Grid item xs={1} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
                                                 <Tooltip title={<span style={tooltipStyle}>ลบไฟล์</span>}>
