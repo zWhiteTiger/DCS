@@ -269,7 +269,7 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl }) => {
   // Fetch cards for the current document
   const fetchCards = async () => {
     try {
-      const response = await axios.get(`/approval/${docReducer.result?._id}`);
+      const response = await httpClient.get(`/approval?=${docPath}`);
       const cards: Card[] = response.data;
 
       // Map the cards to the Shape type

@@ -31,8 +31,6 @@ export default function Login() {
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     try {
       const response = await axios.post(`${import.meta.env.VITE_URL}/auth/login`, values, { withCredentials: true });
-  
-      console.log(`${import.meta.env.URL}`)
 
       if (response.status === 201) {
         // Fetch the profile after a successful login
