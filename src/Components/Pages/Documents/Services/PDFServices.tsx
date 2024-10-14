@@ -22,6 +22,7 @@ type Shape = {
   x: number
   y: number
   width: number
+  priority: number
   height: number
   page: number // Page where the card was created
   firstName: string
@@ -61,15 +62,10 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null) // Track selected card
   const [shapes, setShapes] = useState<Shape[]>([]) // Track added shapes
-
   const [selectedEmail, setSelectedEmail] = useState('')
-
   const [autoCompleteValue, setAutoCompleteValue] = useState<string>('')
-
   const [options, setOptions] = useState<OptionType[]>([])
-
   const docReducer = useSelector(docSelector)
-
   const docPath = fileUrl?.split('/').pop() // จะได้ <filename>.pdf
 
   const goToPreviousPage = () => {
@@ -179,42 +175,6 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
     }
   }
 
-  const addRectangle = async () => {
-    try {
-      const doc_id = await fetchDocId() // Fetch the doc_id from the document collection
-
-      const response = await httpClient.post('/approval/create', {
-        doc_id, // Use the fetched doc_id
-        email: selectedEmail,
-        position: [{ x: 445, y: 600 }], // Initial card position as an array
-        page: pageNumber, // The page number where the card is created
-      })
-
-      const cardId = response.data._id // Use the _id from MongoDB
-
-      const newShape: Shape = {
-        id: cardId, // Use the card ID directly
-        type: 'rectangle',
-        x: 445,
-        y: 600,
-        width: 200,
-        height: 100,
-        page: pageNumber,
-        firstName: response.data.firstName || 'N/A',
-        lastName: response.data.lastName || 'N/A',
-      }
-
-      setShapes((prevShapes) => [...prevShapes, newShape])
-      console.log('Card created successfully with ID:', cardId)
-
-      // Clear the state and input field
-      setSelectedEmail('') // Clear the selected email
-      setAutoCompleteValue('') // Clear the AutoComplete input value
-    } catch (error) {
-      console.error('Error creating card:', error)
-    }
-  }
-
   const updateShapePosition = async (
     id: string,
     x: number,
@@ -245,15 +205,67 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
     }
   }
 
+  const addRectangle = async () => {
+    try {
+      const doc_id = await fetchDocId(); // Fetch the doc_id from the document collection
+
+      // Calculate the next priority based on the current shapes
+      const nextPriority = shapes.length; // Current shapes length will be the next available priority
+
+      const response = await httpClient.post('/approval/create', {
+        doc_id, // Use the fetched doc_id
+        email: selectedEmail,
+        position: [{ x: 445, y: 600 }], // Initial card position as an array
+        page: pageNumber, // The page number where the card is created
+        priority: nextPriority, // Set the initial priority
+      });
+
+      const cardId = response.data._id; // Use the _id from MongoDB
+
+      const newShape: Shape = {
+        id: cardId, // Use the card ID directly
+        type: 'rectangle',
+        x: 445,
+        y: 1000,
+        width: 200,
+        height: 100,
+        page: pageNumber,
+        priority: nextPriority, // Assign the current priority
+        firstName: response.data.firstName || 'N/A',
+        lastName: response.data.lastName || 'N/A',
+      };
+
+      setShapes((prevShapes) => [...prevShapes, newShape]); // Add new shape
+      console.log('Card created successfully with ID:', cardId);
+
+      // Clear the state and input field
+      setSelectedEmail(''); // Clear the selected email
+      setAutoCompleteValue(''); // Clear the AutoComplete input value
+    } catch (error) {
+      console.error('Error creating card:', error);
+    }
+  };
+
   const handleDeleteCard = async (id: string) => {
     try {
-      setShapes((prevShapes) => prevShapes.filter((shape) => shape.id !== id)) // Remove from frontend state
-      await axios.delete(`/approval/${id}`) // Delete approval in the backend
-      console.log(id)
+      // Remove the card from the frontend state
+      setShapes((prevShapes) => {
+        const updatedShapes = prevShapes.filter((shape) => shape.id !== id); // Remove the selected card
+
+        // Reassign priorities to maintain sequential order
+        return updatedShapes.map((shape, index) => ({
+          ...shape,
+          priority: index, // Assign new priority sequentially
+        }));
+      });
+
+      // Delete the approval in the backend
+      await axios.delete(`/approval/${id}`);
+      console.log(`Card with ID ${id} deleted successfully`);
     } catch (error) {
-      console.error('Error deleting approval', error)
+      console.error('Error deleting approval:', error);
     }
-  }
+  };
 
   const fetchUsers = async (searchTerm: string) => {
     try {
@@ -294,6 +306,7 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
           x: card.position[0].x,
           y: card.position[0].y,
           width: 200,
+          priority: card.priority,
           height: 100,
           page: card.page,
           firstName: card.firstName,
@@ -311,6 +324,26 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
       fetchCards()
     }
   }, [docId])
+
+  const [docName, setDocName] = useState("");
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDocName(e.target.value);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.patch(`${import.meta.env.VITE_URL}/doc/${docReducer.result?._id}`, {
+        doc_name: docName,
+      });
+
+      console.log("Patch success:", response.data);
+    } catch (error) {
+      console.error("Patch error:", error);
+    }
+  };
 
   return (
     <Grid container spacing={2}>
@@ -331,18 +364,22 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
                 alignItems: 'center',
               }}
             >
-              <Input
-                placeholder='Rename'
-                prefix={<FaPenNib />}
-                size='large'
-                style={{ width: '300px' }}
-                defaultValue={docReducer.result?.docName}
-              />
+
+              <form onSubmit={handleSubmit}>
+                <Input
+                  placeholder='ชื่อเรื่อง'
+                  prefix={<FaPenNib />}
+                  size='large'
+                  style={{ width: '300px' }}
+                  onChange={handleInputChange}
+                  defaultValue={docReducer.result?.docName}
+                />
+                <Button size="large" className="mx-5" htmlType="submit">Submit</Button>
+              </form>
 
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant='h6'>{`หน้า ${pageNumber} ของ ${
-                  numPages || 1
-                }`}</Typography>
+                <Typography variant='h6'>{`หน้า ${pageNumber} ของ ${numPages || 1
+                  }`}</Typography>
                 <div style={{ display: 'flex', marginLeft: '20px' }}>
                   <button
                     onClick={goToPreviousPage}

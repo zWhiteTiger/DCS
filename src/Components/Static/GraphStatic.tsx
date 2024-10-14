@@ -25,12 +25,13 @@ export default function Graph({ setPercentageChange }: Props) {
           count: 0,
         }));
 
+        // Filter documents for the current year and count based on created_at
         const currentYearDocuments = data.filter((doc: any) => {
-          return dayjs(doc.create_at).year() === currentYear;
+          return dayjs(doc.created_at).year() === currentYear; // Make sure to use created_at
         });
 
         currentYearDocuments.forEach((doc: any) => {
-          const docMonth = dayjs(doc.createdAt).month();
+          const docMonth = dayjs(doc.created_at).month(); // Use created_at here
           months[docMonth].count += 1;
         });
 
@@ -57,9 +58,9 @@ export default function Graph({ setPercentageChange }: Props) {
     group: false,
     autofit: true,
     label: {
-      content: (d: any) => d.count > 0 ? `${d.count} เอกสาร` : '',
+      content: (d: any) => (d.count > 0 ? `${d.count} เอกสาร` : ''),
       style: {
-        fill: '#4318FF'
+        fill: '#4318FF',
       },
       position: 'middle',
     },

@@ -1,203 +1,268 @@
-import { Card, CardContent, Grid, Typography } from '@mui/material';
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { authSelector } from '../../../Store/Slices/authSlice';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { httpClient } from '../Utility/HttpClient';
-import Loader from '../Loader/Loader';
-import { Button, Tooltip } from 'antd';
-import { IoTrashBin } from 'react-icons/io5';
-import PDFModal from '../Documents/PDFModal';
+import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
+import { Button, Input } from 'antd'; // Import Input from antd
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import Pwr from './pwr';
+import { MdOutlinePassword } from 'react-icons/md';
+import { CiEdit } from "react-icons/ci";
+import { AiOutlineDelete } from "react-icons/ai";
+import NoMoreContent from '../Utility/NoMoreContent';
+
+type User = {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  picture?: string;
+  role?: string;
+  department?: string;
+};
 
 type Props = {};
 
-const fetchAPI = async () => {
-    const response = await httpClient.get("auth");
-    return response.data;
-}
-
-const deleteUser = async (id: string) => {
-    const response = await httpClient.delete(`doc/${id}`);
-    return response.data; // Adjust based on your API response
-}
-
-export interface Document {
-    _id: string;
-    doc_name: string;
-    user_id: string;
-    deleted_at: null;
-    isStatus: string;
-    docs_path: string;
-    public: boolean;
-    created_at: Date;
-    updated_at: Date;
-    __v: number;
-}
-
 export default function UserManagement({ }: Props) {
+  const [users, setUsers] = useState<User[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(''); // State for search term
 
-    const profileReducer = useSelector(authSelector);
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
-    const [imageSrc, _setImageSrc] = useState(profileReducer.result?.picture
-        ? `${import.meta.env.VITE_URL}${profileReducer.result.picture}`
-        : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png');
+  const cardStyles = {
+    borderRadius: '10px',
+    boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)',
+  };
 
-    const { data, isLoading, error } = useQuery<Document[], any>("docs", fetchAPI, {
-        select: (data) => data.filter(doc => doc.user_id === profileReducer.result?._id),
-    });
+  const departmentNames: Record<string, string> = {
+    CE: "วิศวกรรมคอมพิวเตอร์",
+    LE: "วิศวกรรมโลจิสติกส์และเทคโนโลยีขนส่ง",
+    IEA: "วิศวกรรมอุตสาหการ",
+    ME: "วิศวกรรมเครื่องกล",
+    IDA: "นวัตกรรมการออกแบบและสถาปัตยกรรม",
+    AME: "วิศวกรรมเครื่องจักรกลเกษตร"
+  };
 
-    const queryClient = useQueryClient();
-    const { mutate, isLoading: _isDeleting, error: _deleteError } = useMutation(
-        (id: string) => deleteUser(id),
-        {
-            onSuccess: () => {
-                // Invalidate and refetch the documents query to update the list
-                queryClient.invalidateQueries("docs");
-            },
-            onError: (error) => {
-                // Handle the error (e.g., show a notification)
-                console.error('Error deleting document:', error);
-            }
-        }
-    );
+  const roleName: Record<string, string> = {
+    student: "นักศึกษา",
+    counselor: "ที่ปรึกษาสโมสรนักศึกษา",
+    head_of_student_affairs: "หัวหน้าฝ่ายกิจการนักศึกษา",
+    vice_dean: "รองคณบดี",
+    dean: "คณบดี",
+    admin: "ผู้ดูแลระบบ",
+  };
 
-    if (error) {
-        return <div>An error occurred</div>;
-    }
+  const roleColors: Record<string, string> = {
+    admin: "#ffeded",
+    dean: "#FFFAEF",
+    vice_dean: "#ebffff",
+    head_of_student_affairs: "#fffff5",
+    counselor: "#EFF4FB",
+    student: "#F1FBEF",
+    null: "#F3F3F3"
+  };
 
-    const tooltipStyle = {
-        fontFamily: 'Kanit'
-    };
+  const roleOrder: string[] = ['admin', 'dean', 'vice_dean', 'head_of_student_affairs', 'counselor', 'student'];
 
-    const cardStyles = {
-        borderRadius: '10px',
-        boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)', // Drop shadow with color #FFF
-    };
+  useEffect(() => {
+    axios
+      .get(`${import.meta.env.VITE_URL}/user/`)
+      .then((response) => {
+        console.log(response.data); // ตรวจสอบข้อมูล
+        setUsers(response.data);
+      })
+      .catch((error) => console.error("Error fetching users:", error));
+  }, []);
 
-    return (
-        <>
-            {isLoading ? (
-                <div className="mx-auto w-full flex justify-center items-center h-[80%]">
-                    <Card style={{ marginBottom: '5px', backgroundColor: "#fafafa", ...cardStyles }}>
-                        <Loader />
-                    </Card>
-                </div>
-            ) : (
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        {data?.map((item: Document, index: number) => {
-                            let data = {
-                                ...item,
-                                status: 'student'
-                            };
-                            let cardBackgroundColor;
-                            switch (data.isStatus) {
-                                case 'Professor':
-                                    cardBackgroundColor = '#F1FBEF'; // Light green
-                                    break;
-                                case 'Student':
-                                    cardBackgroundColor = '#EFF4FB'; // Light blue
-                                    break;
-                                case 'Leader':
-                                    cardBackgroundColor = '#FBF0EF'; // Light red
-                                    break;
-                                case 'Role1':
-                                    cardBackgroundColor = '#F3F3F3'; // Light gray
-                                    break;
-                                case 'Admin':
-                                    cardBackgroundColor = '#FFFAEF'; // Light yellow
-                                    break;
-                                default:
-                                    cardBackgroundColor = 'inherit';
-                            }
+  // Sort users based on the roleOrder
+  const sortedUsers = [...users].sort((a, b) => {
+    const aIndex = roleOrder.indexOf(a.role || '');
+    const bIndex = roleOrder.indexOf(b.role || '');
+    return aIndex - bIndex;
+  });
 
-                            return (
-                                <Card key={index} style={{ marginBottom: '5px', backgroundColor: cardBackgroundColor, ...cardStyles }}>
-                                    <CardContent>
-                                        <Grid container spacing={3} alignItems="start" style={{ alignItems: 'center' }}>
-                                            <Grid item xs={0}>
-                                                <div style={{ width: 'auto', height: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '20%' }}>
-                                                    <img src={imageSrc} alt="User Avatar" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
-                                                </div>
-                                            </Grid>
-                                            <Grid item xs={3}>
-                                                <Typography className="font-bold">
-                                                    {data.doc_name}
-                                                </Typography>
-                                                <Typography style={tooltipStyle}>
-                                                    {data.docs_path}
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item xs={3}>
-                                                <Typography className="font-bold">
-                                                    {profileReducer.result?.firstName} {profileReducer.result?.lastName}
-                                                </Typography>
-                                                <Typography style={tooltipStyle}>
-                                                    {profileReducer.result?.email}
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item xs={2}>
-                                                <Typography className="font-bold">
-                                                    วันที่
-                                                </Typography>
-                                                <Typography style={tooltipStyle}>
-                                                    {data.created_at.toString()}
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item xs={1} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                <Typography className="font-bold" style={{ marginBottom: '4px' }}>
-                                                    สถานะ
-                                                </Typography>
-                                                <Typography style={{
-                                                    backgroundColor:
-                                                        data.isStatus === 'express' ? '#FFE6B6' : data.isStatus === 'draft' ? '#B6B6B6' : data.isStatus === 'read' ? '#AFFFEA' : data.isStatus === 'unread' ? '#CFC1FF' : data.isStatus === 'reject' ? '#FFC1C1' : '#6A50A7',
-                                                    color: data.isStatus === 'express' ? '#DA9000' : data.isStatus === 'draft' ? '#FFFFFF' : data.isStatus === 'read' ? '#05CD99' : data.isStatus === 'unread' ? '#4318FF' : data.isStatus === 'reject' ? '#960000' : 'white',
-                                                    padding: '1px 5px',
-                                                    borderRadius: '4px',
-                                                    fontSize: '12px',
-                                                    height: '100%',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center'
-                                                }}>
-                                                    {data.isStatus}
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item xs={1} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
-                                                <PDFModal docsPath={data?.docs_path} />
-                                            </Grid>
-                                            <Grid item xs={1} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
-                                                <Tooltip title={<span style={tooltipStyle}>ลบบัญชีผู้ใช้นี้</span>}>
-                                                    <Button
-                                                        type="primary"
-                                                        icon={<IoTrashBin />}
-                                                        size="large"
-                                                        style={{
-                                                            fontFamily: 'Kanit',
-                                                            color: 'white',
-                                                            backgroundColor: '#FE3636',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center'
-                                                        }}
-                                                        onClick={() => {
-                                                            if (window.confirm("Are you sure you want to delete this document?")) {
-                                                                mutate(item._id);
-                                                            }
-                                                        }}
-                                                    >
-                                                        ลบบัญชีผู้ใช้
-                                                    </Button>
-                                                </Tooltip>
-                                            </Grid>
-                                        </Grid>
-                                    </CardContent>
-                                </Card>
-                            );
-                        })}
+  // Filter users based on the search term
+  const filteredUsers = sortedUsers.filter(user =>
+    `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <>
+      <Card sx={cardStyles}>
+        <CardContent>
+          <Box display="flex" justifyContent="space-between" alignItems="center" className="my-2 mx-5 mb-5">
+            <Typography
+              style={{ color: "#001234", fontWeight: "bold", fontSize: "20px" }}
+            >
+              ผู้ใช้งาน
+            </Typography>
+            <Input
+              size="large"
+              variant='filled'
+              placeholder="ค้นหา"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ width: '200px' }} // Adjust width as needed
+            />
+          </Box>
+
+          {filteredUsers.map((user) => {
+            const imageSrc = user.picture
+              ? `${import.meta.env.VITE_URL}${user.picture}`
+              : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+
+            return (
+              <Card
+                key={user._id}
+                sx={{ ...cardStyles, backgroundColor: roleColors[user.role || 'null'] }}
+                className="my-2"
+              >
+                <CardContent className="mt-2">
+                  <Grid container xs={12} spacing={2}>
+                    <Grid item xs={1}>
+                      <Box
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        height="100%"
+                      >
+                        <img
+                          src={imageSrc}
+                          alt="User Avatar"
+                          style={{
+                            width: '70px',
+                            height: '70px',
+                            objectFit: 'cover',
+                            borderRadius: '7px',
+                          }}
+                        />
+                      </Box>
                     </Grid>
-                </Grid>
-            )}
-        </>
-    );
+                    <Grid item xs={2}>
+                      <Box
+                        style={{
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <Typography
+                          style={{
+                            color: '#001234',
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          {user.firstName} {user.lastName}
+                        </Typography>
+                        <Typography className='mt-2'>{user.email}</Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={2}>
+                      <Box
+                        style={{
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <Typography
+                          style={{
+                            color: '#001234',
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          รหัสผ่าน
+                        </Typography>
+                        <Button
+                          size="large"
+                          type="link"
+                          onClick={openModal}
+                          style={{ color: '#001268' }}
+                        >
+                          <MdOutlinePassword style={{ color: '#001234' }} />
+                          เปลี่ยนรหัสผ่าน
+                        </Button>
+
+                        <Pwr isOpen={isModalOpen} toggleModal={closeModal} />
+                      </Box>
+                    </Grid>
+                    <Grid item xs={2}>
+                      <Box
+                        style={{
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <Typography
+                          style={{
+                            color: '#001234',
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          ตำแหน่ง
+                        </Typography>
+                        <Typography className='mt-2'>
+                          {user.role
+                            ? roleName[user.role] || "ว่าง"
+                            : "ว่าง"
+                          }
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <Box
+                        style={{
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <Typography
+                          style={{
+                            color: '#001234',
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          สาขาวิชา
+                        </Typography>
+                        <Typography className='mt-2'>
+                          {user.department
+                            ? departmentNames[user.department] || "ไม่มีสาขาวิชา"
+                            : "ไม่มีสาขาวิชา"}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={2}>
+                      <Box
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        height="100%"
+                      >
+                        <Button style={{ background: '#4318FF', color: '#FFF' }} size="large">
+                          <CiEdit />
+                          แก้ไข
+                        </Button>
+                        <Box className="mx-2" />
+                        <Button style={{ background: '#f06969', color: '#FFF' }} size="large">
+                          <AiOutlineDelete />
+                          ลบ
+                        </Button>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </CardContent>
+      </Card>
+
+      <NoMoreContent />
+    </>
+  );
 }

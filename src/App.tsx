@@ -19,6 +19,7 @@ import { pdfjs } from 'react-pdf';
 import Profile from './Components/Pages/Setting/Profile';
 import axios from 'axios';
 import ForgotPassword from './Components/Pages/Auth/Forgot_Pass';
+import UserManagement from './Components/Pages/Setting/UserManagement';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -87,7 +88,7 @@ const App = () => {
     } else if (path === '/docs/create') {
       title = `${import.meta.env.VITE_SERVICES_NAME} • สร้างเอกสาร`;
     } else if (path === '/user/management') {
-      title = `${import.meta.env.VITE_SERVICES_NAME} • ภาพรวม`;
+      title = `${import.meta.env.VITE_SERVICES_NAME} • จัดการผู้ใช้งาน`;
     } else if (path === '/docs/draft') {
       title = `${import.meta.env.VITE_SERVICES_NAME} • ร่างเอกสาร`;
     } else if (path === '/auth/login') {
@@ -164,9 +165,9 @@ const App = () => {
               <Route path='/docs/draft' element={<DraftDocs />} />
               <Route path='/setting' element={<DraftDocs />} />
               <Route path='/profile' element={<Profile />} />
+              <Route path='/user/management' element={<UserManagement />} />
             </Route>
             {/* Auth */}
-            <Route path='/user/management' element={<h1>Hello</h1>} />
 
             <Route element={<PublicRoute />}>
               <Route path='/auth/register' element={<Register />} />

@@ -8,6 +8,8 @@ type Profile = {
     _id: string
     picture: string
     signature: string
+    role: string
+    department: string
 }
 
 type AuthState = {

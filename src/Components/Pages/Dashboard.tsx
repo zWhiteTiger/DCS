@@ -13,6 +13,7 @@ import ApprovalModal from './Documents/ApprovalModal';
 import { httpClient } from './Utility/HttpClient';
 import { useQuery } from 'react-query';
 import Loader from './Loader/Loader';
+import axios from 'axios';
 
 type Props = {};
 
@@ -28,6 +29,16 @@ export interface Document {
   updated_at: Date;
   __v: number;
 }
+
+type User = {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  picture?: string;
+  role?: string;
+  department?: string;
+};
 
 const fetchAPI = async () => {
   const response = await httpClient.get("doc"); // Fetch documents
@@ -70,6 +81,7 @@ export default function Dashboard({ }: Props) {
   const isMobile = useMediaQuery('(max-width:960px)');
   const profileReducer = useSelector(authSelector);
   const [percentageChange, setPercentageChange] = useState<number | null>(null);
+  const [_users, setUsers] = useState<User[]>([]);
 
   // Fetch and filter documents
   const { data, isLoading, error } = useQuery<Document[], any>("docs", fetchAPI, {
@@ -81,6 +93,15 @@ export default function Dashboard({ }: Props) {
   }
   const [loading, setLoading] = useState(true); // State to manage loading
   const [_name, setName] = useState<string | null>(null); // State to manage name
+
+  useEffect(() => {
+    axios.get(`${import.meta.env.VITE_URL}/user/`)
+      .then((response) => {
+        console.log(response.data); // ตรวจสอบข้อมูล
+        setUsers(response.data);
+      })
+      .catch((error) => console.error("Error fetching users:", error));
+  }, []);
 
   useEffect(() => {
     // Simulate a name query with delay
@@ -106,6 +127,15 @@ export default function Dashboard({ }: Props) {
 
   const tooltipStyle = {
     fontFamily: 'Kanit'
+  };
+
+  const roleName: Record<string, string> = {
+    student: "นักศึกษา",
+    counselor: "ที่ปรึกษาสโมสรนักศึกษา",
+    head_of_student_affairs: "หัวหน้าฝ่ายกิจการนักศึกษา",
+    vice_dean: "รองคณบดี",
+    dean: "คณบดี",
+    admin: "ผู้ดูแลระบบ",
   };
 
   return (
@@ -189,7 +219,10 @@ export default function Dashboard({ }: Props) {
                     {loading ? (
                       <IDQuery /> // Show loading component
                     ) : (
-                      `นักศึกษา`
+                      `${profileReducer.result?.role
+                        ? roleName[profileReducer.result?.role] || "ว่าง"
+                        : "ว่าง"
+                      }`
                     )}
                   </Typography>
                 </Box>
@@ -295,7 +328,7 @@ export default function Dashboard({ }: Props) {
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={2} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
-                                      <ApprovalModal docsPath={data?.docs_path} />
+                                      <ApprovalModal docId={data._id} docsPath={data.docs_path} />
                                     </Grid>
                                   </Grid>
                                 </CardContent>

@@ -1,7 +1,6 @@
 import { Box, Grid, Typography, Card, CardContent } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { authSelector } from '../../Store/Slices/authSlice';
-import SearchBarBlack from './Utility/SearchBar_Black';
 import NoMoreContent from './Utility/NoMoreContent';
 import { useQuery } from 'react-query';
 import { useState } from 'react';
@@ -12,44 +11,80 @@ import ApprovalModal from './Documents/ApprovalModal';
 export interface Document {
   _id: string;
   doc_name: string;
-  user_id: string;
-  deleted_at: null;
+  currentPriority: number;
   isStatus: string;
   docs_path: string;
   public: boolean;
   created_at: Date;
   updated_at: Date;
-  __v: number;
 }
 
+export interface Approval {
+  priority: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
+// Fetch both documents and approvals
 const fetchAPI = async () => {
-  const response = await httpClient.get("doc"); // Fetch documents
-  return response.data;
+  const docsResponse = await httpClient.get("doc");
+  const approvalResponse = await httpClient.get("approval");
+  return {
+    docs: docsResponse.data,
+    approvals: approvalResponse.data
+  };
 };
 
 export default function Explore() {
+  const profileReducer = useSelector(authSelector);
+  const userEmail: string | undefined = profileReducer.result?.email;
 
-  const profileReducer = useSelector(authSelector)
   const [imageSrc, _setImageSrc] = useState(profileReducer.result?.picture
     ? `${import.meta.env.VITE_URL}${profileReducer.result.picture}`
     : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png');
 
-  // Fetch and filter documents
-  const { data, isLoading, error } = useQuery<Document[], any>("docs", fetchAPI, {
-    select: (data) => data.filter(doc => doc.public === true), // Filter public documents
-  });
+  // Function to check if the current user should sign
+  const canUserSign = (doc: Document, approvals: Approval[], userEmail: string | undefined) => {
+    const currentPriority = doc.currentPriority;
+    const approvalEntry = approvals.find(approval => approval.priority === currentPriority);
+    return approvalEntry && approvalEntry.email === userEmail;
+  };
 
+  // Fetch documents and approvals
+  // Fetch documents and approvals
+  const { data, isLoading, error } = useQuery<{ docs: Document[], approvals: Approval[] }, any>(
+    "docsAndApprovals",
+    fetchAPI,
+    {
+      select: (data) => ({
+        docs: data.docs
+          .filter(doc => canUserSign(doc, data.approvals, userEmail)) // Ensure it returns both docs and approvals
+          .filter(doc => doc.public && doc.isStatus !== "draft"), // Filter to show only public documents that are not in draft
+        approvals: data.approvals
+      })
+    }
+  );
+
+  // Check for error
   if (error) {
     return <div>An error occurred</div>;
   }
 
-  const tooltipStyle = {
-    fontFamily: 'Kanit'
+  // Department mapping
+  const departmentNames: Record<string, string> = {
+    CE: "วิศวกรรมคอมพิวเตอร์",
+    LE: "วิศวกรรมโลจิสติกส์และเทคโนโลยีขนส่ง",
+    IEA: "วิศวกรรมอุตสาหการ",
+    ME: "วิศวกรรมเครื่องกล",
+    IDA: "นวัตกรรมการออกแบบและสถาปัตยกรรม",
+    AME: "วิศวกรรมเครื่องจักรกลเกษตร"
   };
 
+  const tooltipStyle = { fontFamily: 'Kanit' };
   const cardStyles = {
     borderRadius: '10px',
-    boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)', // Drop shadow with color #FFF
+    boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)'
   };
 
   return (
@@ -57,7 +92,6 @@ export default function Explore() {
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <div style={{ overflowX: 'auto', flex: '1' }}>
           <Grid container spacing={1}>
-            {/* Left Section */}
             <Grid item xs={12} md={12}>
               <Card sx={cardStyles}>
                 <CardContent>
@@ -65,18 +99,20 @@ export default function Explore() {
                     <Box className='m-5'>
                       <img src={imageSrc} alt="Profile" style={{ maxWidth: '200px', height: '200px', borderRadius: '10px', objectFit: 'cover' }} />
                     </Box>
-                    <Box
-                      className="infoBox mt-6"
-                      display="flex"
-                      flexDirection="column"
-                    >
+                    <Box className="infoBox mt-6" display="flex" flexDirection="column">
                       <Box className="my-5">
-                        <Typography style={{ color: '#1B2559' }} className='text-xl font-bold'>{profileReducer.result?.firstName} {profileReducer.result?.lastName}</Typography>
-                        <Typography>รหัสนักศึกษา: 12345678</Typography>
+                        <Typography style={{ color: '#1B2559' }} className='text-xl font-bold'>
+                          {profileReducer.result?.firstName} {profileReducer.result?.lastName}
+                        </Typography>
+                        <Typography>{profileReducer.result?.email}</Typography>
                       </Box>
                       <Box className="my-5">
                         <Typography style={{ color: '#1B2559' }} className='text-xl font-bold'>สาขาวิชา</Typography>
-                        <Typography>วิศวกรรมคอมพิวเตอร์และระบบอัตโนมัติ (6441)</Typography>
+                        <Typography>
+                          {profileReducer.result?.department
+                            ? departmentNames[profileReducer.result?.department] || "ไม่มีสาขาวิชา"
+                            : "ไม่มีสาขาวิชา"}
+                        </Typography>
                       </Box>
                     </Box>
                   </Grid>
@@ -86,18 +122,17 @@ export default function Explore() {
           </Grid>
         </div>
       </div>
+
       <Box className="m-6" />
+
       <div style={{ overflowX: 'auto', display: 'flex' }}>
         <Grid container spacing={4}>
-          {/* Full Width Section */}
           <Grid item xs={12}>
             <Card sx={cardStyles}>
               <CardContent>
                 <Box className="mb-5" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Typography style={{ color: '#1B2559' }} className='text-xl font-bold'>Documents</Typography>
-                  <Box sx={{ ml: 3 }}>
-                    <SearchBarBlack />
-                  </Box>
+                  <Box sx={{ ml: 3 }}>Search</Box>
                 </Box>
 
                 {isLoading ? (
@@ -109,27 +144,23 @@ export default function Explore() {
                 ) : (
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
-                      {data?.map((item: any, index: number) => {
-                        let data = {
-                          ...item,
-                          status: 'unread'
-                        };
+                      {data?.docs?.map((doc: Document, index: number) => {
                         let cardBackgroundColor;
-                        switch (data.isStatus) {
+                        switch (doc.isStatus) {
                           case 'read':
-                            cardBackgroundColor = '#F1FBEF'; // Light green
+                            cardBackgroundColor = '#F1FBEF';
                             break;
                           case 'unread':
-                            cardBackgroundColor = '#EFF4FB'; // Light blue
+                            cardBackgroundColor = '#EFF4FB';
                             break;
                           case 'reject':
-                            cardBackgroundColor = '#FBF0EF'; // Light red
+                            cardBackgroundColor = '#FBF0EF';
                             break;
                           case 'draft':
-                            cardBackgroundColor = '#F3F3F3'; // Light red
+                            cardBackgroundColor = '#F3F3F3';
                             break;
                           case 'express':
-                            cardBackgroundColor = '#FFFAEF'; // Light red
+                            cardBackgroundColor = '#FFFAEF';
                             break;
                           default:
                             cardBackgroundColor = 'inherit';
@@ -145,37 +176,24 @@ export default function Explore() {
                                   </div>
                                 </Grid>
                                 <Grid item xs={3}>
-                                  <Typography className="font-bold">
-                                    {data.doc_name}
-                                  </Typography>
-                                  <Typography style={tooltipStyle}>
-                                    {data.docs_path}
-                                  </Typography>
+                                  <Typography className="font-bold">{doc.doc_name}</Typography>
+                                  <Typography style={tooltipStyle}>{doc.docs_path}</Typography>
                                 </Grid>
                                 <Grid item xs={3}>
-                                  <Typography className="font-bold">
-                                    {profileReducer.result?.firstName} {profileReducer.result?.lastName}
-                                  </Typography>
-                                  <Typography style={tooltipStyle}>
-                                    {profileReducer.result?.email}
-                                  </Typography>
+                                  <Typography className="font-bold">{profileReducer.result?.firstName} {profileReducer.result?.lastName}</Typography>
+                                  <Typography style={tooltipStyle}>{profileReducer.result?.email}</Typography>
                                 </Grid>
                                 <Grid item xs={2}>
-                                  <Typography className="font-bold">
-                                    วันที่
-                                  </Typography>
-                                  <Typography style={tooltipStyle}>
-                                    {data.created_at}
-                                  </Typography>
+                                  <Typography className="font-bold">วันที่</Typography>
+                                  <Typography style={tooltipStyle}>{doc.created_at.toString()}</Typography>
                                 </Grid>
                                 <Grid item xs={1} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                  <Typography className="font-bold" style={{ marginBottom: '4px' }}>
-                                    สถานะ
-                                  </Typography>
+                                  <Typography className="font-bold" style={{ marginBottom: '4px' }}>สถานะ</Typography>
                                   <Typography style={{
                                     backgroundColor:
-                                      data.isStatus === 'express' ? '#FFE6B6' : data.isStatus === 'draft' ? '#B6B6B6' : data.isStatus === 'read' ? '#AFFFEA' : data.isStatus === 'unread' ? '#CFC1FF' : data.isStatus === 'reject' ? '#FFC1C1' : '#6A50A7',
-                                    color: data.isStatus === 'express' ? '#DA9000' : data.isStatus === 'draft' ? '#FFFFFF' : data.isStatus === 'read' ? '#05CD99' : data.isStatus === 'unread' ? '#4318FF' : data.isStatus === 'reject' ? '#960000' : 'white',
+                                      doc.isStatus === 'express' ? '#FFE6B6' : doc.isStatus === 'draft' ? '#B6B6B6' : doc.isStatus === 'read' ? '#AFFFEA' : doc.isStatus === 'unread' ? '#CFC1FF' : doc.isStatus === 'reject' ? '#FFC1C1' : '#6A50A7',
+                                    color:
+                                      doc.isStatus === 'express' ? '#DA9000' : doc.isStatus === 'draft' ? '#FFFFFF' : doc.isStatus === 'read' ? '#05CD99' : doc.isStatus === 'unread' ? '#4318FF' : doc.isStatus === 'reject' ? '#960000' : 'white',
                                     padding: '1px 5px',
                                     borderRadius: '4px',
                                     fontSize: '12px',
@@ -184,11 +202,11 @@ export default function Explore() {
                                     alignItems: 'center',
                                     justifyContent: 'center'
                                   }}>
-                                    {data.isStatus}
+                                    {doc.isStatus}
                                   </Typography>
                                 </Grid>
                                 <Grid item xs={2} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
-                                  <ApprovalModal docsPath={data?.docs_path} />
+                                  <ApprovalModal docId={doc._id} docsPath={doc.docs_path} />
                                 </Grid>
                               </Grid>
                             </CardContent>
@@ -205,7 +223,6 @@ export default function Explore() {
         </Grid>
       </div>
       <NoMoreContent />
-
     </>
   );
 }

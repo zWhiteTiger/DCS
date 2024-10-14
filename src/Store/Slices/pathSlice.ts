@@ -10,7 +10,7 @@ const initialState: State = {
 }
 
 const pathSlice = createSlice({
-    name: 'docpath',
+    name: 'documentRef',
     initialState,
     reducers: {
         setPath: (state: State, actions: PayloadAction<string>) => {

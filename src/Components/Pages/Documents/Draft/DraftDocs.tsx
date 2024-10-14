@@ -1,12 +1,8 @@
-import { Box, Grid, Typography, Card, CardContent, Divider } from '@mui/material';
-import { FaCheck, FaXmark } from 'react-icons/fa6';
-import { LuSearch } from 'react-icons/lu';
+import { Box, Grid, Typography, Card, CardContent } from '@mui/material';
 import { useSelector } from 'react-redux';
-import SearchBarBlack from '../../Utility/SearchBar_Black';
+import { authSelector } from '../../../../Store/Slices/authSlice';
 import NoMoreContent from '../../Utility/NoMoreContent';
 import DraftList from './DraftList';
-import { authSelector } from '../../../../Store/Slices/authSlice';
-
 const cardStyles = {
   borderRadius: '10px',
   boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)', // Drop shadow with color #FFF
@@ -22,13 +18,23 @@ export default function DraftDocs() {
     ? `${import.meta.env.VITE_URL}${picturePath}`
     : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
 
+  const departmentNames: Record<string, string> = {
+    CE: "วิศวกรรมคอมพิวเตอร์",
+    LE: "วิศวกรรมโลจิสติกส์และเทคโนโลยีขนส่ง",
+    IEA: "วิศวกรรมอุตสาหการ",
+    ME: "วิศวกรรมเครื่องกล",
+    IDA: "นวัตกรรมการออกแบบและสถาปัตยกรรม",
+    AME: "วิศวกรรมเครื่องจักรกลเกษตร"
+  };
+
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <div style={{ overflowX: 'auto', flex: '1' }}>
           <Grid container spacing={1}>
             {/* Left Section */}
-            <Grid item xs={12} md={8}>
+            <Grid item xs={12} md={12}>
               <Card sx={cardStyles}>
                 <CardContent>
                   <Grid container spacing={1}>
@@ -42,57 +48,18 @@ export default function DraftDocs() {
                     >
                       <Box className="my-5">
                         <Typography style={{ color: '#1B2559' }} className='text-xl font-bold'>{profileReducer.result?.firstName} {profileReducer.result?.lastName}</Typography>
-                        <Typography>รหัสนักศึกษา: 12345678</Typography>
+                        <Typography>{profileReducer.result?.email}</Typography>
                       </Box>
                       <Box className="my-5">
                         <Typography style={{ color: '#1B2559' }} className='text-xl font-bold'>สาขาวิชา</Typography>
-                        <Typography>วิศวกรรมคอมพิวเตอร์และระบบอัตโนมัติ (6441)</Typography>
+                        <Typography>
+                          {profileReducer.result?.department
+                            ? departmentNames[profileReducer.result?.department] || "ไม่มีสาขาวิชา"
+                            : "ไม่มีสาขาวิชา"}
+                        </Typography>
                       </Box>
                     </Box>
                   </Grid>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Card sx={cardStyles}>
-                <CardContent>
-                  <Typography style={{ color: '#1B2559' }} className='text-xl font-bold'>History</Typography>
-                  <Box className="my-2" style={{ display: 'flex', alignItems: 'center' }}>
-                    <LuSearch style={{
-                      background: '#E0E5F2',
-                      color: '#7551FF',
-                      padding: '5px',
-                      borderRadius: '4px',
-                      fontSize: '30px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginRight: '8px' // เพิ่ม margin ขวาเพื่อให้มีระยะห่างระหว่างไอคอนกับข้อความ
-                    }} />
-                    <Typography>หนังสือ1</Typography>
-                    <FaCheck className='mx-2' style={{
-                      fontSize: '20px',
-                      color: 'green',
-                    }} />
-                  </Box>
-                  <Box className="my-2" style={{ display: 'flex', alignItems: 'center' }}>
-                    <LuSearch style={{
-                      background: '#E0E5F2',
-                      color: '#7551FF',
-                      padding: '5px',
-                      borderRadius: '4px',
-                      fontSize: '30px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginRight: '8px' // เพิ่ม margin ขวาเพื่อให้มีระยะห่างระหว่างไอคอนกับข้อความ
-                    }} />
-                    <Typography>หนังสือ2</Typography>
-                    <FaXmark className='mx-2' style={{
-                      fontSize: '20px',
-                      color: 'red',
-                    }} />
-                  </Box>
                 </CardContent>
               </Card>
             </Grid>
@@ -106,24 +73,19 @@ export default function DraftDocs() {
           <Grid item xs={12}>
             <Card sx={cardStyles}>
               <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Typography style={{ color: '#1B2559' }} className='text-xl font-bold'>Documents</Typography>
+                <Box className="mb-2" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography style={{ color: '#1B2559' }} className='text-xl font-bold'>เอกสาร</Typography>
                   <Box sx={{ ml: 3 }}>
-                    <SearchBarBlack />
+                    Search
                   </Box>
                 </Box>
-
-                <Divider className="mb-5" style={{ borderColor: '#dedede', color: '#dedede', padding: '20px' }} ></Divider>
-
                 <DraftList />
-
               </CardContent>
             </Card>
           </Grid>
         </Grid>
       </div>
       <NoMoreContent />
-
     </>
   );
 }

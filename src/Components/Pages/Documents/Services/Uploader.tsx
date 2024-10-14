@@ -5,14 +5,16 @@ import Box from '@mui/material/Box';
 import { LuHardDriveUpload } from 'react-icons/lu';
 import { useAppDispatch } from '../../../../Store/Store';
 import { setPath } from '../../../../Store/Slices/pathSlice';
+import { setDocumentId } from '../../../../Store/Slices/DocSlice';
 const { Dragger } = Upload;
 
 type UploaderProps = {
   setFileUrl: (url: string) => void;
   nextStep: () => void;
+  setDocId: React.MutableRefObject<string | null>
 };
 
-const Uploader: React.FC<UploaderProps> = ({ setFileUrl, nextStep }) => {
+const Uploader: React.FC<UploaderProps> = ({ setFileUrl, nextStep, setDocId }) => {
   const [loading, setLoading] = useState(false);  // เพิ่ม state สำหรับการควบคุมสถานะการอัพโหลด
   const disPatch = useAppDispatch();
 
@@ -48,6 +50,8 @@ const Uploader: React.FC<UploaderProps> = ({ setFileUrl, nextStep }) => {
           setFileUrl(response.url);
           disPatch(setPath(response.url));
           nextStep();  // ไปยังสเต็ปถัดไป
+          disPatch(setDocumentId(response.docID));
+          setDocId.current = response.docID
         }
       } else if (status === 'error') {
         message.error(`อัพโหลดไฟล์ ${info.file.name} ล้มเหลว`);

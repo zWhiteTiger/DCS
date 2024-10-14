@@ -5,13 +5,11 @@ import docsReducer from './Slices/DocSlice'
 import approveReducer from './Slices/approvalSlice'
 import pathReducer from './Slices/pathSlice'
 
-
-
 const reducer = {
     authReducer,
     docsReducer,
     approveReducer,
-    pathReducer
+    pathReducer,
 }
 
 

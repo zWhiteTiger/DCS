@@ -1,162 +1,201 @@
-import { useEffect, useState } from "react";
-import { Card, CardContent, Typography, Grid } from "@mui/material";
-import { Button, Tooltip } from "antd";
-import { MdFileOpen } from "react-icons/md";
-import Static from "../../Static/Static";
-import Loader from "../Loader/Loader";
-import axios from "axios";
-import NoMoreContent from "../Utility/NoMoreContent";
+import { Box, Grid, Typography, Card, CardContent } from '@mui/material';
+import { useSelector } from 'react-redux';
+import { useQuery } from 'react-query';
+import { useState } from 'react';
+import { httpClient } from '../Utility/HttpClient';
+import { authSelector } from '../../../Store/Slices/authSlice';
+import NoMoreContent from '../Utility/NoMoreContent';
+import Loader from '../Loader/Loader';
+import Static from '../../Static/Static';
+import PreviewDocs from '../Documents/PreviewDocs';
 
-type Props = {};
+export interface Document {
+  _id: string;
+  doc_name: string;
+  user_id: string;
+  deleted_at: null;
+  isStatus: string;
+  isProgress: string;
+  docs_path: string;
+  public: boolean;
+  created_at: Date;
+  updated_at: Date;
+  __v: number;
+}
 
-const cardStyles = {
-  borderRadius: '10px',
-  boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)', // Drop shadow with color #FFF
+export interface User {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  picture?: string; // Assuming you have a picture field
+}
+
+// Fetch documents that are public and complete
+const fetchDocuments = async () => {
+  const response = await httpClient.get("doc");
+  return response.data.filter((doc: Document) => doc.public === true && doc.isProgress === 'complete'); // Filter for public and complete documents
 };
 
-export default function Archive({ }: Props) {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  const apifunc = async () => {
-    try {
-      const response = await axios.get('https://66349c759bb0df2359a21751.mockapi.io/book/book');
-      setData(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+export default function Archive() {
+  const profileReducer = useSelector(authSelector);
+  const [imageSrc, _setImageSrc] = useState(profileReducer.result?.picture
+    ? `${import.meta.env.VITE_URL}${profileReducer.result.picture}`
+    : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png');
 
-  useEffect(() => {
-    apifunc();
-  }, []);
+  // Fetch documents
+  const { data: documents, isLoading, error } = useQuery<Document[], any>("docs", fetchDocuments);
+
+  if (error) {
+    return <div>An error occurred</div>;
+  }
 
   const tooltipStyle = {
     fontFamily: 'Kanit'
   };
 
+  const cardStyles = {
+    borderRadius: '10px',
+    boxShadow: '0px 0px 10px rgba(255, 255, 255, 0)',
+  };
+
   return (
     <>
-      <Static />
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ overflowX: 'auto', flex: '1' }}>
+          <Grid container spacing={1}>
+            <Grid item xs={12} md={12}>
+              <Static />
+            </Grid>
+          </Grid>
+        </div>
+      </div>
+      <Box className="m-6" />
+      <div style={{ overflowX: 'auto', display: 'flex' }}>
+        <Grid container spacing={4}>
+          <Grid item xs={12}>
+            <Card sx={cardStyles}>
+              <CardContent>
+                <Box className="mb-5" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography style={{ color: '#1B2559' }} className='text-xl font-bold'>Documents</Typography>
+                  <Box sx={{ ml: 3 }}>
+                    Search
+                  </Box>
+                </Box>
 
-      <div className="mt-5">
-        <Card sx={cardStyles}>
-          <CardContent>
-            <Typography style={{ display: 'flex', color: '#1B2559' }} className='text-xl font-bold'>
-              เอกสาร
-            </Typography>
-            {loading ? (
-              <div className="mx-auto w-full flex justify-center items-center h-[80%]">
-                <Card style={{ marginBottom: '5px', backgroundColor: "#fafafa", ...cardStyles }}>
-                  <Loader />
-                </Card>
-              </div>
-            ) : (
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  {data.map((item: any, index: number) => {
-                    let book = {
-                      ...item,
-                      status: 'Unread'
-                    };
-                    let cardBackgroundColor;
-                    switch (book.status) {
-                      case 'Read':
-                        cardBackgroundColor = '#F1FBEF'; // Light green
-                        break;
-                      case 'Unread':
-                        cardBackgroundColor = '#EFF4FB'; // Light blue
-                        break;
-                      case 'Reject':
-                        cardBackgroundColor = '#FBF0EF'; // Light red
-                        break;
-                      default:
-                        cardBackgroundColor = 'inherit';
-                    }
+                {isLoading ? (
+                  <div className="mx-auto w-full flex justify-center items-center h-[80%]">
+                    <Card style={{ marginBottom: '5px', backgroundColor: "#fafafa", ...cardStyles }}>
+                      <Loader />
+                    </Card>
+                  </div>
+                ) : (
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      {documents?.map((document: Document) => {
+                        // Fetch user data for the document's user_id
+                        let cardBackgroundColor;
+                        switch (document.isStatus) {
+                          case 'read':
+                            cardBackgroundColor = '#F1FBEF'; // Light green
+                            break;
+                          case 'unread':
+                            cardBackgroundColor = '#EFF4FB'; // Light blue
+                            break;
+                          case 'reject':
+                            cardBackgroundColor = '#FBF0EF'; // Light red
+                            break;
+                          case 'draft':
+                            cardBackgroundColor = '#F3F3F3'; // Light red
+                            break;
+                          case 'express':
+                            cardBackgroundColor = '#FFFAEF'; // Light red
+                            break;
+                          default:
+                            cardBackgroundColor = 'inherit';
+                        }
 
-                    return (
-                      <Card key={index} style={{ marginBottom: '5px', backgroundColor: cardBackgroundColor, ...cardStyles }}>
-                        <CardContent>
-                          <Grid container spacing={3} alignItems="start">
-                            <Grid item xs={0}>
-                              <div style={{ width: 'auto', height: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '20%' }}>
-                                <img src='https://www.bing.com/th?id=OIP.zb2bMkSw2aP62F8liqmASQHaE8&w=202&h=200&c=8&rs=1&qlt=90&o=6&pid=3.1&rm=2' alt="User Avatar" style={{ maxWidth: '50px', maxHeight: '50px' }} />
-                              </div>
-                            </Grid>
-                            <Grid item xs={4}>
-                              <Typography className="font-bold">
-                                {book.title}
-                              </Typography>
-                              <Typography>
-                                12345678
-                              </Typography>
-                            </Grid>
-                            <Grid item xs={3}>
-                              <Typography className="font-bold">
-                                {book.name}
-                              </Typography>
-                              <Typography>
-                                {book.email}
-                              </Typography>
-                            </Grid>
-                            <Grid item xs={2}>
-                              <Typography className="font-bold">
-                                วันที่
-                              </Typography>
-                              <Typography>
-                                {book.date}
-                              </Typography>
-                            </Grid>
-                            <Grid item xs={1} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                              <Typography className="font-bold" style={{ marginBottom: '4px' }}>
-                                สถานะ
-                              </Typography>
-                              <div style={{
-                                backgroundColor:
-                                  book.status === 'Read' ? '#AFFFEA' : book.status === 'Unread' ? '#CFC1FF' : book.status === 'Reject' ? '#FFC1C1' : '#6A50A7',
-                                color: book.status === 'Read' ? '#05CD99' : book.status === 'Unread' ? '#4318FF' : book.status === 'Reject' ? '#960000' : 'white',
-                                padding: '1px 5px',
-                                borderRadius: '4px',
-                                fontSize: '12px',
-                                height: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}>
-                                {book.status}
-                              </div>
-                            </Grid>
-                            <Grid item xs={1} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
-                              <Tooltip title={<span style={tooltipStyle}>Open this file</span>}>
-                                <Button
-                                  className="mt-2"
-                                  type="primary"
-                                  icon={<MdFileOpen />}
-                                  size="large"
-                                  style={{
-                                    fontFamily: 'Kanit',
-                                    color: 'white',
-                                    backgroundColor: '#4318FF',
+                        return (
+                          <Card key={document._id} style={{ marginBottom: '5px', backgroundColor: cardBackgroundColor, ...cardStyles }}>
+                            <CardContent>
+                              <Grid container spacing={3} alignItems="start" style={{ alignItems: 'center' }}>
+                                <Grid item xs={0}>
+                                  <div style={{ width: 'auto', height: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '20%' }}>
+                                    <img src={imageSrc} alt="User Avatar" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
+                                  </div>
+                                </Grid>
+                                <Grid item xs={3}>
+                                  <Typography className="font-bold">
+                                    {document.doc_name}
+                                  </Typography>
+                                  <Typography style={tooltipStyle}>
+                                    {document.docs_path}
+                                  </Typography>
+                                </Grid>
+                                <Grid item xs={3}>
+                                  <Typography className="font-bold">
+                                    name
+                                  </Typography>
+                                  <Typography style={tooltipStyle}>
+                                    email
+                                  </Typography>
+                                </Grid>
+                                <Grid item xs={2}>
+                                  <Typography className="font-bold">
+                                    วันที่
+                                  </Typography>
+                                  <Typography style={tooltipStyle}>
+                                    {new Date(document.created_at).toLocaleDateString()} {/* Format date to string */}
+                                  </Typography>
+                                </Grid>
+                                <Grid item xs={1} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                  <Typography className="font-bold" style={{ marginBottom: '4px' }}>
+                                    สถานะ
+                                  </Typography>
+                                  <Typography style={{
+                                    backgroundColor:
+                                      document.isStatus === 'express' ? '#FFE6B6' : document.isStatus === 'draft' ? '#B6B6B6' : document.isStatus === 'read' ? '#AFFFEA' : document.isStatus === 'unread' ? '#CFC1FF' : document.isStatus === 'reject' ? '#FFC1C1' : '#6A50A7',
+                                    color: document.isStatus === 'express' ? '#DA9000' : document.isStatus === 'draft' ? '#FFFFFF' : document.isStatus === 'read' ? '#05CD99' : document.isStatus === 'unread' ? '#4318FF' : document.isStatus === 'reject' ? '#960000' : 'white',
+                                    padding: '1px 5px',
+                                    borderRadius: '4px',
+                                    fontSize: '12px',
+                                    height: '100%',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center'
-                                  }}
-                                >
-                                  เปิดไฟล์
-                                </Button>
-                              </Tooltip>
-                            </Grid>
-                          </Grid>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </Grid>
-              </Grid>
-            )}
-          </CardContent>
-        </Card>
+                                  }}>
+                                    {document.isStatus}
+                                  </Typography>
+                                  <Typography className="mt-1" style={{
+                                    backgroundColor: '#AFFFEA',
+                                    color: '#05CD99',
+                                    padding: '1px 5px',
+                                    borderRadius: '4px',
+                                    fontSize: '12px',
+                                    height: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}>
+                                    {document.isProgress}
+                                  </Typography>
+                                </Grid>
+                                <Grid item xs={2} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
+                                  <PreviewDocs docId={document._id} docsPath={document?.docs_path} />
+                                </Grid>
+                              </Grid>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </Grid>
+                  </Grid>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
       </div>
       <NoMoreContent />
     </>

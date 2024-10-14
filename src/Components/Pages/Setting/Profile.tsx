@@ -77,6 +77,15 @@ export default function Profile({ }: Props) {
         accept: '.png,.jpg,.jpeg',
     };
 
+    const roleName: Record<string, string> = {
+        student: "นักศึกษา",
+        counselor: "ที่ปรึกษาสโมสรนักศึกษา",
+        head_of_student_affairs: "หัวหน้าฝ่ายกิจการนักศึกษา",
+        vice_dean: "รองคณบดี",
+        dean: "คณบดี",
+        admin: "ผู้ดูแลระบบ",
+    };
+
     return (
         <>
             <Box display="flex" width="100%">
@@ -97,14 +106,17 @@ export default function Profile({ }: Props) {
                                         {profileReducer.result?.firstName} {profileReducer.result?.lastName}
                                     </Typography>
                                     <Typography variant="body1" color="textSecondary">
-                                        รหัสนักศึกษา: 123456
+                                        {profileReducer.result?.email}
                                     </Typography>
                                     <br />
                                     <Typography variant="h6">
                                         ตำแหน่ง
                                     </Typography>
                                     <Typography variant="body2" color="textSecondary">
-                                        นักศึกษา
+                                        {profileReducer.result?.role
+                                            ? roleName[profileReducer.result?.role] || "ว่าง"
+                                            : "ว่าง"
+                                        }
                                     </Typography>
                                 </Box>
                             </CardContent>

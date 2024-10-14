@@ -1,4 +1,4 @@
-import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Collapse } from '@mui/material';
+import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Collapse, Typography } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { BiSolidDashboard } from 'react-icons/bi';
 import { PiCompassFill } from 'react-icons/pi';
@@ -42,6 +42,8 @@ export default function Sidebar({
     fontFamily: 'Kanit, sans-serif',
   };
 
+  const userRole = "admin"; // Replace this with your actual user role retrieval logic
+
   const mainMenuItems = [
     {
       path: '/',
@@ -54,12 +56,14 @@ export default function Sidebar({
       icon1: <PiCompassFill size={'1.5em'} className='text-isActive' />, // is active
       icon2: <LuCompass size={'1.5em'} className='text-IconColor' />, // none active
       title: 'สำรวจ',
+      total: 15,
     },
     {
       path: '/archive',
       icon1: <HiArchive size={'1.5em'} className='text-isActive' />, // is active
       icon2: <LuArchive size={'1.5em'} className='text-IconColor' />, // none active
       title: 'คลังเอกสาร',
+      total: 1,
     },
   ];
 
@@ -78,14 +82,15 @@ export default function Sidebar({
     },
   ];
 
-  const secondaryMenu = [
+  // Modify the secondary menu to conditionally render based on userRole
+  const secondaryMenu = userRole === "admin" ? [
     {
       path: '/user/management',
       icon1: <BsGearFill size={'1.5em'} className='text-isActive' />, // is active
       icon2: <BsGear size={'1.5em'} className='text-IconColor' />, // none active
       title: 'จัดการบัญชีผู้ใช้งาน',
     },
-  ]
+  ] : []; // Empty array if not an admin
 
   const drawer = (
     <div>
@@ -107,15 +112,30 @@ export default function Sidebar({
               exact
             >
               <ListItemButton>
+
                 <ListItemIcon>
                   {location.pathname === item.path ? item.icon1 : item.icon2}
                 </ListItemIcon>
+
                 <ListItemText
                   primary={item.title}
                   sx={{
                     color: location.pathname === item.path ? '#FFF' : '#A3AED0',
                   }}
                 />
+
+
+                <Typography
+                  sx={{
+                    background: location.pathname === item.path ? 'rgba(0, 0, 0, 0)' : '#A3AED0',
+                    color: location.pathname === item.path ? 'rgba(0, 0, 0, 0)' : '#FFF'
+                  }}
+                  className="mr-4 px-2"
+                  style={{ borderRadius: '7px' }}
+                >
+                  {item.total}
+                </Typography>
+
               </ListItemButton>
             </ListItem>
             <Box className="m-2" />
@@ -152,6 +172,8 @@ export default function Sidebar({
                     <ListItemIcon>
                       {location.pathname === item.path ? item.icon1 : item.icon2}
                     </ListItemIcon>
+
+
                     <ListItemText
                       primary={item.title}
                       sx={{
@@ -160,37 +182,40 @@ export default function Sidebar({
                     />
                   </ListItemButton>
                 </ListItem>
+                {/* </Badge> */}
                 <Box className="m-2" />
               </Box>
             ))}
           </List>
         </Collapse>
         <Box className="m-2" />
-        {secondaryMenu.map((item) => (
-          <Box key={item.path}>
-            <ListItem
-              disablePadding
-              to={item.path}
-              component={MyNavLink}
-              activeClassName="Mui-selected"
-              exact
-            >
-              <ListItemButton>
-                <ListItemIcon>
-                  {location.pathname === item.path ? item.icon1 : item.icon2}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.title}
-                  sx={{
-                    color: location.pathname === item.path ? '#FFF' : '#A3AED0',
-                  }}
-                />
-              </ListItemButton>
-            </ListItem>
-          </Box>
-        ))}
-      </List>
-    </div>
+        {
+          secondaryMenu.map((item) => (
+            <Box key={item.path}>
+              <ListItem
+                disablePadding
+                to={item.path}
+                component={MyNavLink}
+                activeClassName="Mui-selected"
+                exact
+              >
+                <ListItemButton>
+                  <ListItemIcon>
+                    {location.pathname === item.path ? item.icon1 : item.icon2}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.title}
+                    sx={{
+                      color: location.pathname === item.path ? '#FFF' : '#A3AED0',
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            </Box>
+          ))
+        }
+      </List >
+    </div >
   );
 
   return (
