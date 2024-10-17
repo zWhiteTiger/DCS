@@ -8,8 +8,9 @@ import { HiArchive } from 'react-icons/hi';
 import logo from '/logo/logo.png';
 import { MyNavLink } from '../Pages/Utility/NavLink';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BsGear, BsGearFill } from "react-icons/bs";
+import { httpClient } from '../Pages/Utility/HttpClient';
 
 
 type Props = {
@@ -19,6 +20,11 @@ type Props = {
   handleDrawerTransitionEnd: () => void;
   handleDrawerClose: () => void;
 };
+
+// Define the document interface
+interface Document {
+  isStatus: 'express' | 'standard'; // Define allowed status values
+}
 
 export default function Sidebar({
   window,
@@ -30,6 +36,7 @@ export default function Sidebar({
   const container = window !== undefined ? () => window().document.body : undefined;
   const location = useLocation();
   const [openDocs, setOpenDocs] = useState(false);
+  const [totalDocuments, setTotalDocuments] = useState(0); // State for total documents
 
   const handleDocsClick = () => {
     setOpenDocs(!openDocs);
@@ -44,6 +51,39 @@ export default function Sidebar({
 
   const userRole = "admin"; // Replace this with your actual user role retrieval logic
 
+
+  const POLLING_INTERVAL = 5000; // 5 seconds
+
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      try {
+        const response = await httpClient.get<Document[]>('/doc/');
+        const documents = response.data;
+
+        // Filter documents where status is either 'express' or 'standard'
+        const filteredDocuments = documents.filter(
+          (doc: Document) => doc.isStatus === 'express' || doc.isStatus === 'standard'
+        );
+
+        // Set the total count of filtered documents
+        setTotalDocuments(filteredDocuments.length);
+      } catch (error) {
+        console.error('Error fetching documents:', error);
+      }
+    };
+
+    // Initial fetch when component mounts
+    fetchDocuments();
+
+    // Poll the server every few seconds
+    const intervalId = setInterval(() => {
+      fetchDocuments();
+    }, POLLING_INTERVAL);
+
+    // Cleanup: Clear the interval when the component is unmounted
+    return () => clearInterval(intervalId);
+  }, []);
+
   const mainMenuItems = [
     {
       path: '/',
@@ -56,14 +96,13 @@ export default function Sidebar({
       icon1: <PiCompassFill size={'1.5em'} className='text-isActive' />, // is active
       icon2: <LuCompass size={'1.5em'} className='text-IconColor' />, // none active
       title: 'สำรวจ',
-      total: 15,
+      total: totalDocuments > 0 ? totalDocuments : undefined,
     },
     {
       path: '/archive',
       icon1: <HiArchive size={'1.5em'} className='text-isActive' />, // is active
       icon2: <LuArchive size={'1.5em'} className='text-IconColor' />, // none active
       title: 'คลังเอกสาร',
-      total: 1,
     },
   ];
 

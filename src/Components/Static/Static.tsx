@@ -1,7 +1,7 @@
 import { Card, CardContent, Grid, Stack, Typography, useMediaQuery } from '@mui/material';
 import { Statistic, StatisticProps } from 'antd';
 import { BiSolidUpArrow, BiSolidDownArrow } from 'react-icons/bi';
-import { LuFile, LuFileDown, LuFileSymlink, LuFileSpreadsheet } from 'react-icons/lu';
+import { TbClockHour2Filled } from "react-icons/tb";
 import CountUp from 'react-countup';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -12,6 +12,7 @@ import { IoRemoveOutline } from 'react-icons/io5';
 
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
+import { BsFileEarmarkFill, BsFillFileEarmarkCheckFill, BsFillLightningChargeFill } from 'react-icons/bs';
 
 dayjs.extend(isBetween);
 
@@ -20,7 +21,7 @@ type Props = {}
 interface Document {
     created_at: string; // Added created_at field
     isProgress: 'complete' | 'pending';
-    isStatus: 'unread' | 'draft' | 'express' | 'read' | 'reject';
+    isStatus: 'standard' | 'draft' | 'express' | 'reject';
     public: boolean;
 }
 
@@ -65,8 +66,8 @@ export default function Static({ }: Props) {
         const previousMonthStart = dayjs().subtract(1, 'month').startOf('month');
         const previousMonthEnd = dayjs().subtract(1, 'month').endOf('month');
 
-        let completeCount = 0, pendingCount = 0, unreadCount = 0, totalCount = 0;
-        let prevCompleteCount = 0, prevPendingCount = 0, prevUnreadCount = 0, prevTotalCount = 0;
+        let completeCount = 0, pendingCount = 0, ExpressCount = 0, totalCount = 0;
+        let prevCompleteCount = 0, prevPendingCount = 0, prevExpressCount = 0, prevTotalCount = 0;
 
         docs.forEach(doc => {
             const createdAt = dayjs(doc.created_at);
@@ -75,7 +76,7 @@ export default function Static({ }: Props) {
             if (createdAt.isSame(currentMonthStart, 'month')) {
                 if (doc.isProgress === 'complete' && doc.isStatus !== 'draft') completeCount++;
                 if (doc.isProgress === 'pending' && doc.isStatus !== 'draft') pendingCount++;
-                if (doc.isStatus === 'unread') unreadCount++;
+                if (doc.isStatus === 'express') ExpressCount++;
                 totalCount++;
             }
 
@@ -83,14 +84,14 @@ export default function Static({ }: Props) {
             if (createdAt.isBetween(previousMonthStart, previousMonthEnd, null, '[]') && doc.isStatus !== 'draft') {
                 if (doc.isProgress === 'complete') prevCompleteCount++;
                 if (doc.isProgress === 'pending') prevPendingCount++;
-                if (doc.isStatus === 'unread') prevUnreadCount++;
+                if (doc.isStatus === 'express') prevExpressCount++;
                 prevTotalCount++;
             }
         });
 
         return {
-            current: { completeCount, pendingCount, unreadCount, totalCount },
-            previous: { completeCount: prevCompleteCount, pendingCount: prevPendingCount, unreadCount: prevUnreadCount, totalCount: prevTotalCount }
+            current: { completeCount, pendingCount, ExpressCount, totalCount },
+            previous: { completeCount: prevCompleteCount, pendingCount: prevPendingCount, ExpressCount: prevExpressCount, totalCount: prevTotalCount }
         };
     };
 
@@ -107,28 +108,28 @@ export default function Static({ }: Props) {
             current: current.completeCount,
             previous: previous.completeCount,
             percentageChange: calculatePercentageChange(current.completeCount, previous.completeCount),
-            icon: <LuFile style={{ color: '#05CD99', marginRight: '0.5rem' }} />
+            icon: <BsFillFileEarmarkCheckFill style={{ color: '#05CD99', marginRight: '0.5rem' }} />
         },
         {
             title: 'รอดำเนินการ',
             current: current.pendingCount,
             previous: previous.pendingCount,
             percentageChange: calculatePercentageChange(current.pendingCount, previous.pendingCount),
-            icon: <LuFileDown style={{ color: '#5BBCFF', marginRight: '0.5rem' }} />
+            icon: <TbClockHour2Filled style={{ color: '#5BBCFF', marginRight: '0.5rem' }} />
         },
         {
-            title: 'ยังไม่อ่าน',
-            current: current.unreadCount,
-            previous: previous.unreadCount,
-            percentageChange: calculatePercentageChange(current.unreadCount, previous.unreadCount),
-            icon: <LuFileSymlink style={{ color: '#DD5746', marginRight: '0.5rem' }} />
+            title: 'เอกสารด่วน',
+            current: current.ExpressCount,
+            previous: previous.ExpressCount,
+            percentageChange: calculatePercentageChange(current.ExpressCount, previous.ExpressCount),
+            icon: <BsFillLightningChargeFill style={{ color: '#DD5746', marginRight: '0.5rem' }} />
         },
         {
             title: 'เอกสารทั้งหมด',
             current: current.totalCount,
             previous: previous.totalCount,
             percentageChange: calculatePercentageChange(current.totalCount, previous.totalCount),
-            icon: <LuFileSpreadsheet style={{ color: '#B3C8CF', marginRight: '0.5rem' }} />
+            icon: <BsFileEarmarkFill style={{ color: '#B3C8CF', marginRight: '0.5rem' }} />
         },
     ];
 

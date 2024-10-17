@@ -55,7 +55,7 @@ const PreviewDocs = ({ docsPath, docId }: PDFModalProps) => {
 
     return (
         <>
-            <Tooltip title={<span style={tooltipStyle}>แก้ไขไฟล์</span>}>
+            <Tooltip title={<span style={tooltipStyle}>เรียกดูไฟล์</span>}>
                 <Button
                     type="primary"
                     icon={<MdFileOpen />}
@@ -70,7 +70,7 @@ const PreviewDocs = ({ docsPath, docId }: PDFModalProps) => {
                     }}
                     onClick={showModal}
                 >
-                    แก้ไข
+                    เรียกดู
                 </Button>
             </Tooltip>
 

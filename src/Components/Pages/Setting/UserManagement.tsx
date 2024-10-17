@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Pwr from './pwr';
 import { MdOutlinePassword } from 'react-icons/md';
-import { CiEdit } from "react-icons/ci";
 import { AiOutlineDelete } from "react-icons/ai";
 import NoMoreContent from '../Utility/NoMoreContent';
+import UserEditor from './UserEditor';
 
 type User = {
   _id: string;
@@ -243,12 +243,13 @@ export default function UserManagement({ }: Props) {
                         alignItems="center"
                         height="100%"
                       >
-                        <Button style={{ background: '#4318FF', color: '#FFF' }} size="large">
+                        {/* <Button style={{ background: '#4318FF', color: '#FFF' }} size="large">
                           <CiEdit />
                           แก้ไข
-                        </Button>
+                        </Button> */}
+                        <UserEditor />
                         <Box className="mx-2" />
-                        <Button style={{ background: '#f06969', color: '#FFF' }} size="large">
+                        <Button style={{ background: '#FE3636', color: '#FFF' }} size="large">
                           <AiOutlineDelete />
                           ลบ
                         </Button>

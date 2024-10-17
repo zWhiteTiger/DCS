@@ -4,6 +4,9 @@ import { Steps, Button, Form, Select, FormProps, Modal } from 'antd';
 import NoMoreContent from '../Utility/NoMoreContent';
 import PDFServices from './Services/PDFServices';
 import Uploader from './Services/Uploader';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../Store/Store';
+import { httpClient } from '../Utility/HttpClient';
 
 type publicType = {
   isStatus: string;
@@ -13,6 +16,10 @@ const CreateDocs: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [fileUrl, setFileUrl] = useState<string>('');
   const docIdRef = useRef<string | null>(null)
+
+  const formRef = useRef<any>(null); // Create a reference for the form
+
+  const documentId = useSelector((state: RootState) => state.docsReducer.documentId);
 
   const StyledCard = styled(Card)(({ }) => ({
     borderRadius: '10px',
@@ -32,66 +39,34 @@ const CreateDocs: React.FC = () => {
   };
 
   const onFinish: FormProps<publicType>['onFinish'] = async (values) => {
-    // Add the public field to values
     const dataToSend = {
       ...values,
       public: true, // Set public to true by default
     };
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_URL}/doc/${docIdRef.current}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dataToSend), // Send data with the public field included
-      });
 
-      const data = await response.json();
-      console.log('API Response:', data); // Log response data for debugging
-
-      if (response.status === 201) {
-        Modal.success({
-          title: 'สร้างบัญชีใหม่เสร็จสิ้น',
-          content: 'สร้างบัญชีใหม่เสร็จสิ้น เข้าสู่ระบบเพื่อดำเนินการต่อ',
-          okText: 'เข้าสู่ระบบ',
-          okButtonProps: {
-            style: { color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }
-          },
-          // onOk: () => navigate('/create'), // Redirect to login page on success
-        });
-      } else {
-        if (data.errorCode === 'EMAIL_EXISTS') {
-          Modal.error({
-            title: 'ผู้ใช้นี้ถูกใช้งานไปแล้ว',
-            content: 'อีเมลนี้ถูกใช้ไปแล้ว กรุณาใช้อีเมลอื่น',
-            okText: 'ลองใหม่อีกครั้ง',
-            okButtonProps: {
-              style: { color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }
-            }
-          });
-        } else {
-          Modal.error({
-            title: 'ลงทะเบียนไม่สำเร็จ',
-            content: 'ชื่อผู้ใช้นี้ถูกใช้งานไปแล้ว',
-            okText: 'ลองใหม่อีกครั้ง',
-            okButtonProps: {
-              style: { color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }
-            }
-          });
+      const response = await httpClient.patch(`/doc/${documentId}`, dataToSend);
+      Modal.success({
+        title: 'นำส่งเอกสารเสร็จสิ้น',
+        content: 'ระบบได้ทำการนำส่งเอกสารไปยังผู้ลงนามแล้ว',
+        okText: 'ตกลง',
+        okButtonProps: {
+          style: { color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }
         }
-      }
+      });
+      return response.data
     } catch (error) {
-      console.error('Error:', error);
       Modal.error({
-        title: 'ลงทะเบียนไม่สำเร็จ',
-        content: 'เกิดข้อผิดพลาดที่ไม่คาดคิด',
+        title: 'ข้อมูลไม่ครบ',
+        content: 'โปรดกรอกข้อมูลให้ครบถ้วนและตรวจสอบรหัสผ่านให้ตรงกัน',
         okText: 'ลองใหม่อีกครั้ง',
         okButtonProps: {
           style: { color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }
         }
       });
     }
+
   };
 
   const onFinishFailed: FormProps<publicType>['onFinishFailed'] = (errorInfo) => {
@@ -138,7 +113,7 @@ const CreateDocs: React.FC = () => {
           <Typography variant="h4">ขั้นตอนที่ 2 แก้ไขเอกสาร</Typography>
           <Typography>แก้ไขเอกสารหรือเพิ่มผู้ลงนาม</Typography>
           <StyledCard>
-            {fileUrl ? <PDFServices fileUrl={fileUrl} /> :
+            {fileUrl ? <PDFServices fileUrl={fileUrl} docId={documentId} /> :
               <Box className='flex justify-center' style={{ backgroundColor: '#ec4649', color: '#FFFFFF', height: '100px' }}>
                 <Typography className='mt-9'>กรุณาอัพโหลดไฟล์ก่อน</Typography>
               </Box>
@@ -159,7 +134,8 @@ const CreateDocs: React.FC = () => {
             <Typography variant="h5">รายชื่อผู้ลงนาม</Typography>
 
             <Form
-              name="basic"
+              ref={formRef} // Add this line
+              name="patchForm"
               labelCol={{ span: 8 }}
               wrapperCol={{ span: 16 }}
               style={{ maxWidth: 600 }}
@@ -170,17 +146,16 @@ const CreateDocs: React.FC = () => {
             >
               <Form.Item<publicType>
                 name="isStatus"
-                rules={[{ required: true, message: 'โปรดเลือกเพศของคุณ' }]}
+                rules={[{ required: true, message: 'โปรดเลือกประเภทของเอกสาร' }]}
               >
                 <Select
                   size='large'
                   placeholder="ประเภทหนังสือ"
-                  defaultValue={'unread'}
                   style={{ width: '100%', fontFamily: 'Kanit' }}
                   onChange={handleChange}
                   options={[
-                    { value: 'unread', label: 'หนังสือทั่วไป' },
-                    { value: 'express', label: 'หนังสือด่วน' },
+                    { value: 'standard', label: 'Standard' },
+                    { value: 'express', label: 'Express' },
                   ]}
                 />
               </Form.Item>
@@ -216,7 +191,11 @@ const CreateDocs: React.FC = () => {
                   </Button>
                 )}
                 {currentStep === steps.length - 1 && (
-                  <Button size='large' type="primary" htmlType="submit" style={{ color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }}>
+                  <Button size='large' type="primary"
+                    onClick={() => {
+                      formRef.current.submit();
+                    }}
+                    style={{ color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }}>
                     เสร็จสิ้น
                   </Button>
                 )}

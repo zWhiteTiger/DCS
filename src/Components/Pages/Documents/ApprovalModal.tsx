@@ -7,11 +7,11 @@ import { httpClient } from '../Utility/HttpClient';
 import { useSelector } from 'react-redux';
 import { authSelector } from '../../../Store/Slices/authSlice';
 
-// Define type for approval card
 interface ApprovalCard {
     _id: string;
     email: string;
-    isApprove: string;  // "unApproved" or "Approved"
+    isApproved: "unApproved" | "Approved" | "Reject"; // "unApproved" or "Approved"
+    priority: number; // Assume priority is also part of the approval card
 }
 
 type PDFModalProps = {
@@ -25,17 +25,22 @@ const ApprovalModal = ({ docsPath, docId }: PDFModalProps) => {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
     const [approvalCards, setApprovalCards] = useState<ApprovalCard[]>([]);
-    const [disableButtons, setDisableButtons] = useState(false);
-
     const profileReducer = useSelector(authSelector);
+    const [_maxPriority, setMaxPriority] = useState<number | null>(null);
+    const [_currentPriority, setCurrentPriority] = useState<number>(0); // เพิ่ม currentPriority ที่ใช้จัดการค่า
+    const approvedCount = approvalCards.filter((card: ApprovalCard) => card.isApproved === 'Approved').length;
 
-    // Fetch approval cards from the server
+
     useEffect(() => {
         const fetchApprovalCards = async () => {
             try {
                 const response = await httpClient.get(`/approval/${docId}`);
                 if (response.status === 200) {
                     setApprovalCards(response.data);
+                    const maxPrio = Math.max(...response.data.map((card: ApprovalCard) => card.priority));
+                    setMaxPriority(maxPrio);
+
+                    setCurrentPriority(response.data[0]?.currentPriority || 0);
                 }
             } catch (error) {
                 console.error('Error fetching approval cards:', error);
@@ -44,19 +49,14 @@ const ApprovalModal = ({ docsPath, docId }: PDFModalProps) => {
         fetchApprovalCards();
     }, [docId]);
 
-    // Check if buttons should be disabled
-    // Check if buttons should be disabled
     useEffect(() => {
-        const userCards = approvalCards.filter(card => card.email === profileReducer.result?.email);
-        const hasUnapprovedCards = userCards.some(card => card.isApprove === 'unApprove');
+        const userCards = approvalCards.filter((card: ApprovalCard) => card.email === profileReducer.result?.email);
+        const hasUnapprovedCards = userCards.some((card: ApprovalCard) => card.isApproved === 'unApproved');
         const noUserCards = userCards.length === 0;
-        const hasApprovedOrRejected = userCards.some(card => card.isApprove === 'Approved' || card.isApprove === 'Reject');
+        const hasApprovedOrRejected = userCards.some((card: ApprovalCard) => card.isApproved === 'Approved' || card.isApproved === 'Reject');
 
-        // Disable if the user has no cards or has unapproved/approved/rejected status
         if (noUserCards || hasUnapprovedCards || hasApprovedOrRejected) {
-            setDisableButtons(true);
         } else {
-            setDisableButtons(false);
         }
     }, [approvalCards, profileReducer.result?.email]);
 
@@ -73,68 +73,75 @@ const ApprovalModal = ({ docsPath, docId }: PDFModalProps) => {
         setIsConfirmModalOpen(true);
     };
 
-    const handleConfirmOk = async () => {
+    const updateDocumentStatus = async (isApproved: string) => {
         try {
             const cardIdsToUpdate = approvalCards
-                .filter(card => card.email === profileReducer.result?.email)
-                .map(card => card._id);
+                .filter((card: ApprovalCard) => card.email === profileReducer.result?.email)
+                .map((card: ApprovalCard) => card._id);
 
             if (cardIdsToUpdate.length === 0) {
                 console.warn('No approval cards found for the user:', profileReducer.result?.email);
                 return;
             }
 
-            const patchPromises = cardIdsToUpdate.map(async id => {
-                console.log(`Updating approval card ID: ${id}`);
+            // const index = approvalCards.findIndex((approve) => approve.id === action.payload.id);
+            // if (index !== -1) {
+            //     state.users[index] = action.payload;
+            // }
+
+            // Update the approval status
+            const patchPromises = cardIdsToUpdate.map(async (id: string) => {
                 const response = await httpClient.patch(`/approval/${id}`, {
-                    isApproved: 'Approved',
+                    isApproved: isApproved,
                 });
-                console.log('Patch response:', response);
                 return response;
             });
 
             await Promise.all(patchPromises);
 
-            setIsConfirmModalOpen(false);
-            setDisableButtons(true); // Disable buttons after confirming
+            // ดึงค่า currentPriority ปัจจุบันจากฐานข้อมูล
+            const currentPriorityResponse = await httpClient.get(`/doc/${docsPath}`);
+            const currentPriorityFromDb = currentPriorityResponse.data.currentPriority;
+
+            // เพิ่มค่า currentPriority ขึ้น 1
+            const updatedPriority = currentPriorityFromDb + 1;
+
+            // อัปเดตค่า currentPriority ใหม่
+            await httpClient.patch(`/doc/${docId}`, {
+                currentPriority: updatedPriority,
+            });
+
+            // ตรวจสอบว่าผู้ใช้คนนี้เป็นคนสุดท้ายหรือไม่
+            // const allApproved = approvalCards.every((card: ApprovalCard) => card.isApproved === 'Approved' || card.isApproved === 'Reject');
+            const maxPriorityResponse = await httpClient.get(`/approval/${docId}`);
+            const maxPriority = Math.max(...maxPriorityResponse.data.map((card: ApprovalCard) => card.priority));
+            // ตรวจสอบว่าจำนวนผู้ลงนามที่ Approved เท่ากับค่าสูงสุดหรือไม่
+            if (approvedCount >= maxPriority) {
+                await httpClient.patch(`/doc/${docId}`, {
+                    isProgress: 'complete',
+                    isStatus: 'complete',
+                    currentPriority: 0, // อัปเดตค่า currentPriority เป็น 0 เมื่อครบทุกคน
+                });
+            }
+
             console.log('Data updated successfully');
         } catch (error) {
             console.error('Error updating data:', error);
         }
+    };
+
+    const handleConfirmOk = () => {
+        updateDocumentStatus('Approved');
+        setIsConfirmModalOpen(false);
     };
 
     const handleReject = () => {
         setIsRejectModalOpen(true);
     };
 
-    const handleRejectOk = async () => {
-        try {
-            const cardIdsToUpdate = approvalCards
-                .filter(card => card.email === profileReducer.result?.email)
-                .map(card => card._id);
-
-            if (cardIdsToUpdate.length === 0) {
-                console.warn('No approval cards found for the user:', profileReducer.result?.email);
-                return;
-            }
-
-            const patchPromises = cardIdsToUpdate.map(async id => {
-                console.log(`Updating approval card ID: ${id}`);
-                const response = await httpClient.patch(`/approval/${id}`, {
-                    isApproved: 'Reject',
-                });
-                console.log('Patch response:', response);
-                return response;
-            });
-
-            await Promise.all(patchPromises);
-
-            setIsRejectModalOpen(false);
-            setDisableButtons(true); // Disable buttons after rejecting
-            console.log('Data updated successfully');
-        } catch (error) {
-            console.error('Error updating data:', error);
-        }
+    const handleRejectOk = () => {
+        updateDocumentStatus('Reject');
+        setIsRejectModalOpen(false);
     };
 
     const tooltipStyle = { fontFamily: 'Kanit' };
@@ -202,7 +209,7 @@ const ApprovalModal = ({ docsPath, docId }: PDFModalProps) => {
                                     height="100%"
                                 >
                                     <Typography>
-                                        ลงนามแล้ว 0/1
+                                        ลงนามแล้ว {approvalCards.filter(card => card.isApproved === 'Approved').length}/{approvalCards.length}
                                     </Typography>
                                 </Box>
                             </Card>
@@ -212,7 +219,6 @@ const ApprovalModal = ({ docsPath, docId }: PDFModalProps) => {
                                     size="large"
                                     style={{ background: "#3fcf38", color: "#FFFFFF", width: "125px" }}
                                     onClick={handleConfirm}
-                                    disabled={disableButtons}  // Disable based on conditions
                                 >
                                     ลงนาม
                                 </Button>
@@ -220,16 +226,21 @@ const ApprovalModal = ({ docsPath, docId }: PDFModalProps) => {
                                     size="large"
                                     style={{ background: "#cf3b38", color: "#FFFFFF", width: "125px" }}
                                     onClick={handleReject}
-                                    disabled={disableButtons}  // Disable based on conditions
                                 >
                                     ปฏิเสธ
                                 </Button>
                             </Box>
 
                             <Divider variant="dashed">รายชื่อผู้ลงนาม</Divider>
-                            <Typography>
-                                ชื่อ-นามสกุล
-                            </Typography>
+                            <Box>
+                                {approvalCards
+                                    .sort((a, b) => a.priority - b.priority) // เรียงตามลำดับ priority
+                                    .map((card, index) => (
+                                        <Typography key={card._id} style={{ marginBottom: '8px' }}>
+                                            {index + 1}. {card.email} - {card.isApproved === 'Approved' ? 'ลงนามแล้ว' : 'ยังไม่ลงนาม'}
+                                        </Typography>
+                                    ))}
+                            </Box>
                         </Box>
                     </Grid>
                 </Grid>

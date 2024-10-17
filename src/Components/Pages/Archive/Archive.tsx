@@ -37,7 +37,6 @@ const fetchDocuments = async () => {
   return response.data.filter((doc: Document) => doc.public === true && doc.isProgress === 'complete'); // Filter for public and complete documents
 };
 
-
 export default function Archive() {
   const profileReducer = useSelector(authSelector);
   const [imageSrc, _setImageSrc] = useState(profileReducer.result?.picture
@@ -97,23 +96,20 @@ export default function Archive() {
                         // Fetch user data for the document's user_id
                         let cardBackgroundColor;
                         switch (document.isStatus) {
-                          case 'read':
-                            cardBackgroundColor = '#F1FBEF'; // Light green
-                            break;
-                          case 'unread':
+                          case 'standard':
                             cardBackgroundColor = '#EFF4FB'; // Light blue
                             break;
                           case 'reject':
-                            cardBackgroundColor = '#FBF0EF'; // Light red
+                            cardBackgroundColor = '#EFF4FB'; // Light red
                             break;
                           case 'draft':
-                            cardBackgroundColor = '#F3F3F3'; // Light red
+                            cardBackgroundColor = '#EFF4FB'; // Light red
                             break;
                           case 'express':
-                            cardBackgroundColor = '#FFFAEF'; // Light red
+                            cardBackgroundColor = '#EFF4FB'; // Light red
                             break;
                           default:
-                            cardBackgroundColor = 'inherit';
+                            cardBackgroundColor = '#EFF4FB';
                         }
 
                         return (
@@ -152,20 +148,6 @@ export default function Archive() {
                                 <Grid item xs={1} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                   <Typography className="font-bold" style={{ marginBottom: '4px' }}>
                                     สถานะ
-                                  </Typography>
-                                  <Typography style={{
-                                    backgroundColor:
-                                      document.isStatus === 'express' ? '#FFE6B6' : document.isStatus === 'draft' ? '#B6B6B6' : document.isStatus === 'read' ? '#AFFFEA' : document.isStatus === 'unread' ? '#CFC1FF' : document.isStatus === 'reject' ? '#FFC1C1' : '#6A50A7',
-                                    color: document.isStatus === 'express' ? '#DA9000' : document.isStatus === 'draft' ? '#FFFFFF' : document.isStatus === 'read' ? '#05CD99' : document.isStatus === 'unread' ? '#4318FF' : document.isStatus === 'reject' ? '#960000' : 'white',
-                                    padding: '1px 5px',
-                                    borderRadius: '4px',
-                                    fontSize: '12px',
-                                    height: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                  }}>
-                                    {document.isStatus}
                                   </Typography>
                                   <Typography className="mt-1" style={{
                                     backgroundColor: '#AFFFEA',

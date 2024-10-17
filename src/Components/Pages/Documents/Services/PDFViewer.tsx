@@ -256,7 +256,7 @@ const PDFViewer: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
                   shape.isApproved === 'Approved' ? (
                     <img
                       key={shape.id}
-                      src={`${import.meta.env.VITE_URL}/signature/1728658686877-711807710.png`} // ใช้เส้นทางของลายเซ็นเมื่ออนุมัติแล้ว
+                      src={`${import.meta.env.VITE_URL}/signature/1728983339668-700468440.png`} // ใช้เส้นทางของลายเซ็นเมื่ออนุมัติแล้ว
                       alt="Signature"
                       style={{
                         position: 'absolute',
@@ -277,7 +277,7 @@ const PDFViewer: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
                         height: `${shape.height * scale}px`, // Scale the height
                         border: '2px solid rgba(0, 0, 0, 0.8)', // To make the card visible
                         borderRadius: '7px',
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.3)',
                         zIndex: 10,
                         transform: `scale(${scale})`, // Apply scaling transformation
                         transformOrigin: 'top left',  // Set the scaling origin to the top left corner
@@ -286,12 +286,17 @@ const PDFViewer: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
                       <Box
                         display="flex"
                         justifyContent="center"
+                        flexDirection={"column"}
                         alignItems="center"
                         height="100%"
                       >
-                        <Typography>
+                        <Typography style={{ color: '#ff1f1f', fontSize: "20px", fontWeight: 'bold' }}>
+                          Rejected
+                        </Typography>
+                        <Typography className="mt-2">
                           {shape.firstName} {shape.lastName}
                         </Typography>
+
                       </Box>
                     </div>
                   )

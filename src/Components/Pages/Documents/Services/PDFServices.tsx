@@ -6,9 +6,7 @@ import { AutoComplete, Button, Col, Input, Row } from 'antd'
 import { FaPenNib } from 'react-icons/fa'
 import Draggable from 'react-draggable'
 import { ImCross } from 'react-icons/im'
-import { useSelector } from 'react-redux'
 import axios from 'axios'
-import { docSelector } from '../../../../Store/Slices/DocSlice'
 import { httpClient } from '../../Utility/HttpClient'
 
 type PDFServicesProps = {
@@ -65,8 +63,10 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
   const [selectedEmail, setSelectedEmail] = useState('')
   const [autoCompleteValue, setAutoCompleteValue] = useState<string>('')
   const [options, setOptions] = useState<OptionType[]>([])
-  const docReducer = useSelector(docSelector)
   const docPath = fileUrl?.split('/').pop() // จะได้ <filename>.pdf
+  const [loading, setLoading] = useState(false);
+
+  const [initialDocName, setInitialDocName] = useState(''); // Store the initial value to compare
 
   const goToPreviousPage = () => {
     setPageNumber((prevPage) => Math.max(prevPage - 1, 1))
@@ -327,15 +327,18 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
 
   const [docName, setDocName] = useState("");
 
+  // Specify the type of the event parameter correctly
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDocName(e.target.value);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Correctly typing the event parameter
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true); // Start loading
 
     try {
-      const response = await axios.patch(`${import.meta.env.VITE_URL}/doc/${docReducer.result?._id}`, {
+      const response = await axios.patch(`${import.meta.env.VITE_URL}/doc/${docId}`, {
         doc_name: docName,
       });
 
@@ -343,7 +346,14 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
     } catch (error) {
       console.error("Patch error:", error);
     }
+
+    // Set a timeout to reset loading state after 3 seconds
+    setTimeout(() => {
+      setLoading(false); // Stop loading after 3 seconds
+    }, 3000);
   };
+
+  const isButtonDisabled = docName.trim() === '' || docName === initialDocName;
 
   return (
     <Grid container spacing={2}>
@@ -367,14 +377,24 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
 
               <form onSubmit={handleSubmit}>
                 <Input
+                  className='w-full'
                   placeholder='ชื่อเรื่อง'
                   prefix={<FaPenNib />}
                   size='large'
-                  style={{ width: '300px' }}
-                  onChange={handleInputChange}
-                  defaultValue={docReducer.result?.docName}
+                  style={{ width: '400px' }}
+                  onChange={handleInputChange} // This is correct
+                  onFocus={() => setInitialDocName(docName)} // Set initial value on focus
                 />
-                <Button size="large" className="mx-5" htmlType="submit">Submit</Button>
+                <Button
+                  size="large"
+                  className="mx-5"
+                  style={{ color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit', border: 'none' }}
+                  htmlType="submit"
+                  loading={loading}
+                  disabled={isButtonDisabled}
+                >
+                  ยืนยัน
+                </Button>
               </form>
 
               <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -550,6 +570,7 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
             <Box className='my-2'>
               <Button
                 size='large'
+                style={{ color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }}
                 type='primary'
                 onClick={addRectangle} // Trigger the addRectangle function on click
               >

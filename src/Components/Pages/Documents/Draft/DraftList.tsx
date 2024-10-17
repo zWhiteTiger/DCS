@@ -89,14 +89,11 @@ export default function DraftList({ }: Props) {
                         {data?.map((item: any, index: number) => {
                             let data = {
                                 ...item,
-                                status: 'unread'
+                                status: 'standard'
                             };
                             let cardBackgroundColor;
                             switch (data.isStatus) {
-                                case 'read':
-                                    cardBackgroundColor = '#F1FBEF'; // Light green
-                                    break;
-                                case 'unread':
+                                case 'standard':
                                     cardBackgroundColor = '#EFF4FB'; // Light blue
                                     break;
                                 case 'reject':
@@ -151,8 +148,8 @@ export default function DraftList({ }: Props) {
                                                 </Typography>
                                                 <Typography style={{
                                                     backgroundColor:
-                                                        data.isStatus === 'express' ? '#FFE6B6' : data.isStatus === 'draft' ? '#B6B6B6' : data.isStatus === 'read' ? '#AFFFEA' : data.isStatus === 'unread' ? '#CFC1FF' : data.isStatus === 'reject' ? '#FFC1C1' : '#6A50A7',
-                                                    color: data.isStatus === 'express' ? '#DA9000' : data.isStatus === 'draft' ? '#FFFFFF' : data.isStatus === 'read' ? '#05CD99' : data.isStatus === 'unread' ? '#4318FF' : data.isStatus === 'reject' ? '#960000' : 'white',
+                                                        data.isStatus === 'express' ? '#FFE6B6' : data.isStatus === 'draft' ? '#B6B6B6' : data.isStatus === 'standard' ? '#CFC1FF' : data.isStatus === 'reject' ? '#FFC1C1' : '#6A50A7',
+                                                    color: data.isStatus === 'express' ? '#DA9000' : data.isStatus === 'draft' ? '#FFFFFF' : data.isStatus === 'standard' ? '#4318FF' : data.isStatus === 'reject' ? '#960000' : 'white',
                                                     padding: '1px 5px',
                                                     borderRadius: '4px',
                                                     fontSize: '12px',

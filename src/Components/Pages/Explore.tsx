@@ -15,8 +15,10 @@ export interface Document {
   isStatus: string;
   docs_path: string;
   public: boolean;
+  isProgress: string;
   created_at: Date;
   updated_at: Date;
+  user_id: string; // Add this line to reference the user ID
 }
 
 export interface Approval {
@@ -52,15 +54,14 @@ export default function Explore() {
   };
 
   // Fetch documents and approvals
-  // Fetch documents and approvals
   const { data, isLoading, error } = useQuery<{ docs: Document[], approvals: Approval[] }, any>(
     "docsAndApprovals",
     fetchAPI,
     {
       select: (data) => ({
         docs: data.docs
-          .filter(doc => canUserSign(doc, data.approvals, userEmail)) // Ensure it returns both docs and approvals
-          .filter(doc => doc.public && doc.isStatus !== "draft"), // Filter to show only public documents that are not in draft
+          .filter(doc => canUserSign(doc, data.approvals, userEmail) || doc.user_id === profileReducer.result?._id) // Include documents created by the user
+          .filter(doc => doc.public && doc.isStatus !== "draft" && doc.isProgress === "pending"), // Show public documents that are not drafts
         approvals: data.approvals
       })
     }
@@ -147,10 +148,7 @@ export default function Explore() {
                       {data?.docs?.map((doc: Document, index: number) => {
                         let cardBackgroundColor;
                         switch (doc.isStatus) {
-                          case 'read':
-                            cardBackgroundColor = '#F1FBEF';
-                            break;
-                          case 'unread':
+                          case 'standard':
                             cardBackgroundColor = '#EFF4FB';
                             break;
                           case 'reject':
@@ -189,24 +187,49 @@ export default function Explore() {
                                 </Grid>
                                 <Grid item xs={1} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                   <Typography className="font-bold" style={{ marginBottom: '4px' }}>สถานะ</Typography>
-                                  <Typography style={{
-                                    backgroundColor:
-                                      doc.isStatus === 'express' ? '#FFE6B6' : doc.isStatus === 'draft' ? '#B6B6B6' : doc.isStatus === 'read' ? '#AFFFEA' : doc.isStatus === 'unread' ? '#CFC1FF' : doc.isStatus === 'reject' ? '#FFC1C1' : '#6A50A7',
-                                    color:
-                                      doc.isStatus === 'express' ? '#DA9000' : doc.isStatus === 'draft' ? '#FFFFFF' : doc.isStatus === 'read' ? '#05CD99' : doc.isStatus === 'unread' ? '#4318FF' : doc.isStatus === 'reject' ? '#960000' : 'white',
-                                    padding: '1px 5px',
-                                    borderRadius: '4px',
-                                    fontSize: '12px',
-                                    height: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                  }}>
-                                    {doc.isStatus}
-                                  </Typography>
+                                  {doc.user_id === profileReducer.result?._id ? (
+                                    <Typography style={{
+                                      backgroundColor:
+                                        doc.isStatus === 'express' ? '#FFE6B6' : doc.isStatus === 'draft' ? '#B6B6B6' : doc.isStatus === 'standard' ? '#CFC1FF' : doc.isStatus === 'reject' ? '#FFC1C1' : '#6A50A7',
+                                      color:
+                                        doc.isStatus === 'express' ? '#DA9000' : doc.isStatus === 'draft' ? '#FFFFFF' : doc.isStatus === 'standard' ? '#4318FF' : doc.isStatus === 'reject' ? '#960000' : 'white',
+                                      padding: '1px 5px',
+                                      borderRadius: '4px',
+                                      fontSize: '12px',
+                                      height: '100%',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center'
+                                    }}>
+                                      <Box className="flex justify-center" flexDirection="column" style={{ alignItems: 'center' }}>
+                                        <Typography>
+                                          ลงนามแล้ว
+                                        </Typography>
+                                        <Typography>
+                                          0/1
+                                        </Typography>
+                                      </Box>
+                                    </Typography>
+                                  ) : (
+                                    <Typography style={{
+                                      backgroundColor:
+                                        doc.isStatus === 'express' ? '#FFE6B6' : doc.isStatus === 'draft' ? '#B6B6B6' : doc.isStatus === 'standard' ? '#CFC1FF' : doc.isStatus === 'reject' ? '#FFC1C1' : '#6A50A7',
+                                      color:
+                                        doc.isStatus === 'express' ? '#DA9000' : doc.isStatus === 'draft' ? '#FFFFFF' : doc.isStatus === 'standard' ? '#4318FF' : doc.isStatus === 'reject' ? '#960000' : 'white',
+                                      padding: '1px 5px',
+                                      borderRadius: '4px',
+                                      fontSize: '12px',
+                                      height: '100%',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center'
+                                    }}>
+                                      {doc.isStatus}
+                                    </Typography>
+                                  )}
                                 </Grid>
                                 <Grid item xs={2} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
-                                  <ApprovalModal docId={doc._id} docsPath={doc.docs_path} />
+                                  <ApprovalModal docsPath={doc.docs_path} docId={doc._id} />
                                 </Grid>
                               </Grid>
                             </CardContent>

@@ -4,8 +4,9 @@ import { UploadProps } from 'antd/es/upload';
 import Box from '@mui/material/Box';
 import { LuHardDriveUpload } from 'react-icons/lu';
 import { useAppDispatch } from '../../../../Store/Store';
+import { setDocumentId } from '../../../../Store/Slices/DocSlice'; // Import the relevant actions
 import { setPath } from '../../../../Store/Slices/pathSlice';
-import { setDocumentId } from '../../../../Store/Slices/DocSlice';
+
 const { Dragger } = Upload;
 
 type UploaderProps = {
@@ -15,15 +16,15 @@ type UploaderProps = {
 };
 
 const Uploader: React.FC<UploaderProps> = ({ setFileUrl, nextStep, setDocId }) => {
-  const [loading, setLoading] = useState(false);  // เพิ่ม state สำหรับการควบคุมสถานะการอัพโหลด
+  const [loading, setLoading] = useState(false);  // State to control loading status
   const disPatch = useAppDispatch();
 
   const props: UploadProps = {
     name: 'file',
     multiple: false,
-    action: `${import.meta.env.VITE_URL}/doc`, // URL ของ Backend ของคุณ
+    action: `${import.meta.env.VITE_URL}/doc`, // Backend URL
     withCredentials: true,
-    accept: '.pdf,.docx',
+    accept: '.pdf',
     data: (file) => ({
       doc_name: file.name,
     }),
@@ -38,30 +39,36 @@ const Uploader: React.FC<UploaderProps> = ({ setFileUrl, nextStep, setDocId }) =
         message.error('ขนาดไฟล์ต้องน้อยกว่า 50MB');
         return Upload.LIST_IGNORE;
       }
-      setLoading(true); // เริ่มการแสดงผลสถานะการอัพโหลด
+      setLoading(true); // Set loading status
       return true;
     },
     onChange(info) {
       const { status, response } = info.file;
       if (status === 'done') {
         message.success(`อัพโหลด ${info.file.name} เสร็จสิ้น`);
-        setLoading(false);  // อัพโหลดเสร็จสิ้น ปิดสถานะการโหลด
-        if (response?.url) {
+        setLoading(false);  // Turn off loading status
+
+        if (response?.url && response?.docID) {
+          // Update local component state
           setFileUrl(response.url);
+          setDocId.current = response.docID;
+
+          // Dispatch global state updates
           disPatch(setPath(response.url));
-          nextStep();  // ไปยังสเต็ปถัดไป
           disPatch(setDocumentId(response.docID));
-          setDocId.current = response.docID
+
+          // Proceed to the next step
+          nextStep();
         }
       } else if (status === 'error') {
         message.error(`อัพโหลดไฟล์ ${info.file.name} ล้มเหลว`);
-        setLoading(false);  // หากอัพโหลดล้มเหลว ปิดสถานะการโหลด
+        setLoading(false);  // Turn off loading status
       }
     },
   };
 
   return (
-    <Spin spinning={loading} tip="กำลังอัพโหลด...">  {/* เพิ่ม Spin component เพื่อแสดงการโหลด */}
+    <Spin spinning={loading} tip="กำลังอัพโหลด...">
       <Dragger {...props}>
         <Box className="flex justify-center my-5">
           <LuHardDriveUpload style={{ fontSize: '50px', color: 'blue' }} />
