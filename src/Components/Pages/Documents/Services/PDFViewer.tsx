@@ -291,9 +291,9 @@ const PDFViewer: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
                         height="100%"
                       >
                         <Typography style={{ color: '#ff1f1f', fontSize: "20px", fontWeight: 'bold' }}>
-                          Rejected
+                          {shape.isApproved}
                         </Typography>
-                        <Typography className="mt-2">
+                        <Typography>
                           {shape.firstName} {shape.lastName}
                         </Typography>
 

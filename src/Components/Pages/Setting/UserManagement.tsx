@@ -174,17 +174,7 @@ export default function UserManagement({ }: Props) {
                         >
                           รหัสผ่าน
                         </Typography>
-                        <Button
-                          size="large"
-                          type="link"
-                          onClick={openModal}
-                          style={{ color: '#001268' }}
-                        >
-                          <MdOutlinePassword style={{ color: '#001234' }} />
-                          เปลี่ยนรหัสผ่าน
-                        </Button>
-
-                        <Pwr isOpen={isModalOpen} toggleModal={closeModal} />
+                        <Pwr />
                       </Box>
                     </Grid>
                     <Grid item xs={2}>

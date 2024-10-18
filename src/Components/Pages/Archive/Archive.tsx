@@ -8,6 +8,7 @@ import NoMoreContent from '../Utility/NoMoreContent';
 import Loader from '../Loader/Loader';
 import Static from '../../Static/Static';
 import PreviewDocs from '../Documents/PreviewDocs';
+import PDFExporter from '../Documents/Services/PDFExporter';
 
 export interface Document {
   _id: string;
@@ -165,6 +166,8 @@ export default function Archive() {
                                 </Grid>
                                 <Grid item xs={2} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
                                   <PreviewDocs docId={document._id} docsPath={document?.docs_path} />
+                                  <PDFExporter docId={document._id} filename={document?.docs_path} />
+
                                 </Grid>
                               </Grid>
                             </CardContent>
