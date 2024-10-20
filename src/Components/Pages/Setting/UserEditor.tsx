@@ -1,34 +1,76 @@
 import React, { useState } from "react";
-import { Modal, Button, Input, Select, Divider } from "antd";
+import { Modal, Button, Input, Select, Divider, message } from "antd";
 import { CiEdit } from "react-icons/ci";
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
+import axios from "axios";
 
-const { Option } = Select;
+interface UserEditorProps {
+    userId: string;
+}
 
-const UserEditor = () => {
+const UserEditor: React.FC<UserEditorProps> = ({ userId }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [input1, setInput1] = useState("");
-    const [input2, setInput2] = useState("");
-    const [selectedValue, setSelectedValue] = useState("");
-
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
     const [selectedPosition, setSelectedPosition] = useState("");
     const [selectedBranch, setSelectedBranch] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
 
     const showModal = () => {
         setIsModalVisible(true);
-    };
-
-    const handleOk = () => {
-        console.log("Input1:", input1, "Input2:", input2, "Selected:", selectedValue);
-        setIsModalVisible(false);
     };
 
     const handleCancel = () => {
         setIsModalVisible(false);
     };
 
-    const handleChange = (value: string) => {
-        console.log(`Selected: ${value}`);
+    const handleUpdateInfo = () => {
+        // Prepare data for user info update
+        const updateData = {
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            role: selectedPosition,
+            department: selectedBranch
+        };
+
+        // Make a PATCH request to update user info
+        axios.patch(`/user/${userId}`, updateData)
+            .then(() => {
+                message.success("User information updated successfully");
+                setIsModalVisible(false);
+            })
+            .catch((error) => {
+                message.error("Failed to update user information");
+            });
+    };
+
+    const handleUpdatePassword = () => {
+        // Check if passwords match
+        if (password !== confirmPassword) {
+            message.error("Passwords do not match");
+            return;
+        }
+
+        // Make a PATCH request to update password
+        axios.patch(`/user/p/${userId}`, { password })
+            .then(() => {
+                message.success("Password updated successfully");
+                setPassword("");
+                setConfirmPassword("");
+                setIsModalVisible(false);
+            })
+            .catch((error) => {
+                message.error("Failed to update password");
+            });
+    };
+
+    const handleChangePosition = (value: string) => {
+        setSelectedPosition(value);
+    };
+
+    const handleChangeBranch = (value: string) => {
+        setSelectedBranch(value);
     };
 
     return (
@@ -39,10 +81,8 @@ const UserEditor = () => {
             <Modal
                 title="แก้ไขข้อมูล ของ ...."
                 visible={isModalVisible}
-                onOk={handleOk}
                 onCancel={handleCancel}
-                okText="บันทึก"
-                cancelText="ยกเลิก"
+                footer={null}
             >
                 <Box className="my-5" />
                 <Divider orientation="left" plain>
@@ -50,63 +90,90 @@ const UserEditor = () => {
                 </Divider>
                 <div style={{ display: "flex", gap: "10px" }}>
                     <Input
-                        size='large'
+                        size="large"
                         placeholder="ชื่อ"
-                        value={input1}
-                        onChange={(e) => setInput1(e.target.value)}
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
                         style={{ marginBottom: 10 }}
                     />
                     <Input
-                        size='large'
+                        size="large"
                         placeholder="นามสกุล"
-                        value={input2}
-                        onChange={(e) => setInput2(e.target.value)}
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
                         style={{ marginBottom: 10 }}
                     />
                 </div>
                 <Divider orientation="left" plain>
-                    แก้ไขข้อตำแหน่งและสาขา
+                    แก้ไขตำแหน่งและสาขา
                 </Divider>
                 <div style={{ display: "flex", gap: "10px" }}>
                     <Select
-                        size='large'
+                        size="large"
                         placeholder="ตำแหน่ง"
-                        style={{ width: '100%', fontFamily: 'Kanit' }}
-                        onChange={handleChange}
+                        value={selectedPosition}
+                        onChange={handleChangePosition}
+                        style={{ width: "100%", fontFamily: "Kanit" }}
                         options={[
-                            { value: 'standard', label: 'Standard' },
-                            { value: 'express', label: 'Express' },
+                            { value: "student", label: "นักศึกษา" },
+                            { value: "counselor", label: "ที่ปรึกษาสโมสรนักศึกษา" },
+                            { value: "head_of_student_affairs", label: "หัวหน้าฝ่ายกิจการนักศึกษา" },
+                            { value: "vice_dean", label: "รองคณบดี" },
+                            { value: "dean", label: "คณบดี" }
                         ]}
                     />
                     <Select
-                        size='large'
+                        size="large"
                         placeholder="สาขาวิชา"
-                        style={{ width: '100%', fontFamily: 'Kanit' }}
-                        onChange={handleChange}
+                        value={selectedBranch}
+                        onChange={handleChangeBranch}
+                        style={{ width: "100%", fontFamily: "Kanit" }}
                         options={[
-                            { value: 'standard', label: 'Standard' },
-                            { value: 'express', label: 'Express' },
+                            { value: "CE", label: "วิศวกรรมคอมพิวเตอร์" },
+                            { value: "LE", label: "วิศวกรรมโลจิสติกส์และเทคโนโลยีขนส่ง" },
+                            { value: "IEA", label: "วิศวกรรมอุตสาหการ" },
+                            { value: "ME", label: "วิศวกรรมเครื่องกล" },
+                            { value: "IDA", label: "นวัตกรรมการออกแบบและสถาปัตยกรรม" },
+                            { value: "AME", label: "วิศวกรรมเครื่องจักรกลเกษตร" }
                         ]}
                     />
                 </div>
+                <Box className="my-5 flex justify-end">
+                    <Button
+                        style={{ background: "#4318FF", color: "#FFF", fontFamily: "Kanit" }}
+                        size="large"
+                        onClick={handleUpdateInfo}
+                    >
+                        เปลี่ยนข้อมูล
+                    </Button>
+                </Box>
+
                 <Divider orientation="left" plain>
                     เปลี่ยนรหัสผ่าน
                 </Divider>
-                <Input
-                    size='large'
+                <Input.Password
+                    size="large"
                     placeholder="รหัสผ่าน"
-                    value={input2}
-                    onChange={(e) => setInput2(e.target.value)}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     style={{ marginBottom: 10 }}
                 />
-                <Input
-                    size='large'
+                <Input.Password
+                    size="large"
                     placeholder="รหัสผ่านอีกครั้ง"
-                    value={input2}
-                    onChange={(e) => setInput2(e.target.value)}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     style={{ marginBottom: 10 }}
                 />
-                <Box className="my-5" />
+                <Box className="my-5 flex justify-end">
+                    <Button
+                        style={{ background: "#4318FF", color: "#FFF", fontFamily: "Kanit" }}
+                        size="large"
+                        onClick={handleUpdatePassword}
+                    >
+                        เปลี่ยนรหัสผ่าน
+                    </Button>
+                </Box>
             </Modal>
         </>
     );

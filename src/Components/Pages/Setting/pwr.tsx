@@ -1,24 +1,39 @@
 import React, { useState } from "react";
-import { Modal, Button, Input, Select, Divider } from "antd";
+import { Modal, Button, Input, Divider, message } from "antd";
 import { CiEdit } from "react-icons/ci";
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { MdOutlinePassword } from "react-icons/md";
+import axios from 'axios';
 
-const { Option } = Select;
+interface PwrProps {
+  userId: string; // ID ของผู้ใช้ที่จะอัพเดทรหัสผ่าน
+}
 
-const Pwr = () => {
+const Pwr: React.FC<PwrProps> = ({ userId }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [input1, setInput1] = useState("");
-  const [input2, setInput2] = useState("");
-  const [selectedValue, setSelectedValue] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const showModal = () => {
     setIsModalVisible(true);
   };
 
   const handleOk = () => {
-    console.log("Input1:", input1, "Input2:", input2, "Selected:", selectedValue);
-    setIsModalVisible(false);
+    // ตรวจสอบว่ารหัสผ่านสองช่องตรงกันหรือไม่
+    if (password !== confirmPassword) {
+      message.error("รหัสผ่านไม่ตรงกัน");
+      return;
+    }
+
+    // ส่งคำร้องขอ PATCH เพื่ออัพเดทรหัสผ่าน
+    axios.patch(`/user/${userId}`, { password })
+      .then(response => {
+        message.success("อัพเดทรหัสผ่านสำเร็จ");
+        setIsModalVisible(false);
+      })
+      .catch(error => {
+        message.error("ไม่สามารถอัพเดทรหัสผ่านได้");
+      });
   };
 
   const handleCancel = () => {
@@ -48,18 +63,18 @@ const Pwr = () => {
         <Divider orientation="left" plain>
           เปลี่ยนรหัสผ่าน
         </Divider>
-        <Input
+        <Input.Password
           size='large'
           placeholder="รหัสผ่าน"
-          value={input2}
-          onChange={(e) => setInput2(e.target.value)}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           style={{ marginBottom: 10 }}
         />
-        <Input
+        <Input.Password
           size='large'
           placeholder="รหัสผ่านอีกครั้ง"
-          value={input2}
-          onChange={(e) => setInput2(e.target.value)}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           style={{ marginBottom: 10 }}
         />
         <Box className="my-5" />

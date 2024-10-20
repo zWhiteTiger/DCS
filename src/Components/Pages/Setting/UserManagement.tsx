@@ -7,6 +7,8 @@ import { MdOutlinePassword } from 'react-icons/md';
 import { AiOutlineDelete } from "react-icons/ai";
 import NoMoreContent from '../Utility/NoMoreContent';
 import UserEditor from './UserEditor';
+import { authSelector } from '../../../Store/Slices/authSlice';
+import { useSelector } from 'react-redux';
 
 type User = {
   _id: string;
@@ -23,6 +25,7 @@ type Props = {};
 export default function UserManagement({ }: Props) {
   const [users, setUsers] = useState<User[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const profileReducer = useSelector(authSelector);
   const [searchTerm, setSearchTerm] = useState(''); // State for search term
 
   const openModal = () => setIsModalOpen(true);
@@ -72,6 +75,16 @@ export default function UserManagement({ }: Props) {
       })
       .catch((error) => console.error("Error fetching users:", error));
   }, []);
+
+  // ฟังก์ชันสำหรับลบผู้ใช้
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      await axios.delete(`${import.meta.env.VITE_URL}/user/${userId}`);
+      setUsers(users.filter(user => user._id !== userId)); // ลบผู้ใช้จากสถานะ
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
+  };
 
   // Sort users based on the roleOrder
   const sortedUsers = [...users].sort((a, b) => {
@@ -174,7 +187,7 @@ export default function UserManagement({ }: Props) {
                         >
                           รหัสผ่าน
                         </Typography>
-                        <Pwr />
+                        <Pwr userId={user._id} />
                       </Box>
                     </Grid>
                     <Grid item xs={2}>
@@ -237,12 +250,16 @@ export default function UserManagement({ }: Props) {
                           <CiEdit />
                           แก้ไข
                         </Button> */}
-                        <UserEditor />
+                        <UserEditor userId={user._id} />
                         <Box className="mx-2" />
-                        <Button style={{ background: '#FE3636', color: '#FFF' }} size="large">
-                          <AiOutlineDelete />
-                          ลบ
-                        </Button>
+
+                        {user.email == profileReducer.result?.email
+                          ? <></>
+                          : <Button onClick={() => handleDeleteUser(user._id)} style={{ background: '#FE3636', color: '#FFF' }} size="large">
+                            <AiOutlineDelete />
+                            ลบ
+                          </Button>
+                        }
                       </Box>
                     </Grid>
                   </Grid>

@@ -6,6 +6,7 @@ import PDFViewer from './Services/PDFViewer';
 import { httpClient } from '../Utility/HttpClient';
 import { useSelector } from 'react-redux';
 import { authSelector } from '../../../Store/Slices/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 interface ApprovalCard {
     _id: string;
@@ -29,6 +30,7 @@ const ApprovalModal = ({ docsPath, docId }: PDFModalProps) => {
     const [_maxPriority, setMaxPriority] = useState<number | null>(null);
     const [_currentPriority, setCurrentPriority] = useState<number>(0); // เพิ่ม currentPriority ที่ใช้จัดการค่า
     const approvedCount = approvalCards.filter((card: ApprovalCard) => card.isApproved === 'Approved').length;
+    const navigate = useNavigate();
 
 
     useEffect(() => {
@@ -133,6 +135,7 @@ const ApprovalModal = ({ docsPath, docId }: PDFModalProps) => {
     const handleConfirmOk = () => {
         updateDocumentStatus('Approved');
         setIsConfirmModalOpen(false);
+        navigate('/');
     };
 
     const handleReject = () => {
@@ -142,6 +145,7 @@ const ApprovalModal = ({ docsPath, docId }: PDFModalProps) => {
     const handleRejectOk = () => {
         updateDocumentStatus('Reject');
         setIsRejectModalOpen(false);
+        navigate('/');
     };
 
     const tooltipStyle = { fontFamily: 'Kanit' };

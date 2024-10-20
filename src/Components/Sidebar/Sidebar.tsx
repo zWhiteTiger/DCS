@@ -11,7 +11,8 @@ import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import { BsGear, BsGearFill } from "react-icons/bs";
 import { httpClient } from '../Pages/Utility/HttpClient';
-
+import { authSelector } from '../../Store/Slices/authSlice';
+import { useSelector } from 'react-redux';
 
 type Props = {
   drawerWidth: number;
@@ -21,9 +22,26 @@ type Props = {
   handleDrawerClose: () => void;
 };
 
-// Define the document interface
-interface Document {
-  isStatus: 'express' | 'standard'; // Define allowed status values
+export interface Document {
+  _id: string;
+  doc_name: string;
+  currentPriority: number;
+  isStatus: string;
+  docs_path: string;
+  public: boolean;
+  isProgress: string;
+  created_at: Date;
+  updated_at: Date;
+  user_id: string; // Add this line to reference the user ID
+}
+
+export interface Approval {
+  priority: number;
+  email: string;
+  doc_id: string;
+  firstName: string;
+  lastName: string;
+  isApproved: string;
 }
 
 export default function Sidebar({
@@ -37,6 +55,8 @@ export default function Sidebar({
   const location = useLocation();
   const [openDocs, setOpenDocs] = useState(false);
   const [totalDocuments, setTotalDocuments] = useState(0); // State for total documents
+
+  const profileReducer = useSelector(authSelector);
 
   const handleDocsClick = () => {
     setOpenDocs(!openDocs);
@@ -55,7 +75,7 @@ export default function Sidebar({
   const POLLING_INTERVAL = 5000; // 5 seconds
 
   useEffect(() => {
-    const fetchDocuments = async () => {
+    const fetchDocumentsWithApproval = async () => {
       try {
         const response = await httpClient.get<Document[]>('/doc/');
         const documents = response.data;
@@ -65,24 +85,37 @@ export default function Sidebar({
           (doc: Document) => doc.isStatus === 'express' || doc.isStatus === 'standard'
         );
 
-        // Set the total count of filtered documents
-        setTotalDocuments(filteredDocuments.length);
+        // Get the user's email from the profileReducer
+        const userEmail = profileReducer.result?.email;
+
+        // Fetch approvals for the logged-in user
+        const approvalResponse = await httpClient.get('/approval/');
+        const approvals = approvalResponse.data;
+
+        // Filter approvals that match the user's email and check which documents they have signed
+        const approvedDocuments = filteredDocuments.filter(doc =>
+          approvals.some((approval: Approval) =>
+            approval.email === userEmail && approval.doc_id === doc._id && approval.isApproved
+          )
+        );
+        // Set the total count of signed documents
+        setTotalDocuments(approvedDocuments.length);
       } catch (error) {
-        console.error('Error fetching documents:', error);
+        console.error('Error fetching documents and approvals:', error);
       }
     };
 
     // Initial fetch when component mounts
-    fetchDocuments();
+    fetchDocumentsWithApproval();
 
     // Poll the server every few seconds
     const intervalId = setInterval(() => {
-      fetchDocuments();
+      fetchDocumentsWithApproval();
     }, POLLING_INTERVAL);
 
     // Cleanup: Clear the interval when the component is unmounted
     return () => clearInterval(intervalId);
-  }, []);
+  }, [profileReducer]);
 
   const mainMenuItems = [
     {

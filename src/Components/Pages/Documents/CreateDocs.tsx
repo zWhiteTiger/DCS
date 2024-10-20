@@ -7,6 +7,7 @@ import Uploader from './Services/Uploader';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../Store/Store';
 import { httpClient } from '../Utility/HttpClient';
+import { useNavigate } from 'react-router-dom';
 
 type publicType = {
   isStatus: string;
@@ -18,6 +19,7 @@ const CreateDocs: React.FC = () => {
   const docIdRef = useRef<string | null>(null)
 
   const formRef = useRef<any>(null); // Create a reference for the form
+  const navigate = useNavigate();
 
   const documentId = useSelector((state: RootState) => state.docsReducer.documentId);
 
@@ -53,6 +55,10 @@ const CreateDocs: React.FC = () => {
         okText: 'ตกลง',
         okButtonProps: {
           style: { color: 'white', backgroundColor: '#4318FF', fontFamily: 'Kanit' }
+        },
+        onOk: () => {
+          // เมื่อกดปุ่ม 'ตกลง' ให้ทำการเปลี่ยนหน้าไปยัง '/explore'
+          navigate('/explore');
         }
       });
       return response.data

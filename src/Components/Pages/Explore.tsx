@@ -19,6 +19,7 @@ export interface Document {
   created_at: Date;
   updated_at: Date;
   user_id: string; // Add this line to reference the user ID
+  approval: Approval[];
 }
 
 export interface Approval {
@@ -28,13 +29,14 @@ export interface Approval {
   lastName: string;
 }
 
-// Fetch both documents and approvals
+// Fetch both documents and approvalsz
 const fetchAPI = async () => {
   const docsResponse = await httpClient.get("doc");
   const approvalResponse = await httpClient.get("approval");
+
   return {
     docs: docsResponse.data,
-    approvals: approvalResponse.data
+    approvals: approvalResponse.data,
   };
 };
 
