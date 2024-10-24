@@ -29,14 +29,24 @@ export interface Approval {
   lastName: string;
 }
 
-// Fetch both documents and approvalsz
+export interface User {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  picture?: string;
+  email: string;
+}
+
+
 const fetchAPI = async () => {
   const docsResponse = await httpClient.get("doc");
   const approvalResponse = await httpClient.get("approval");
+  const userResponse = await httpClient.get("user"); // Fetch users data
 
   return {
     docs: docsResponse.data,
     approvals: approvalResponse.data,
+    users: userResponse.data, // Include users in the response
   };
 };
 
@@ -56,15 +66,16 @@ export default function Explore() {
   };
 
   // Fetch documents and approvals
-  const { data, isLoading, error } = useQuery<{ docs: Document[], approvals: Approval[] }, any>(
+  const { data, isLoading, error } = useQuery<{ docs: Document[], approvals: Approval[], users: User[] }, any>(
     "docsAndApprovals",
     fetchAPI,
     {
       select: (data) => ({
         docs: data.docs
-          .filter(doc => canUserSign(doc, data.approvals, userEmail) || doc.user_id === profileReducer.result?._id) // Include documents created by the user
-          .filter(doc => doc.public && doc.isStatus !== "draft" && doc.isProgress === "pending"), // Show public documents that are not drafts
-        approvals: data.approvals
+          .filter(doc => canUserSign(doc, data.approvals, userEmail) || doc.user_id === profileReducer.result?._id)
+          .filter(doc => doc.public && doc.isStatus !== "draft" && doc.isProgress === "pending"),
+        approvals: data.approvals,
+        users: data.users // Select users data
       })
     }
   );
@@ -148,7 +159,13 @@ export default function Explore() {
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
                       {data?.docs?.map((doc: Document, index: number) => {
-                        
+                        // Find the creator of the document based on the `user_id`
+                        const creator = data.users.find((user) => user._id === doc.user_id);
+                        const creatorName = creator ? `${creator.firstName} ${creator.lastName}` : 'Unknown';
+                        const creatorEmail = creator?.email || 'No email available';
+                        const creatorImage = creator?.picture || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+
+
                         let cardBackgroundColor;
                         switch (doc.isStatus) {
                           case 'standard':
@@ -173,7 +190,7 @@ export default function Explore() {
                               <Grid container spacing={3} alignItems="start" style={{ alignItems: 'center' }}>
                                 <Grid item xs={0}>
                                   <div style={{ width: 'auto', height: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '20%' }}>
-                                    <img src={imageSrc} alt="User Avatar" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
+                                    <img src={creatorImage} alt="User Avatar" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
                                   </div>
                                 </Grid>
                                 <Grid item xs={3}>
@@ -181,8 +198,8 @@ export default function Explore() {
                                   <Typography style={tooltipStyle}>{doc.docs_path}</Typography>
                                 </Grid>
                                 <Grid item xs={3}>
-                                  <Typography className="font-bold">{profileReducer.result?.firstName} {profileReducer.result?.lastName}</Typography>
-                                  <Typography style={tooltipStyle}>{profileReducer.result?.email}</Typography>
+                                  <Typography className="font-bold">{creatorName}</Typography>
+                                  <Typography style={tooltipStyle}>{creatorEmail}</Typography>
                                 </Grid>
                                 <Grid item xs={2}>
                                   <Typography className="font-bold">วันที่</Typography>

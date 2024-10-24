@@ -29,13 +29,19 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  picture?: string; // Assuming you have a picture field
+  picture?: string;
 }
 
 // Fetch documents that are public and complete
 const fetchDocuments = async () => {
   const response = await httpClient.get("doc");
   return response.data.filter((doc: Document) => doc.public === true && doc.isProgress === 'complete'); // Filter for public and complete documents
+};
+
+// Fetch user data for all users based on user_id
+const fetchUsers = async (userIds: string[]) => {
+  const response = await Promise.all(userIds.map(user_id => httpClient.get(`/user/${user_id}`)));
+  return response.map(res => res.data);
 };
 
 export default function Archive() {
@@ -45,9 +51,17 @@ export default function Archive() {
     : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png');
 
   // Fetch documents
-  const { data: documents, isLoading, error } = useQuery<Document[], any>("docs", fetchDocuments);
+  const { data: documents, isLoading: docsLoading, error: docsError } = useQuery<Document[], any>("docs", fetchDocuments);
 
-  if (error) {
+  // Extract user_ids from documents to fetch user details
+  const userIds = documents?.map((doc) => doc.user_id) || [];
+  const { data: users, isLoading: usersLoading, error: usersError } = useQuery<User[], any>(
+    ['users', userIds],
+    () => fetchUsers(userIds),
+    { enabled: !!documents && userIds.length > 0 }
+  );
+
+  if (docsError || usersError) {
     return <div>An error occurred</div>;
   }
 
@@ -84,7 +98,7 @@ export default function Archive() {
                   </Box>
                 </Box>
 
-                {isLoading ? (
+                {(docsLoading || usersLoading) ? (
                   <div className="mx-auto w-full flex justify-center items-center h-[80%]">
                     <Card style={{ marginBottom: '5px', backgroundColor: "#fafafa", ...cardStyles }}>
                       <Loader />
@@ -94,18 +108,15 @@ export default function Archive() {
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
                       {documents?.map((document: Document) => {
-                        // Fetch user data for the document's user_id
+                        const user = users?.find(u => u._id === document.user_id);
+
                         let cardBackgroundColor;
                         switch (document.isStatus) {
                           case 'standard':
                             cardBackgroundColor = '#EFF4FB'; // Light blue
                             break;
                           case 'reject':
-                            cardBackgroundColor = '#EFF4FB'; // Light red
-                            break;
                           case 'draft':
-                            cardBackgroundColor = '#EFF4FB'; // Light red
-                            break;
                           case 'express':
                             cardBackgroundColor = '#EFF4FB'; // Light red
                             break;
@@ -119,7 +130,7 @@ export default function Archive() {
                               <Grid container spacing={3} alignItems="start" style={{ alignItems: 'center' }}>
                                 <Grid item xs={0}>
                                   <div style={{ width: 'auto', height: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '20%' }}>
-                                    <img src={imageSrc} alt="User Avatar" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
+                                    <img src={`${import.meta.env.VITE_URL}${user?.picture}` || imageSrc} alt="User Avatar" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
                                   </div>
                                 </Grid>
                                 <Grid item xs={3}>
@@ -132,10 +143,10 @@ export default function Archive() {
                                 </Grid>
                                 <Grid item xs={3}>
                                   <Typography className="font-bold">
-                                    name
+                                    {user?.firstName} {user?.lastName}
                                   </Typography>
                                   <Typography style={tooltipStyle}>
-                                    email
+                                    {user?.email}
                                   </Typography>
                                 </Grid>
                                 <Grid item xs={2}>
@@ -167,7 +178,6 @@ export default function Archive() {
                                 <Grid item xs={2} style={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
                                   <PreviewDocs docId={document._id} docsPath={document?.docs_path} />
                                   <PDFExporter docId={document._id} docsPath={document?.docs_path} />
-
                                 </Grid>
                               </Grid>
                             </CardContent>
