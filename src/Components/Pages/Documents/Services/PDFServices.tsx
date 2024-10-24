@@ -58,7 +58,7 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
   }>({ x: 0, y: 0 })
   const [numPages, setNumPages] = useState<number>()
   const [pageNumber, setPageNumber] = useState<number>(1)
-  const [scale, setScale] = useState<number>(1) // Default scale is 1
+  const [scale, setScale] = useState<number>(0.2) // Default scale is 1
   const [containerWidth, setContainerWidth] = useState<number>(1077) // Initial width of 1077px
   const containerRef = useRef<HTMLDivElement>(null)
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null) // Track selected card
