@@ -25,6 +25,7 @@ type Shape = {
   page: number // Page where the card was created
   firstName: string
   lastName: string
+  role: string;
 }
 
 type OptionType = {
@@ -32,6 +33,7 @@ type OptionType = {
   value: string // Email
   firstName: string
   lastName: string
+  role: string
 }
 
 interface Card {
@@ -41,6 +43,7 @@ interface Card {
   lastName: string
   position: { x: number; y: number }[]
   page: number
+  role: string;
 }
 
 const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
@@ -233,6 +236,7 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
         priority: nextPriority, // Assign the current priority
         firstName: response.data.firstName || 'N/A',
         lastName: response.data.lastName || 'N/A',
+        role: response.data.role || 'N/A',
       };
 
       setShapes((prevShapes) => [...prevShapes, newShape]); // Add new shape
@@ -284,6 +288,7 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
       value: user.email, // Use email as the value
       label: `${user.firstName} ${user.lastName} (${user.email})`, // Display name and email as the label
       id: user._id, // Store the user ID
+      role: user.role,
     }))
   }
 
@@ -309,6 +314,7 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
           priority: card.priority,
           height: 100,
           page: card.page,
+          role: card.role,
           firstName: card.firstName,
           lastName: card.lastName,
         })),
@@ -485,7 +491,7 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
                         top: 0,
                         width: `${shape.width}px`,
                         height: `${shape.height}px`,
-                        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                        backgroundColor: 'rgba(255,255,255, 1)',
                         border: '2px dashed #8000FF',
                         borderRadius: '7px',
                         cursor: 'grab',
@@ -499,13 +505,14 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
                           alignItems: 'center',
                           height: '100%',
                           gap: '10px',
+                          overflow: 'hidden',
                         }}
                       >
                         <Typography
                           style={{
-                            color: '#4318FF',
-                            fontWeight: 'bold',
+                            color: '#000',
                             fontSize: '16px',
+                            fontFamily: 'Sarabun',
                           }}
                         >
                           ผู้ลงนาม
@@ -513,13 +520,14 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
 
                         <Typography
                           style={{
-                            color: '#FFF',
-                            fontSize: '12px',
-                            marginTop: '10px',
+                            color: '#000',
+                            fontSize: '16px',
+                            fontFamily: 'Sarabun',
                           }}
                         >
-                          {shape.firstName} {shape.lastName}
+                          ( {shape.firstName} {shape.lastName} )
                         </Typography>
+
                       </Box>
 
                       {selectedCardId === shape.id && (
@@ -580,7 +588,7 @@ const PDFServices: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
           </Col>
         </Row>
       </Grid>
-    </Grid>
+    </Grid >
   )
 }
 

@@ -135,10 +135,6 @@ const CreateDocs: React.FC = () => {
           <Grid item xs={9}>
             <Typography variant="h4">ขั้นตอนที่ 3 ดำเนินการส่งเอกสาร</Typography>
             <Typography>ตรวจสอบความเรียบร้อยก่อนส่งเอกสาร</Typography>
-          </Grid>
-          <Grid item xs={3}>
-            <Typography variant="h5">รายชื่อผู้ลงนาม</Typography>
-
             <Form
               ref={formRef} // Add this line
               name="patchForm"
@@ -160,13 +156,17 @@ const CreateDocs: React.FC = () => {
                   style={{ width: '100%', fontFamily: 'Kanit' }}
                   onChange={handleChange}
                   options={[
-                    { value: 'standard', label: 'Standard' },
-                    { value: 'express', label: 'Express' },
+                    { value: 'standard', label: 'หนังสือทั่วไป' },
+                    { value: 'express', label: 'หนังสือด่วน' },
                   ]}
                 />
               </Form.Item>
             </Form>
 
+          </Grid>
+          <Grid item xs={3}>
+            <Typography variant="h5">รายชื่อผู้ลงนาม</Typography>
+                  
           </Grid>
         </Grid>
       ),

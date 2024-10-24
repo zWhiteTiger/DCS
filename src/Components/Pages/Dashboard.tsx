@@ -86,7 +86,7 @@ export default function Dashboard({ }: Props) {
 
   // Fetch and filter documents
   const { data, isLoading, error } = useQuery<Document[], any>("docs", fetchAPI, {
-    select: (data) => data.filter(doc => doc.public === true && doc.isStatus === "express" && doc.isProgress == "pending"), // Filter public documents with express status
+    select: (data) => data.filter(doc => doc.public === true && doc.isStatus === "express" && doc.isProgress == "pending") // Filter public documents with express status
   });
 
   if (error) {

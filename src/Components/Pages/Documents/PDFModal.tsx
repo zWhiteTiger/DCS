@@ -99,8 +99,8 @@ const PDFModal = ({ docsPath, docId }: PDFModalProps) => {
                         <div>
                             <label style={{ fontFamily: 'Kanit', fontSize: '16px', marginLeft: '10px' }}>เลือกประเภทเอกสาร:</label>
                             <Select size="large" defaultValue="standard" style={{ width: 200 }} onChange={handleTypeChange}>
-                                <Select.Option value="standard">Standard</Select.Option>
-                                <Select.Option value="express">Express</Select.Option>
+                                <Select.Option value="standard">เอกสารทั่วไป</Select.Option>
+                                <Select.Option value="express">เอกสารด่วน</Select.Option>
                             </Select>
                         </div>
                         <Button

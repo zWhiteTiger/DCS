@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from 'antd';
-import { PDFDocument, rgb } from 'pdf-lib';
+import { PDFDocument, rgb, scale } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
+import { NumbersOutlined } from '@mui/icons-material';
 
 interface CardData {
     _id: string
@@ -11,7 +12,7 @@ interface CardData {
     position: { x: number; y: number }[]
     page: number
     isApproved: string // Approval status
-    signaturePath?: string // Signature path if approved
+    signature?: string // Signature path if approved
 }
 
 type Props = {
@@ -46,47 +47,41 @@ export default function PDFExporter({ filename, docId }: Props) {
             const fontUrl = '/fonts/Prompt-Regular.ttf';
             const fontBytes = await fetch(fontUrl).then((res) => res.arrayBuffer());
             const promptFont = await pdfDoc.embedFont(fontBytes);
+            const pngUrl = `${import.meta.env.VITE_URL}/signature/1729444320940-260986775.png`
+
+            const pngImageBytes = await fetch(pngUrl).then((res) => res.arrayBuffer())
+
+            const pngImage = await pdfDoc.embedPng(pngImageBytes)
 
             for (const card of cards) {
                 console.log(`Processing card: ${card._id}`);
                 const page = pdfDoc.getPage(card.page - 1);
                 const pageWidth = page.getWidth();
                 const pageHeight = page.getHeight();
-                const centerX = pageWidth / 2 - 100;
-                const centerY = pageHeight / 2 - 50;
 
-                // Draw the card rectangle
-                page.drawRectangle({
-                    x: centerX,
-                    y: centerY,
+                const { height, width } = page.getSize();
+
+                console.log(height, width)
+
+                page.drawImage(pngImage, {
+                    x: 200,
+                    y: 600,
                     width: 200,
-                    height: 100,
-                    color: rgb(0.9, 0.9, 0.9),
-                    borderColor: rgb(0, 0, 0),
-                    borderWidth: 1,
-                });
-
-                // Draw user name in the card
-                page.drawText(`${card.firstName} ${card.lastName}`, {
-                    x: centerX + 10,
-                    y: centerY + 70,
-                    size: 12,
-                    font: promptFont,
-                    color: rgb(0, 0, 0),
-                });
+                    height: 100
+                })
 
                 if (card.isApproved === "Reject") {
                     // Draw "Reject" text in the center of the card
                     page.drawText('Reject', {
-                        x: centerX + 10,
-                        y: centerY + 50,
+                        x: 10,
+                        y: 50,
                         size: 12,
                         font: promptFont,
                         color: rgb(1, 0, 0),
                     });
-                } else if (card.isApproved === "Approved" && card.signaturePath) {
+                } else if (card.isApproved === "Approved" && card.signature) {
                     // Load and embed the signature image if approved
-                    const signatureResponse = await fetch(card.signaturePath);
+                    const signatureResponse = await fetch(card.signature);
                     const signatureBytes = await signatureResponse.arrayBuffer();
                     const signatureImage = await pdfDoc.embedPng(signatureBytes); // Use embedJpg if it's a JPEG
 
@@ -94,8 +89,8 @@ export default function PDFExporter({ filename, docId }: Props) {
                     const signatureWidth = 100; // Adjust size as needed
                     const signatureHeight = 40; // Adjust size as needed
                     page.drawImage(signatureImage, {
-                        x: centerX + 10,
-                        y: centerY + 10, // Adjust y position as needed
+                        x: 10,
+                        y: 10, // Adjust y position as needed
                         width: signatureWidth,
                         height: signatureHeight,
                     });

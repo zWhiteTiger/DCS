@@ -148,6 +148,7 @@ export default function Explore() {
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
                       {data?.docs?.map((doc: Document, index: number) => {
+                        
                         let cardBackgroundColor;
                         switch (doc.isStatus) {
                           case 'standard':

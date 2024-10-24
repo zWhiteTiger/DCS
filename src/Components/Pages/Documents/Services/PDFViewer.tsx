@@ -20,7 +20,8 @@ type Shape = {
   firstName: string
   lastName: string
   isApproved: string // String field for approval status
-  signaturePath?: string // Optional signature path if approved
+  signature?: string // Signature path if approved
+
 }
 
 interface Card {
@@ -31,7 +32,6 @@ interface Card {
   position: { x: number; y: number }[]
   page: number
   isApproved: string // Approval status
-  signaturePath?: string // Signature path if approved
 }
 
 
@@ -150,11 +150,12 @@ const PDFViewer: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
       const response = await httpClient.get(`/approval/${docId}`)
       const cards: Card[] = response.data
       console.log(cards)
+
       // Map the cards to the Shape type
       setShapes(
         cards.map((card: any) => ({
-          id: card._id, // Now the string id will work
-          type: 'rectangle',
+          id: card._id,
+          type: 'rectangle', // Explicitly set the type to 'rectangle'
           x: card.position[0].x,
           y: card.position[0].y,
           width: 200,
@@ -163,7 +164,8 @@ const PDFViewer: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
           firstName: card.firstName,
           lastName: card.lastName,
           isApproved: card.isApproved,
-        })),
+          signature: card.signature || '', // Ensure signature is a string, or fallback to an empty string
+        }))
       )
     } catch (error) {
       console.error('Error fetching cards:', error)
@@ -254,18 +256,34 @@ const PDFViewer: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
                 .filter((shape) => shape.page === pageNumber)
                 .map((shape) =>
                   shape.isApproved === 'Approved' ? (
-                    <img
+                    <div
                       key={shape.id}
-                      src={`${import.meta.env.VITE_URL}/signature/1728983339668-700468440.png`} // ใช้เส้นทางของลายเซ็นเมื่ออนุมัติแล้ว
-                      alt="Signature"
-                      style={{
-                        position: 'absolute',
-                        left: shape.x * scale,
-                        top: shape.y * scale,
-                        width: `${shape.width * scale}px`,
-                        height: `${shape.height * scale}px`,
-                      }}
-                    />
+                    >
+                      <img
+                        key={shape.id}
+                        src={`${import.meta.env.VITE_URL}/signature/${shape.signature}`} // Default image if no signature
+                        alt="Signature"
+                        style={{
+                          position: 'absolute',
+                          left: shape.x * scale,
+                          top: shape.y * scale,
+                          width: `${shape.width * scale}px`,
+                          height: `${shape.height * scale}px`,
+                        }}
+                      />
+                      {/* <Typography
+                        style={{
+                          color: '#000',
+                          position: 'absolute',
+                          left: shape.x * scale, // Align left based on shape's X position
+                          top: (shape.y + shape.height) * scale - 15, // Position it at the bottom by adding shape.height and subtracting for padding
+                          width: `${shape.width * scale}px`, // Make the width match the card's width
+                          textAlign: 'center', // Center the text horizontally
+                          fontFamily: 'Sarabun'
+                        }}>
+                        {shape.firstName} {shape.lastName}
+                      </Typography> */}
+                    </div>
                   ) : (
                     <div
                       key={shape.id}
@@ -291,7 +309,7 @@ const PDFViewer: React.FC<PDFServicesProps> = ({ fileUrl, docId }) => {
                         height="100%"
                       >
                         <Typography style={{ color: '#ff1f1f', fontSize: "20px", fontWeight: 'bold' }}>
-                          {shape.isApproved}
+                          ลงนาม
                         </Typography>
                         <Typography>
                           {shape.firstName} {shape.lastName}
